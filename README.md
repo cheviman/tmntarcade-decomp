@@ -34,7 +34,10 @@ tools verify it, extract the assets and build your own executable.
       (`python tools/check_scenarios.py --reference-only --video --sound`)
 - [ ] The rest of the game in scenarios: the bosses of five areas and the ending (the scripted players do
       not beat Shredder)
-- [ ] 68000 frontend in the shared core: decoder and disassembler, checked against MAME's at every offset
+- [x] 68000 frontend in the shared core (`tools/core/m68000/`): decoder and disassembler ported from MAME's,
+      the same text as MAME's at every even offset of the program and of an image of every opcode
+      (`python tools/core/konami/reference/compare_m68k_with_mame.py`), with each instruction's operands
+      and control flow
 - [ ] Recursive disassembly without traces, and every byte of the program classified
 - [ ] Translation scaffold, the board model in C, and a window port (SDL2) that matches the reference
 - [ ] Decompiler: the program as C with no goto and nothing of the CPU left in it
