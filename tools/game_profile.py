@@ -26,3 +26,5 @@ ROM_SET_TITLE = "Teenage Mutant Ninja Turtles (tmnt, World 4 Players, version X)
 CPU = "68000"
 BINARY = "tmnt"                                 # its executables: tmnt_game_headless, tmnt_headless
 GUARD = "TMNT"                                  # the generated headers' include guards: TMNT_GAME_H...
+REFERENCE = "kref"                              # the reference (tools/core/konami/reference)
+STATIC_ANALYSIS = False                         # the 68000 frontend and its analysis are still to come

@@ -1,0 +1,3 @@
+# The attract mode from power-on, no input: the RAM and ROM check, the title and its music, the
+# turtles' introduction and profiles, the demo game, and the attract mode again
+7200 end

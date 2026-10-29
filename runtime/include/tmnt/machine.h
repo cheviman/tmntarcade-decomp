@@ -46,6 +46,23 @@ extern "C" {
 #define TMNT_TILE_RAM_SIZE    0x6000       /* the K052109's */
 #define TMNT_SPRITE_RAM_SIZE  0x400        /* the K051960's: 128 sprites of 8 bytes */
 
+/* The sound board: a Z80, a YM2151 and a K007232 on 3.579545 MHz, a uPD7759 on 640 kHz, and the title
+   music, a sample played through a DAC at 640 kHz / 32 */
+#define TMNT_SOUND_CLOCK      3579545u
+#define TMNT_SPEECH_CLOCK     640000u
+#define TMNT_SOUND_RAM_SIZE   0x800        /* the Z80's RAM, 8000-87FF */
+
+/* The sound board's chips as the Z80 reaches them (tmnt_z80_read / tmnt_z80_write) */
+enum
+{
+	TMNT_CHIP_PCM,             /* K007232, B000-B00D */
+	TMNT_CHIP_FM,              /* YM2151, C000-C001 */
+	TMNT_CHIP_SPEECH,          /* uPD7759: its port (D000), its start line (E000), whether it is busy (F000) */
+	TMNT_CHIP_SPEECH_START,
+	TMNT_CHIP_SPEECH_BUSY,
+	TMNT_CHIP_SOUND_RESET      /* 9000: bit 1 the uPD7759's reset line, bit 2 plays the title music */
+};
+
 /* The inputs, as MAME's ports have them: every bit active low */
 enum
 {
@@ -91,6 +108,17 @@ typedef struct
 	bool irq5;                     /* the 68000's IRQ5, from VBLANK, until the program disables it */
 	uint8_t sound_latch;           /* 0A0009, which the Z80 reads */
 	uint32_t sound_irqs;           /* the Z80's IRQs: 0A0001 bit 3 going low */
+
+	/* the sound board */
+	uint8_t sound_ram[TMNT_SOUND_RAM_SIZE];
+	uint8_t sound_control;         /* the last byte written to 9000, which reads it back */
+	/* What the sound board's model (the reference's) does: brings the sound board up to the 68000's present
+	   before the 68000 changes what the Z80 sees; raises the Z80's IRQ (held until the Z80 takes it); reads
+	   and writes the sound chips. Unset, the sound board stands still */
+	void (*sound_sync)(void);
+	void (*sound_irq)(void);
+	uint8_t (*sound_chip_read)(int chip, int offset);
+	void (*sound_chip_write)(int chip, int offset, uint8_t data);
 	uint32_t coin_counters[2];
 	uint32_t watchdog_resets;
 
@@ -120,6 +148,11 @@ void tmnt_vblank_start(void);
 
 /* A hash of the state the program keeps: work RAM, palette, the video chips' memories and registers */
 uint64_t tmnt_state_hash(void);
+
+/* The Z80's memory map (MAME's tmnt_audio_map): its program, its RAM, 9000, the latch at A000, the chips.
+   What no device answers reads 0 */
+uint8_t tmnt_z80_read(uint16_t address);
+void tmnt_z80_write(uint16_t address, uint8_t data);
 
 #ifdef __cplusplus
 }

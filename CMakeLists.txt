@@ -27,6 +27,8 @@ endif()
 # original code)
 add_library(tmnt_runtime STATIC
 	runtime/src/machine.c
+	runtime/src/sound.c
+	runtime/src/script.c
 	runtime/src/game_data.c
 	runtime/src/rom_set.c
 	runtime/src/inflate.c

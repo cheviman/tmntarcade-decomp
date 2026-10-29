@@ -21,9 +21,19 @@ tools verify it, extract the assets and build your own executable.
       next
 - [x] The reference's picture: MAME's own tilemap, drawgfx and palette code with its K052109 and K051960
       drawing every frame (`kref --video-hashes`, `--video-dump`), as MAME's `tmnt.cpp` draws them
-- [ ] The reference's sound: the sound board (MAME's Z80, K007232 and uPD7759, ymfm's YM2151, the title
-      music)
-- [ ] Scenarios (`tests/controls/`): scripted inputs through the attract mode, the test mode and every scene
+- [x] The reference's sound: the sound board on the board model (`runtime/src/sound.c`), with MAME's Z80,
+      K007232 and uPD7759, ymfm's YM2151 and the title music (`kref --sound-hashes`, `--sound-wav`,
+      `--sound-trace`): each source's samples at its own rate, the same from one run to the next
+- [x] Scenarios (`tests/controls/`, written by `tools/make_scenarios.py`, the format in
+      `runtime/include/tmnt/script.h`): the attract mode; the test mode through every screen, every input
+      pressed in its I/O test; its sound test through all 135 codes; games of one player (to GAME OVER, and
+      one that continues) and of four; one with the DIP switches changed (the screen flipped among them);
+      and a four-player game in each of the program's ten areas, started there by a poke and with the lives
+      kept up, four of them played until the boss falls and the next area starts. All 17 run to their end,
+      and between them they execute 20,197 addresses of the 68000 program and 4,481 of the Z80's
+      (`python tools/check_scenarios.py --reference-only --video --sound`)
+- [ ] The rest of the game in scenarios: the bosses of five areas and the ending (the scripted players do
+      not beat Shredder)
 - [ ] 68000 frontend in the shared core: decoder and disassembler, checked against MAME's at every offset
 - [ ] Recursive disassembly without traces, and every byte of the program classified
 - [ ] Translation scaffold, the board model in C, and a window port (SDL2) that matches the reference
@@ -79,6 +89,10 @@ build/bin/kref --frames 3600 --hashes build/kref/hashes.txt --text 3000
 build/bin/kref --frames 3600 --video-hashes build/kref/video_hashes.txt --video-dump 1200 2400 --video-dir build/kref
 ```
 
+```bash
+build/bin/kref --frames 3600 --sound-hashes build/kref/sound_hashes.txt --sound-wav build/kref/attract.wav
+```
+
 ## Layout
 
 ```
@@ -88,6 +102,9 @@ tools/core/         arcade-decomp, the shared core (git submodule); its konami/r
 tools/game_profile.py   what the core needs to know of this game
 tools/tmnt_rom.py   the ROM set: its files by hash, and the regions as the board lays them out
 tools/verify_rom.py the ROM set's check (the core's script)
+tools/check_scenarios.py   every control script on the reference (the core's script)
+tools/make_scenarios.py    writes the control scripts
+tests/controls/     the control scripts
 ```
 
 ## Legal

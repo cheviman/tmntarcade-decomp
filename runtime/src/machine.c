@@ -141,7 +141,13 @@ static void control_write(uint8_t data)
 		if ((data >> counter) & 1 && !((tmnt_board.control >> counter) & 1))
 			tmnt_board.coin_counters[counter]++;
 	if ((tmnt_board.control & 0x08) && !(data & 0x08))
+	{
 		tmnt_board.sound_irqs++;
+		if (tmnt_board.sound_sync)
+			tmnt_board.sound_sync();
+		if (tmnt_board.sound_irq)
+			tmnt_board.sound_irq();
+	}
 	tmnt_board.irq5_enabled = data & 0x20;
 	if (!tmnt_board.irq5_enabled)
 		tmnt_board.irq5 = false;
@@ -233,7 +239,11 @@ void tmnt_write16(uint32_t address, uint16_t data, uint16_t mem_mask)
 		return;
 	case 0x0A0008u:
 		if (LOW_BYTE(mem_mask))
+		{
+			if (tmnt_board.sound_sync)
+				tmnt_board.sound_sync();
 			tmnt_board.sound_latch = (uint8_t)data;
+		}
 		return;
 	case 0x0A0010u:
 		tmnt_board.watchdog_resets++;
