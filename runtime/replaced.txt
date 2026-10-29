@@ -1,0 +1,3 @@
+# The 68000 program's functions the board puts its own in place of (runtime/src/board_game.c): tools/decompile.py
+# writes their definitions as BOARD_ORIGINAL(name), which is original_name.
+sum_program_chips   # the boot's ROM test: the game has no ROM chips to sum, so the board gives what good chips sum to

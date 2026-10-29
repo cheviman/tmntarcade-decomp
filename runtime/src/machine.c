@@ -168,16 +168,40 @@ void tmnt_reset(void)
 	tmnt_board.dsw[2] = TMNT_DSW3_DEFAULT;
 }
 
+/* A byte of the program's data where program_at says it is; nowhere (its code), program_outside says so */
+static uint8_t program_byte(uint32_t address)
+{
+	const uint8_t *data = tmnt_board.program_at(address);
+
+	if (data)
+		return *data;
+	if (tmnt_board.program_outside)
+		tmnt_board.program_outside(address);
+	return 0;
+}
+
+/* The program's chips: the ROM set's image (game/data.h), or the bytes the mask asks for where program_at
+   finds them */
+static uint16_t program_word(uint32_t address, uint16_t mem_mask)
+{
+	uint16_t word = 0;
+
+	if (!tmnt_board.program_at)
+		return (uint16_t)(game_program[address] << 8 | game_program[address + 1]);
+	if (mem_mask & 0xFF00u)
+		word |= (uint16_t)(program_byte(address) << 8);
+	if (mem_mask & 0x00FFu)
+		word |= program_byte(address + 1u);
+	return word;
+}
+
 uint16_t tmnt_read16(uint32_t address, uint16_t mem_mask)
 {
 	address &= 0xFFFFFEu;
 	if (address < TMNT_PROGRAM_SIZE)
-		return (uint16_t)(game_program[address] << 8 | game_program[address + 1]);
+		return program_word(address, mem_mask);
 	if (address >= 0x060000u && address < 0x064000u)
-	{
-		const uint32_t offset = address - 0x060000u;
-		return (uint16_t)(tmnt_board.work_ram[offset] << 8 | tmnt_board.work_ram[offset + 1]);
-	}
+		return (uint16_t)(*tmnt_work_ram_byte(address) << 8 | *tmnt_work_ram_byte(address + 1u));
 	if (address >= 0x080000u && address < 0x081000u)
 		return LOW_BYTE(mem_mask) ? tmnt_board.palette[(address - 0x080000u) >> 1] : 0;
 	switch (address)
@@ -215,13 +239,14 @@ uint16_t tmnt_read16(uint32_t address, uint16_t mem_mask)
 void tmnt_write16(uint32_t address, uint16_t data, uint16_t mem_mask)
 {
 	address &= 0xFFFFFEu;
+	if (tmnt_board.write_watch)
+		tmnt_board.write_watch(address, data, mem_mask);
 	if (address >= 0x060000u && address < 0x064000u)
 	{
-		const uint32_t offset = address - 0x060000u;
 		if (HIGH_BYTE(mem_mask))
-			tmnt_board.work_ram[offset] = (uint8_t)(data >> 8);
+			*tmnt_work_ram_byte(address) = (uint8_t)(data >> 8);
 		if (LOW_BYTE(mem_mask))
-			tmnt_board.work_ram[offset + 1] = (uint8_t)data;
+			*tmnt_work_ram_byte(address + 1u) = (uint8_t)data;
 		return;
 	}
 	if (address >= 0x080000u && address < 0x081000u)
@@ -325,7 +350,13 @@ uint64_t tmnt_state_hash(void)
 	};
 	uint64_t hash = 0xcbf29ce484222325ull;
 
-	hash = hash_bytes(tmnt_board.work_ram, sizeof(tmnt_board.work_ram), hash);
+	for (uint32_t address = TMNT_WORK_RAM; address < TMNT_WORK_RAM + TMNT_WORK_RAM_SIZE; address++)
+	{
+		if ((address >= TMNT_SAVED_REGISTERS && address < TMNT_SAVED_REGISTERS_END)
+			|| (address >= TMNT_STACKS && address < TMNT_STACKS_END))
+			continue;
+		hash = (hash ^ *tmnt_work_ram_byte(address)) * 0x100000001b3ull;
+	}
 	hash = hash_bytes(tmnt_board.palette, sizeof(tmnt_board.palette), hash);
 	hash = hash_bytes(tmnt_board.tile_ram, sizeof(tmnt_board.tile_ram), hash);
 	hash = hash_bytes(tmnt_board.sprite_ram, sizeof(tmnt_board.sprite_ram), hash);

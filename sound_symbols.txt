@@ -1,0 +1,419 @@
+# TMNT (MAME set 'tmnt', World 4 Players, version X) - Z80 sound program symbols (963e20.g13)
+#
+# Addresses and names only: no game data lives in this file.
+# Format:  ADDRESS  KIND  NAME  [...]   [# comment: how it was found]
+#   func     a function entry (one nothing calls is decompiled too: code the entry points never reach)
+#   loop     the main loop's top, a function entry: where the program waits for the board (runtime/src/sound_cpu.c
+#            runs the main loop from there while the board's time is ahead)
+#   code     a code label (a place the code jumps into the middle of a routine: set_channel_handler)
+#   jumps    NAME COUNT [first=K]: a table of COUNT 16-bit code addresses, which the code indexes from
+#            ADDRESS; with first=K it never reads the first K entries (the table starts K entries on)
+#   data     NAME TYPE[COUNT] [TARGET]: COUNT values of TYPE (u8, u16, or a record: struct NAME SIZE rom);
+#            TARGET, what each u16 points at (a record, or the elements a pointer walks)
+#   codedata NAME TYPE[COUNT]: code the program also reads as data (the bytes stay code)
+#   fill     COUNT: bytes nothing reads (none: the program's own fill is the 0xFF after its last track)
+# Addresses are the Z80's: 0000-7FFF the program ROM, 8000-87FF the RAM, 9000 sres (bit 2 the title music
+# sample), A000 the 68000's sound command (the latch), B000-B00D the K007232, C000-C001 the YM2151, D000 the
+# uPD7759's sample number, E000 its start line, F000 its busy line.
+#
+# The analysis (tools/core/z80/analysis.py, game_profile's SOUND_ settings) starts at the reset (0000) and
+# the interrupt (0038) and finds the code without traces, following what the registers hold into the jumps
+# through them (z80/values.py): the main loop runs each channel through the handler its record keeps at +2
+# (run_channel_handler, JP (HL) at 05CF), which the code stores there (set_channel_handler and the like),
+# and the music's note hook at +28 (09FC). The jumps lines give the tables' lengths, which the code does not.
+# The data lines describe the rest of the program for tools/sound_coverage.py; tools/sound_data_walk.py
+# walks the music tracks the song table points at.
+#
+# Names for the decompiled C (tools/decompile_sound.py), as symbols.txt has them (disassemble.load_names):
+#   struct NAME SIZE rom, field STRUCT OFFSET NAME TYPE[N] [TARGET]: a record of the program ROM and its
+#   fields; elements NAME TYPE: values a pointer walks; param FUNCTION REGISTER NAME STRUCT: what a function
+#   takes in a register (the sound coverage takes every constant the analysis sees there as one);
+#   ADDRESS io NAME TYPE: a register of the board on the Z80's bus; ADDRESS var NAME[COUNT] TYPE: a variable in
+#   the RAM; ADDRESS table NAME TYPE: a table the C reads by name (the game loads the asset piece of that name);
+#   struct NAME SIZE, array STRUCT FIRST COUNT, field: records in the RAM.
+
+# ======== the driver ========
+#
+# What the program is (read from the listing): the 68000 writes a sound command to the latch and raises the
+# Z80's IRQ; sound_command (0038) takes it at once: 00 resets the sound, FF silences it, FE fades the music
+# out, 01-41 start an FM effect, 60-78 a song, 7D and 7E start and stop the title music (the 512 KB sample
+# MAME's tmnt.cpp plays through sres bit 2), 80-93 a PCM effect (the K007232), A0-C3 a speech (the
+# uPD7759), DF stops the speech. The main loop waits for the YM2151's timer, then runs 15 channel records of
+# 40h bytes (8000-83BF), each through the handler it keeps at +2: 8000 the FM effects that come first (YM2151
+# channel 0), 8040-81C0 the music's 7 FM channels (1-7) and 8200, 8240 its 2 PCM channels (the K007232's A
+# and B), 8280 and 82C0 the PCM effects (A, B), 8300 the speech, 8340 and 8380 the FM effects that take the
+# music's channels 6 and 7. A record's +0 is its chip channel (bit 3: the K007232, bit 0 its channel B), +1
+# the sound it plays, +F its priority.
+
+0000  func  sound_reset                 # the reset: tests the RAM (8000-87FF) with 00, 55, AA and FF, then check_rom; a failure beeps the K007232 and starts again
+0017  func  check_rom                   # the ROM test: adds up the program's 32 KB (0000-7FFF) and compares the sum with 783C, then sound_main (the game has no ROM to add up: runtime/sound_replaced.txt)
+0038  func  sound_command               # IM 1: the 68000's command from the latch (A000), dispatched by its range
+0069  code  self_test_failed            # the RAM or ROM test failed: a beep on the K007232's channel A, then the reset again
+008C  code  start_title_music           # command 7D: sres bit 2 on (the title music sample) for 13 x 250 main loop passes (title_music_timer)
+00A1  code  stop_title_music            # command 7E: the title music's timer cleared, then stop_speech (sres 0, which also stops the title music)
+00AE  func  title_music_timer           # the main loop's, while title_music_on (83C4): 250 passes 13 times, then stop_title_music
+00BD  code  start_speech                # commands A0-C3: the speech on the speech channel (8300) if its priority (speech_priorities) is not below the one playing; DF stops it
+00FE  code  stop_speech                 # command DF: sres 0 then 2 (the uPD7759 reset by bit 1, the title music off by bit 2), the speech channel idle
+0121  code  speech_fallback             # a speech whose priority is below the one playing: one of priority 12 plays PCM effect 87 instead, one of 13 PCM effect 8A
+0178  func  speech_play                 # the speech channel's handler: the sample number to the uPD7759 (D000), a pulse on its start line (E000), the music's attenuation from speech_music_attenuation
+01A4  func  speech_wait                 # the speech channel's handler while it speaks: waits for the uPD7759's busy line (F000 bit 0), then frees the channel and the music's attenuation
+01C4  code  start_music                 # commands 60-78: the music's 9 channels (8040-8240) on music_track_start, song_header (83C0) the song's entry of songs less 2
+021B  code  start_pcm_effect            # commands 80-93: on the PCM effects' channel B (82C0) if its priority (pcm_effect_priorities) is not below the one playing (86 on channel A, 8280), the handler from pcm_effect_handlers
+026E  func  start_fm_effect             # commands 01-41 (also called by FM effects that start another): priority (fm_effect_priorities) 20 or more on channel 0 (8000), else on whichever of 8000, 8340, 8380 has the lowest, if it is not below it; the handler from fm_effect_handlers
+02D5  func  lower_priority_channel      # start_fm_effect's: the record (HL) with the lower priority of the one in IX and the one so far
+02E0  code  assign_fm_effect            # the effect into the record in IX: its number, priority and handler (fm_effect_handlers)
+033D  code  fade_out_music              # command FE: fade_timer (83C9) 16h: the main loop turns the music down
+0343  func  reset_sound                 # command 00 (and at the reset): sres 0, the fades and attenuations cleared, then silence
+0367  func  silence                     # command FF: no LFO on the 8 FM channels (register 38+), every channel stopped (FM keyed off, PCM stopped)
+039D  func  stop_fm_effect_channels     # 8000, 8340, 8380 on stop_channel
+03AA  func  stop_music_fm_6_7           # 8180, 81C0 on stop_channel
+03B4  func  stop_music_fm_1_5           # 8040-8140 on stop_channel
+03C7  func  free_music_fm_6_7           # 8180, 81C0 on free_channel
+03D1  func  stop_music_pcm_a            # 8200 on stop_pcm_channel
+03D8  func  free_music_pcm_a            # 8200 on free_channel
+03DF  func  stop_pcm_effect_b           # 82C0 on stop_pcm_channel
+03E6  func  free_music_pcm_b            # 8240 on free_channel
+03ED  func  stop_music_pcm_b            # 8240 on stop_pcm_channel
+03F4  func  stop_pcm_effect_a           # 8280 on stop_pcm_channel
+03FB  func  free_speech_channel         # 8300 on free_channel
+0402  func  write_fm_register_de        # YM2151 register D + E = C
+0408  func  write_fm_channel_register   # YM2151 register B + the record's channel (+0) = C
+040D  func  write_fm_register           # YM2151 register B = C, each write after the busy flag (C001 bit 7) clears
+0424  func  restart_frame_timer         # YM2151 timer B (register 12 = F2) restarted, its flag cleared (register 14): the main loop's tick
+0435  func  sound_main                  # RAM cleared, IM 1, SP 8600, the K007232 and the YM2151 set up, every record's channel number, then the main loop
+04C9  loop  sound_main_loop             # EI for 4 NOPs (the only time a command can come in), then, interrupts off, fills the random bytes (8600-86FF) until the YM2151's timer B flag; the fade out; every channel's handler; title_music_timer
+05C9  func  run_channel_handler         # JP to the handler the record in IX keeps at +2
+05D0  func  stop_channel                # an FM channel's: keyed off, fast release, then free_channel
+05D6  func  free_channel                # the record's sound and priority 0, its handler channel_idle
+05E1  code  set_channel_handler         # HL into the record's handler (+2): the routine that runs the channel from the next pass on
+05E7  func  channel_idle                # a free channel's handler: RET
+05E8  func  stop_pcm_channel            # a PCM channel's: the attenuations off, volume 0, no loop, then free_channel
+05F9  func  load_fm_voice               # the 25 bytes at HL into the record's YM2151 channel (registers 20, 40-F8): the operators' total levels kept in +6-+9, their release in +A-+D
+06B4  func  fm_key_on                   # YM2151 register 08: the channel's 4 operators on
+06C2  func  fm_key_off                  # register 08: the channel's operators off
+06CE  func  fm_fast_release             # registers E0-F8: the 4 operators' release at its fastest (+A-+D, low nibble F)
+06F7  func  fm_restore_release          # registers E0-F8 from +A-+D
+071D  func  set_fm_pitch                # HL, a pitch in 1/64 semitone: the key fraction (register 30) and the key code (28, fm_key_codes)
+079D  func  set_fm_volume_from_record   # set_fm_volume with the record's +2C
+07A0  func  set_fm_volume               # A into +4: the total level of each carrier (fm_carrier_masks by the algorithm, +5) is its voice's plus A (at most 7F)
+07E6  func  set_pcm_start               # the K007232's start address of the record's channel (A or B by +0 bit 0): DE and C (bit 16)
+07FE  func  set_pcm_pitch               # the K007232's pitch of the record's channel: DE
+080F  func  set_pcm_volume              # the channel's volume (C) into the K007232's volume port (B00C, kept in pcm_volumes 83C2: A high nibble, B low)
+0835  func  start_pcm                   # reads the channel's key register (B005 or B00B): the K007232 starts it
+0844  func  set_pcm_loop                # the channel's loop bit (B00D, kept in pcm_loops 83C3) on: nothing calls it
+0860  func  clear_pcm_loop              # the channel's loop bit off
+087C  func  next_random_byte            # A, the next of the random bytes the main loop keeps (8600-86FF, random_read 83D3)
+0885  func  music_track_start           # a music channel's first handler: FM keyed off, its record cleared from +12, its track from the song (song_header + 2 x channel)
+08CD  func  music_track_first_tick      # the handler after music_track_start: music_track_tick next, and the track's first commands now
+08D6  func  music_track_tick            # a music channel's handler: the tempo (tempo 83D9 + tempo_increase 83DA; 0 stops it) into +12, a step of +13 (the note's ticks left) at each carry: its next commands at 0, else the note's volume, portamento, LFO ramp
+09BF  code  pcm_note_tick               # music_track_tick's for a PCM channel: its decay
+09EC  code  clear_note_hook             # the note hook (+28) back to note_hook_none
+09F5  func  note_hook_none              # the note hook's (+28) only handler: RET
+09F6  code  run_note_hook               # JP to the note hook (+28)
+09FD  func  accelerando_tick            # music channel 1's, each pass: tempo_increase (83DA) up by one every 16 x the low nibble of accelerando (83D7) ticks
+0A16  func  check_fm_effect_override    # on music channels 6 and 7: while an FM effect plays on them (8341, 8381), the music stays keyed off (+3F bit 0)
+0A3F  code  read_track                  # the commands of the track at +10 up to the next note (or the end)
+0A46  code  read_track_command          # the track's next byte: 0x the octave, 7x the attenuation, E0-FF a command, others a note (length, pitch; pitch 0 a rest)
+0A68  code  play_note                   # a note of pitch E: FM (fm_note_pitches, set_fm_pitch, key on) or PCM (play_pcm_note); its gate (+20) and volume
+0BE5  code  play_pcm_note               # a PCM channel's note: drum mode (+18 bit 0) by pcm_drums, else the instrument (+38) of pcm_instruments at pcm_note_pitches
+0CCA  code  play_rest                   # a rest: keyed off unless the effect override; no note hook
+0CDD  func  next_note_length            # the note's length (note_lengths by the high nibble D) into +13, the track on by one
+0D06  code  track_set_octave            # 0x: +1E, the octave (x 24, or x 1 on a PCM channel)
+0D21  code  track_set_attenuation       # 7x: +39, added to the note's attenuation (E3 clears it)
+0D2B  code  track_command               # E0-FF: through track_commands_e0 or track_commands_f0, DE at its first argument
+0D8D  code  track_set_mode              # E0: +18 (bit 0: a PCM channel's drum mode; on FM, no note hook)
+0D94  code  track_set_tempo             # E1: tempo (83D9), the music's, for every channel
+0D9B  code  track_set_instrument        # E2: +38; on FM the voice of fm_voice_pointers (load_instrument)
+0DB0  func  load_instrument             # the FM voice of fm_voice_pointers by A
+0DC0  code  track_set_volume            # E3: +1F (plus 0A on FM), +39 cleared
+0DD7  code  track_set_gate              # E4: +20, how much of a note's length it is keyed on (x / 256)
+0DDE  code  track_held_note             # E5: a note held over several lengths (two a byte up to a 0 nibble)
+0E0E  func  add_note_length_high        # the length of the high nibble of A into +13
+0E16  func  add_note_length             # the length of A into +13
+0E25  code  track_set_detune            # E6: +15
+0E2C  code  track_set_portamento        # E7: +17
+0E33  code  track_set_music_transpose   # E8: music_transpose (83D6)
+0E3C  func  read_transpose              # the argument as semitones: low nibble x 2 + 24 x octave (bits 4-6), bit 7 down
+0E59  code  track_set_transpose         # E9: +19
+0E62  code  track_set_music_volume      # EA: music_volume (83D5)
+0E6B  func  read_volume_offset          # the argument: bit 7 a negative offset
+0E74  code  track_set_volume_offset     # EB: +1A
+0E7D  code  track_loop_transposed       # EC: count, two transpositions (+32, +33 add up each time), address: jumps the count times
+0EBD  code  track_set_lfo               # ED: the YM2151's LFO (registers 18, 19, 1B)
+0EDF  code  track_set_lfo_ramp          # EE: +16, how many ticks apart the channel's LFO sensitivity (register 38) rises after a note starts
+0EE6  code  track_nop                   # EF: an argument, ignored
+0EE9  code  track_jump                  # F0: the track goes on at the address
+0EF5  code  track_loop_exit             # F1: count, address: goes on the count times less one, then jumps
+0F0F  code  track_loop_start            # F2: count: the loop's start (+1B, +2C) after it
+0F1D  code  track_loop_end              # F3: back to the F2 loop's start the count times
+0F2C  code  track_loop_2_start          # F4: as F2 with +1C, +2E
+0F3A  code  track_loop_2_end            # F5
+0F49  code  track_call_repeat           # F6: count, address: plays the part there the count times (+35, return +2A)
+0F5A  func  read_track_address          # the address at DE into the track (+10), DE past it
+0F65  code  track_return_repeat         # F7: the end of an F6 part
+0F7E  code  track_call                  # F8: address: plays the part there (return +36)
+0F8A  code  track_return                # F9
+0F93  code  track_call_2                # FA: as F8 with +3A
+0F9F  code  track_return_2              # FB
+0FA8  code  track_set_accelerando       # FC-FE: accelerando (83D7, 83D8) and tempo_increase 0: the music speeds up (accelerando_tick)
+0FC0  code  track_end                   # FF: the channel stops (an FM one's channel back to the music or the effect)
+0FF6  code  track_skip_3                # the track on past 3 more bytes
+0FF8  code  track_skip_1                # past 1 more byte
+0FF9  code  track_go_on                 # the track at DE, and its next command
+1094  func  play_pcm_sample             # an effect's K007232 sample: start DE (C bit 16), volume +32, pitch +33, HL ticks into +30
+10AF  func  pcm_effect_countdown        # a PCM effect's handler: +30 ticks down, then stop_pcm_channel
+10C2  func  queue_pcm_effect_a          # PCM effect channel A (8280) on the handler HL as sound 88, unless music_pcm_hold (83DE)
+
+# ======== the effects ========
+# The handlers of fm_effect_handlers and pcm_effect_handlers, by command (each runs its channel through the
+# handlers it stores after it, unnamed). An FM effect loads its voice first (load_fm_voice, the 25 bytes
+# before its code).
+10D0  func  pcm_effect_81         # pcm_effect_handlers[01]: command 81
+1125  func  pcm_effect_82         # pcm_effect_handlers[02]: command 82
+1165  func  pcm_effect_83         # pcm_effect_handlers[03]: command 83
+1183  func  pcm_effect_84         # pcm_effect_handlers[04]: command 84
+11A1  func  pcm_effect_85         # pcm_effect_handlers[05]: command 85
+11AE  func  pcm_effect_86         # pcm_effect_handlers[06]: command 86
+11F4  func  pcm_effect_8d         # pcm_effect_handlers[0D]: command 8D
+120E  func  pcm_effect_87         # pcm_effect_handlers[07]: command 87
+122C  func  pcm_effect_88         # pcm_effect_handlers[08]: command 88
+1261  func  pcm_effect_89         # pcm_effect_handlers[09]: command 89
+129C  func  pcm_effect_8a         # pcm_effect_handlers[0A]: command 8A
+12D1  func  pcm_effect_8b         # pcm_effect_handlers[0B]: command 8B
+134C  func  pcm_effect_8c         # pcm_effect_handlers[0C]: command 8C
+1359  func  pcm_effect_8e         # pcm_effect_handlers[0E]: command 8E
+137D  func  pcm_effect_8f         # pcm_effect_handlers[0F]: command 8F
+13A3  func  pcm_effect_90         # pcm_effect_handlers[10]: command 90
+13C1  func  pcm_effect_91         # pcm_effect_handlers[11]: command 91
+13CE  func  pcm_effect_92         # pcm_effect_handlers[12]: command 92
+13D4  func  pcm_effect_93         # pcm_effect_handlers[13]: command 93
+1638  func  fm_effect_01          # fm_effect_handlers[01]: command 01
+169A  func  fm_effect_02          # fm_effect_handlers[02]: command 02
+174F  func  fm_effect_03          # fm_effect_handlers[03]: command 03
+17E7  func  fm_effect_04          # fm_effect_handlers[04]: command 04
+1811  func  fm_effect_05          # fm_effect_handlers[05]: command 05
+1877  func  fm_effect_37          # fm_effect_handlers[37]: command 37
+1888  func  fm_effect_06          # fm_effect_handlers[06]: command 06
+192C  func  fm_effect_07          # fm_effect_handlers[07]: command 07
+19D1  func  fm_effect_08          # fm_effect_handlers[08]: command 08
+1A23  func  fm_effect_09          # fm_effect_handlers[09]: command 09
+1A43  func  fm_effect_0a          # fm_effect_handlers[0A]: command 0A
+1B4F  func  fm_effect_0b          # fm_effect_handlers[0B]: command 0B
+1BDE  func  fm_effect_0c          # fm_effect_handlers[0C]: command 0C
+1CA0  func  fm_effect_0d          # fm_effect_handlers[0D]: command 0D
+1D74  func  fm_effect_0e          # fm_effect_handlers[0E]: command 0E
+1E33  func  fm_effect_0f          # fm_effect_handlers[0F]: command 0F
+1F07  func  fm_effect_10          # fm_effect_handlers[10]: command 10
+1FCB  func  fm_effect_11          # fm_effect_handlers[11]: command 11
+1FF6  func  fm_effect_12          # fm_effect_handlers[12]: command 12
+2012  func  fm_effect_13          # fm_effect_handlers[13]: command 13
+203E  func  fm_effect_14          # fm_effect_handlers[14]: command 14
+20AD  func  fm_effect_15          # fm_effect_handlers[15]: command 15
+215A  func  fm_effect_16          # fm_effect_handlers[16]: command 16
+21F6  func  fm_effect_17          # fm_effect_handlers[17]: command 17
+2299  func  fm_effect_18          # fm_effect_handlers[18]: command 18
+22D2  func  fm_effect_19          # fm_effect_handlers[19]: command 19
+234E  func  fm_effect_1a          # fm_effect_handlers[1A]: command 1A
+250F  func  fm_effect_1b          # fm_effect_handlers[1B]: command 1B
+257F  func  fm_effect_1c          # fm_effect_handlers[1C]: command 1C
+262A  func  fm_effect_1d          # fm_effect_handlers[1D]: command 1D
+26C4  func  fm_effect_1e          # fm_effect_handlers[1E]: command 1E
+26F6  func  fm_effect_1f          # fm_effect_handlers[1F]: command 1F
+2767  func  fm_effect_20          # fm_effect_handlers[20]: command 20
+2785  func  fm_effect_21          # fm_effect_handlers[21]: command 21
+2804  func  fm_effect_22          # fm_effect_handlers[22]: command 22
+28B6  func  fm_effect_23          # fm_effect_handlers[23]: command 23
+2925  func  fm_effect_24          # fm_effect_handlers[24]: command 24
+29EB  func  fm_effect_25          # fm_effect_handlers[25]: command 25
+2A68  func  fm_effect_26          # fm_effect_handlers[26]: command 26
+2B2D  func  fm_effect_27          # fm_effect_handlers[27]: command 27
+2BDF  func  fm_effect_28          # fm_effect_handlers[28]: command 28
+2C49  func  fm_effect_29          # fm_effect_handlers[29]: command 29
+2CF5  func  fm_effect_2a          # fm_effect_handlers[2A]: command 2A
+2D7D  func  fm_effect_2b          # fm_effect_handlers[2B]: command 2B
+2DBF  func  fm_effect_2c          # fm_effect_handlers[2C]: command 2C
+2E77  func  fm_effect_2d          # fm_effect_handlers[2D]: command 2D
+2F11  func  fm_effect_2e          # fm_effect_handlers[2E]: command 2E
+2FA8  func  fm_effect_2f          # fm_effect_handlers[2F]: command 2F
+3032  func  fm_effect_30          # fm_effect_handlers[30]: command 30
+30A4  func  fm_effect_31          # fm_effect_handlers[31]: command 31
+3154  func  fm_effect_32          # fm_effect_handlers[32]: command 32
+31AD  func  fm_effect_33          # fm_effect_handlers[33]: command 33
+31CE  func  fm_effect_34          # fm_effect_handlers[34]: command 34
+3316  func  fm_effect_35          # fm_effect_handlers[35]: command 35
+3336  func  fm_effect_36          # fm_effect_handlers[36]: command 36
+33C2  func  fm_effect_38          # fm_effect_handlers[38]: command 38
+3432  func  fm_effect_39          # fm_effect_handlers[39]: command 39
+348B  func  fm_effect_3a          # fm_effect_handlers[3A]: command 3A
+3524  func  fm_effect_3b          # fm_effect_handlers[3B]: command 3B
+3570  func  fm_effect_3c          # fm_effect_handlers[3C]: command 3C
+35D3  func  fm_effect_3d          # fm_effect_handlers[3D]: command 3D
+3621  func  fm_effect_3e          # fm_effect_handlers[3E]: command 3E
+3664  func  fm_effect_3f          # fm_effect_handlers[3F]: command 3F
+3703  func  fm_effect_40          # fm_effect_handlers[40]: command 40
+373F  func  fm_effect_41          # fm_effect_handlers[41]: command 41
+
+# ======== tables ========
+0D4D  jumps  track_commands_e0 16       # E0-EF's handlers: track_command 0D37 "ld hl,$0D4D", 0D48-0D4C "ld a,(hl); inc hl; ld h,(hl); ld l,a; jp (hl)"
+0D6D  jumps  track_commands_f0 16       # F0-FF's: 0D41 "ld hl,$0D6D" (FC, FD and FE share one handler)
+106C  jumps  pcm_effect_handlers 20     # commands 80-93's: start_pcm_effect 024C "ld hl,$106C" + 2 x (command - 80), 0250/0252 into the record's handler; entry 0 is 0 (command 80 returns at 021D)
+13D9  jumps  fm_effect_handlers 66 first=1   # commands 01-41's: assign_fm_effect 02ED "ld hl,$13D9" + 2 x command, 02F1/02F3; command 00 never comes here (sound_command: reset_sound), and the entry's bytes are the address of the jump at 13D8
+3794  jumps  unused_note_hooks 15       # 15 x unused_note_hook: no code names it (the music's hook is set directly: clear_note_hook)
+37B2  func  unused_note_hook            # JP clear_note_hook: only unused_note_hooks points here
+
+0130  data   speech_priorities u8[36]   # by speech (A0-C3): start_speech 00CA "ld hl,$0130", 00CE "ld a,(hl)", compared with the speech playing (83C8)
+0154  data   speech_music_attenuation u8[36]   # by speech: how much the music is turned down while it speaks (speech_play 0193 "ld hl,$0154", 0197, into 83DB and 83CC)
+025A  data   pcm_effect_priorities u8[20]      # by PCM effect (80-93; 80's is never read): start_pcm_effect 0222 "ld hl,$025A", 0229 "ld d,(hl)"
+02FB  data   fm_effect_priorities u8[66]       # by FM effect (01-41; 00's is never read): start_fm_effect 0274 "ld hl,$02FB", 0278; 20 or more plays on channel 0 (8000)
+073D  data   fm_key_codes u8[96]        # a semitone's YM2151 key code (octave, note 0-E without 3, 7, B), by semitone: set_fm_pitch 0733 "ld hl,$073D", 0737
+07DE  data   fm_carrier_masks u8[8]     # by the voice's algorithm: the carriers, from bit 7 in set_fm_volume's order (M1, M2, C1, C2): 07AB "ld hl,$07DE", 07AF "ld l,(hl)"
+0B1C  data   fm_note_pitches u16[99]    # a note's pitch in 1/64 semitone (as set_fm_pitch takes it), by 2 x pitch + the transpositions: play_note 0AA2 "ld hl,$0B1A" (the index is at least 2), 0AA6/0AA8
+0C96  data   pcm_note_pitches u8[52]    # a tonal PCM note's K007232 pitch (low byte; the high one is 0F), by pitch + 12 x (octave + 1): play_pcm_note 0C89 "ld hl,$0C8A", 0C8D
+0CF9  data   note_lengths u8[13]        # a note's ticks by its high nibble 1-D: next_note_length 0CF0 "ld hl,$0CF8", 0CF4; add_note_length 0E19, 0E1D (7's, 09, is never a length: 7x is the attenuation command)
+1002  data   pcm_instruments pcm_instrument[4]   # a PCM channel's instruments (E2): play_pcm_note 0C1F-0C29 "ld hl,$1002" + 4 x +38, 0C3B-0C56
+1012  data   pcm_drums pcm_drum[15]     # drum mode (E0 01): by the note's pitch 1-F, play_pcm_note 0C2F-0C37 "ld hl,$100C" + 6 x pitch, 0C3B-0C6D
+145D  data   songs song[25]             # commands 60-78: start_music 01F7 "ld de,$145B" + 18 x song (song_header 83C0); music_track_start 08BA-08C3 reads song_header + 2 x channel (1-9)
+# The songs by command (songs[command - 60]), from the commands the 68000 gives in the scenarios (kref
+# --sound-commands): the zones' music (tests/controls/areaN.txt), 60 zone 6 (the highway on skateboards),
+# 61 zone 5 (the highway), 62 zone 9 (Krang and Shredder), 63 zone 0 (the burning building), 65 zone 3 (the
+# sewers), 66 zones 4 and 7 (the street of cars, the building site), 67 zone 2 (the street), 68 zone 1
+# (April's apartment), 69 zone 8 (the Technodrome); 64 a boss (zones 1, 3 and 8); a zone cleared 6E (zones 3
+# and 6), 72 (zone 1), 73 (zone 8); 6F a coin in; 77 a player down (the continue's count); 6D the game over;
+# 78 the attract mode's introduction. 6A, 6C, 70, 71, 75 and 76 only the sound test plays; 6B (all 9 tracks
+# one, nothing commands it) and 74 (song 60's tracks) none.
+2B04  data   fm_effect_26_pitches u16[8]   # FM effect 26's pitches, from the last: 2AD1 "ld hl,$2B02" + 2 x (8 down to 1, 842F), 2ADD/2ADF
+37B5  data   fm_voice_pointers u16[112] fm_voice   # the FM instruments (E2): load_instrument 0DB5 "ld hl,$37B5" + 2 x instrument, 0DB9/0DBB, then load_fm_voice
+# the program's first 256 bytes, which the main loop adds up into its random bytes (04DF "add a,(hl)",
+# random_source 83CF from 0000, "inc l" at 04E0): code, and 0036-0037, two bytes no code reaches between the
+# reset's JP sound_main (0033) and the interrupt's entry (0038)
+0000  codedata random_bytes u8[256]
+
+# Music no song reaches (sound_data_walk.py measures it from here): the sound coverage left these bytes
+# unknown inside the music, each between tracks the walk reaches; nothing in the scenarios reads them
+4721  data   unreached_end_4721 music_track[1]    # FF: song 63 channel 1's end mark, after the jump that loops it (F0 469F at 471E)
+5EB2  data   unused_part_5eb2 music_track[1]      # an F6 part (it ends with F7) no track calls, between song 66's parts
+5EC7  data   unused_part_5ec7 music_track[1]      # another, right after it (its first commands the same, other notes)
+63A5  data   unreached_end_63a5 music_track[1]    # FF: song 67 channel 9's end mark, after the jump that loops it (F0 6354 at 63A2)
+6D46  data   unreached_return_6d46 music_track[1] # F9: a return no track reaches, after song 6C channel 9's end (FF at 6D45)
+7CAA  data   unused_part_7caa music_track[1]      # an FA part (it ends with FB) no track calls, between two F8 parts
+
+# ======== the board and the RAM (names for the decompiled C) ========
+# The board's registers on the Z80's bus (MAME's tmnt_audio_map), which the C reads and writes through the bus
+9000  io   sound_control         u8     # sres: bit 1 the uPD7759's reset line (0 resets it), bit 2 the title music; reads back
+A000  io   sound_latch           u8     # the 68000's sound command (its 0A0009)
+B000  io   pcm_a_pitch           u16    # the K007232's channel A: its pitch (12 bits)
+B002  io   pcm_a_start           u16    # its sample's start, bits 0-15
+B004  io   pcm_a_bank            u8     # bit 16
+B005  io   pcm_a_key             u8     # reading it starts the channel (start_pcm)
+B006  io   pcm_b_pitch           u16    # channel B's
+B008  io   pcm_b_start           u16
+B00A  io   pcm_b_bank            u8
+B00B  io   pcm_b_key             u8
+B00C  io   pcm_volume_port       u8     # the K007232's port: tmnt.cpp's volume callback, A in the high nibble, B in the low one
+B00D  io   pcm_loop_flags        u8     # bit 0 channel A loops, bit 1 channel B
+C000  io   fm_address            u8     # the YM2151's register number
+C001  io   fm_data               u8     # its data; read, its status (bit 7 busy, bit 1 timer B's flag)
+D000  io   speech_sample         u8     # the uPD7759's port: the sample to speak
+E000  io   speech_start          u8     # its start line (bit 0, inverted: tmnt_upd_start_w)
+F000  io   speech_busy           u8     # bit 0: 1 while the uPD7759 stands idle (tmnt_upd_busy_r)
+
+# The variables (8000-83BF are the channel records; 8600-86FF the random bytes; the stack below 8600), from
+# what the routines above do with them
+83C0  var  song_header           u16    # start_music: the song's entry of songs less 2 (music_track_start adds 2 x channel)
+83C2  var  pcm_volumes           u8     # what was written to pcm_volume_port (set_pcm_volume)
+83C3  var  pcm_loops             u8     # what was written to pcm_loop_flags (set_pcm_loop, clear_pcm_loop)
+83C4  var  title_music_on        u8     # start_title_music, title_music_timer
+83C5  var  title_music_passes    u8     # main loop passes left of the 250 of a round
+83C6  var  title_music_rounds    u8     # rounds left of 13
+83C8  var  speech_priority       u8     # the priority of the speech that plays (speech_priorities)
+83C9  var  fade_timer            u8     # fade_out_music: 16h main loop passes between the fade's steps
+83CA  var  fade_step             u8     # the fade's steps so far: it ends at 30h
+83CB  var  fade_attenuation      u8     # up by one every 4 steps
+83CD  var  random_seed           u16    # the main loop's random number (x 3 and more, each pass)
+83CF  var  random_source         u16    # where the main loop reads random_bytes (0000-00FF, inc l)
+83D1  var  random_write          u16    # where it writes the next random byte (8600-86FF)
+83D3  var  random_read           u16    # where next_random_byte reads them
+83D5  var  music_volume          u8     # track command EA
+83D6  var  music_transpose       u8     # track command E8
+83D7  var  accelerando           u16    # track commands FC-FE (83D7, 83D8)
+83D9  var  tempo                 u8     # track command E1, the music's for every channel
+83DA  var  tempo_increase        u8     # accelerando_tick
+83DB  var  music_attenuation     u8     # while a speech plays (speech_music_attenuation) or a PCM channel stops
+83DE  var  music_pcm_hold        u8     # set: the PCM effects leave the music's PCM channels alone (silence, queue_pcm_effect_a)
+8600  var  random_pool[256]      u8     # the random bytes the main loop writes and next_random_byte reads
+
+# The tables the C reads by name (the game loads them from the asset pieces of these names). Some the code
+# reads from an element before their start (the index starts at 1): the C reads NAME[i - 1]
+0B1C  table  fm_note_pitches        u16
+0C96  table  pcm_note_pitches       u8
+0CF9  table  note_lengths           u8
+2B04  table  fm_effect_26_pitches   u16
+37B5  table  fm_voice_pointers      u16
+0D4D  table  track_commands_e0      u16
+0D6D  table  track_commands_f0      u16
+106C  table  pcm_effect_handlers    u16
+
+# The 15 channel records (8000-83BF, 40h bytes each): 8000 the FM effects' first channel, 8040-81C0 the music's
+# FM channels 1-7, 8200 and 8240 its PCM channels, 8280 and 82C0 the PCM effects', 8300 the speech's, 8340 and
+# 8380 the FM effects' on the music's channels 6 and 7. Every handler runs on one in IX; the fields past +3
+# mean one thing to the music and others to each effect (named in the naming rounds)
+struct  channel 40
+array   channel 8000 15
+field   channel 0  chip_channel u8      # the YM2151's channel, or bit 3 the K007232 (bit 0 its channel B)
+field   channel 1  sound u8             # the sound it plays (0: free)
+field   channel 2  handler u16          # the routine that runs it on the next pass (run_channel_handler)
+field   channel F  priority u8          # the priority of what it plays
+
+# ======== records ========
+struct  fm_voice 19 rom                 # a YM2151 voice: load_fm_voice 05F9-06B1 writes it a byte at a time ("inc hl; ld c,(hl)"), operators M1, C1, M2, C2
+field   fm_voice 0  connection u8       # register 20: both outputs, feedback, algorithm (into +5)
+field   fm_voice 1  m1_detune_multiple u8   # 40
+field   fm_voice 2  m1_total_level u8   # into +6 (written with the volume: set_fm_volume, 60)
+field   fm_voice 3  m1_attack u8        # 80: key scaling, attack rate
+field   fm_voice 4  m1_decay_1 u8       # A0: AMS enable, first decay rate
+field   fm_voice 5  m1_decay_2 u8       # C0: detune 2, second decay rate
+field   fm_voice 6  m1_release u8       # E0: first decay level, release rate (into +A)
+field   fm_voice 7  c1_detune_multiple u8   # 50
+field   fm_voice 8  c1_total_level u8   # into +7 (70)
+field   fm_voice 9  c1_attack u8        # 90
+field   fm_voice A  c1_decay_1 u8       # B0
+field   fm_voice B  c1_decay_2 u8       # D0
+field   fm_voice C  c1_release u8       # F0 (into +B)
+field   fm_voice D  m2_detune_multiple u8   # 48
+field   fm_voice E  m2_total_level u8   # into +8 (68)
+field   fm_voice F  m2_attack u8        # 88
+field   fm_voice 10 m2_decay_1 u8       # A8
+field   fm_voice 11 m2_decay_2 u8       # C8
+field   fm_voice 12 m2_release u8       # E8 (into +C)
+field   fm_voice 13 c2_detune_multiple u8   # 58
+field   fm_voice 14 c2_total_level u8   # into +9 (78)
+field   fm_voice 15 c2_attack u8        # 98
+field   fm_voice 16 c2_decay_1 u8       # B8
+field   fm_voice 17 c2_decay_2 u8       # D8
+field   fm_voice 18 c2_release u8       # F8 (into +D)
+param   load_fm_voice hl voice fm_voice # every FM effect hands it its voice in HL ("ld hl,VOICE; call 05F9"), load_instrument an entry of fm_voice_pointers
+
+struct  pcm_instrument 4 rom            # play_pcm_note 0C3B-0C56: "ld e,(hl); inc hl; ld d,(hl); inc hl; ld c,(hl); inc hl" then set_pcm_start, "ld a,(hl)"
+field   pcm_instrument 0 start u16      # the sample's start in the K007232's ROM (bits 0-15)
+field   pcm_instrument 2 bank u8        # its bit 16
+field   pcm_instrument 3 level u8       # its volume before the attenuations (into +3C)
+
+struct  pcm_drum 6 rom                  # as pcm_instrument, and the pitch (0C6B/0C6D "ld e,(hl); inc hl; ld d,(hl)", set_pcm_pitch)
+field   pcm_drum 0 start u16
+field   pcm_drum 2 bank u8
+field   pcm_drum 3 level u8
+field   pcm_drum 4 pitch u16
+
+struct  song 12 rom                     # a song: the tracks of its 9 channels
+field   song 0 tracks u16[9] music_track    # FM channels 1-7, then the K007232's A and B (music_track_start 08BE/08C3 into +10)
+elements music_track u8                 # a track's commands, which read_track_command reads a byte at a time (tools/sound_data_walk.py walks them)
+
+# ======== source files: the files of src/sound/ and the stretches of the program each takes ========
+0000  file  commands       # the 68000's sound commands: the reset and its tests, the command's dispatch, the title music, the speech, the starts of the music and the effects, the fade, silence, the channels' stops
+0402  file  chips          # the chips' registers: the YM2151's writes and the frame's timer, its voices, keys, pitches and volumes; the K007232's start, pitch, volume and loop
+0435  file  main           # the program's frame: sound_main, the main loop, the channels' handlers and their stop
+05F9  file  chips          # (the YM2151's voices, keys, pitches and volumes; the K007232's registers)
+087C  file  music          # the music: the random bytes, the tracks' tick, their commands and notes, the note hooks
+1094  file  pcm_effects    # the PCM effects (commands 80-93) and their samples
+1638  file  fm_effects     # the FM effects (commands 01-41)
+37B2  file  music          # (the note hook no track uses)

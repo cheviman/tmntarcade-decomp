@@ -21,3 +21,254 @@
 # four records of three work RAM addresses and a handler, which the loop at 004722 walks from the last one:
 # 00475E calls the handler (kref --jumps: 00475E -> 0048B2, 0048E6, 00491A, 00494E)
 0047C8  data  channel_records  record=16 code=12 count=4
+
+# ======== the C's files ========
+# ADDRESS file PATH  # description: the functions from ADDRESS up to the next file line go to src/PATH.c (a file may
+# take several stretches). The unsorted/ ones are stretches whose subject is not known yet
+001000  file  system/boot         # the reset, the RAM and ROM tests, and the main loop that runs the jobs the frames queue
+00193E  file  system/test_mode    # the exceptions' handler and the test mode's pages: the RAM and ROM check, the mask ROM check, the inputs, the sounds, the DIP switches
+001E98  file  video/texts         # the texts: from the program's tables of texts into the fixed layer, big characters, numbers
+003B5C  file  system/frame        # the VBLANK interrupt: the inputs, the frame's work, the game's states and the job queue
+00467C  file  scenes/demo         # the demos' recorded inputs, the coins and the players' controls
+005010  file  unsorted/code_005010
+009202  file  system/sound_commands    # the commands to the sound board, queued and sent one a frame
+009242  file  video/palettes      # the palettes: requests queued and done a frame later, the palette effects
+009C18  file  unsorted/code_009C18
+0180E0  file  video/tile_blocks   # blocks of tiles drawn into the layers, and texts typed a character at a time
+019B3A  file  unsorted/code_019B3A
+01A704  file  stage/scroll        # the areas' scroll segments: the layers' limits and speeds
+01A876  file  unsorted/code_01A876
+01E050  file  stage/layers        # the areas' layers: their maps of blocks drawn as the scroll goes on
+01FDCA  file  stage/fire          # the fire's tiles redrawn in the first two areas
+02B25C  file  unsorted/code_02B25C
+046EEA  file  engine/sprites      # the sprite engine: the objects' animations, their sprites into the K051960, their boxes
+04791E  file  objects/spawns      # the enemies' spawn lists, by the scroll
+047BF2  file  engine/sprites      # (setting an object's animation)
+047D98  file  engine/directions   # the direction from one object to another
+048236  file  objects/states      # the objects' state dispatcher and the objects' handlers (provisional: by subject later)
+
+# ======== the boot ========
+# the ROM test: sums every other byte of each area of the table at 0016CC into the work RAM from 060018, a word an
+# area, writing the watchdog after each block; it keeps its return address in A6 (the boot has no stack yet: it
+# tests the RAM). The board puts its own in its place (runtime/replaced.txt): the game has no ROM chips to sum
+001850  func  sum_program_chips
+
+# ======== the sprite engine ========
+# An object (0x50 bytes in work RAM, 062000 on) shows an animation: +36 holds where its frame is, +33 how many
+# more frames to show it. tools/data_walk.py walks the animations, their sprite lists and boxes from what the
+# code hands set_animation (its A6), as these functions read them.
+
+# A6 -> +36 of the object in A0, and the frame's count (+ the object's +43) -> +33; every animation starts here
+047BF2  func  set_animation
+# steps the object in A0 on to its animation's next frame when +33 runs out, without drawing it
+0471AE  func  step_animation
+# every object of the draw list (061400) into the K051960's sprite RAM (140400): its frame's sprites, its
+# shadow sprite (+3A, when +1 has bit 7), and the animation stepped on
+046F92  func  draw_sprites
+# 8 sizes of 8 bytes, by the top 3 bits of a sprite's code: the bounds draw_sprites keeps a sprite of that
+# size on screen by (046FDC "lea $4716e.l, A6", 046FF4/047004/04701C read them)
+04716E  data  sprite_sizes
+# 4-byte records (half the width, the height) at the offset a frame gives (+6): the collision code reads them
+# (047268 "lea $53756.l, A3"; 047534 and 047662 the same)
+053756  data  body_boxes
+
+# ======== the layers' maps ========
+# A layer (the K052109's tile layers) is drawn from a map: rows of 16-bit offsets into a table of blocks, a block
+# 4 x 4 tiles (17 bytes: a colour byte, then the 16 tile codes; 33 with a floor: the colour, 16 bytes of the floor
+# map at 061800, the tiles). tools/data_walk.py walks them from area_layers and from the maps the code stores.
+
+# 10 records of 36 bytes, by the area (060121): layer A's x and y (32-bit), layer B's, A's map and blocks, B's
+# map and blocks, A's map width in bytes and B's (01E258-01E2B6 copy them into 063340 and 063380)
+01E5A0  data  area_layers  record=36 count=10 data=16,20,24,28
+
+# ======== the palettes ========
+# D7 = kind << 8 | the banks' mask, A6 = the data: queued at 060B00 (6 bytes a request), and done by 009272
+# a frame later (the kinds' handlers, by 009310)
+009242  func  post_palette_request
+# 16 colours from each palette of the list in A6 (D7 + 1 of them) into the palette RAM at A5
+0095E6  func  copy_palette_list
+# the palette lists' counts less one, a byte a bank (0095E6's D7: 00938A "move.b (A5,D6.w), D7")
+0095D2  data  palette_bank_counts
+# where each bank starts in the palette RAM (00939E "movea.l (A5,D6.w), A5" after "movea.l #$95d6, A5")
+0095D6  data  palette_bank_addresses  record=4 count=4 data=0
+# a palette set (4 lists, a bank each) by the area: request kind 1 (00935A "movea.l #$9f56, A6", then the area)
+009F56  data  area_palettes
+# A5 = palette sets one after the other, D6's high byte = the banks: kept at 063414 and 063418, and over the
+# next frames (063411 the step) their colours copied into 063800 (02F8F4 "lea $a0ae.l, A5", D6 = $0C02)
+00961C  func  copy_palette_sets
+
+# ======== the enemies ========
+# the area's spawn list (area_spawn_lists) -> 061200, its scroll variables -> 061210 and 061214, its start -> 061218
+04791E  func  start_area_spawns
+# every frame: the next enemy of the spawn list (061200) when the scroll (061218) reaches its x, into a free object
+047A32  func  spawn_enemies
+# A1 = spawn_offsets' record for the kind of the spawn record in A0
+047B98  func  spawn_offset
+# an address an area (060120): its spawn list (04792E "move.l (A0,D0.w), $61200.l" after "lea $4796a.l, A0")
+04796A  data  area_spawn_lists  record=4 count=10 data=0
+# two work RAM addresses an area: the scroll variables spawn_enemies follows (04793E, 04794A)
+047992  data  area_spawn_scrolls
+# an area's start of the spawn scroll, x and y (16.16) -> 061218, 06121C (047958, 047960)
+0479E2  data  area_spawn_starts
+# 4 bytes by an enemy's kind (the low 7 bits of a spawn record's +7): its x from the spawn point (047AF2)
+053A5E  data  spawn_offsets
+
+# ======== the fire ========
+# areas 0 and 1 (the burning building, April's apartment): the fire's blocks redrawn in the tile RAM, a frame
+# every 4 frames of the game (060121 picks the table: 01FEBA in area 0, 01FF1C elsewhere)
+01FDCA  func  animate_fire_tiles
+0203D2  data  fire_tiles_area_0
+0200F2  data  fire_tiles
+# the blocks the fire's frames give offsets of (01FED2/01FF34 "lea $32312.l, A1")
+032312  data  fire_blocks
+# the effects of the list in A6 (a count, then their addresses) into free slots of 060480 (10 bytes each)
+00987E  func  start_palette_effects
+# every frame: each effect's step on when its count runs out (colour cycles, flashes)
+009902  func  step_palette_effects
+
+# ======== the tile blocks ========
+# the block in A6 (its width and height less one, then its tiles: code and colour) into the tile RAM at the
+# address tile_block_places gives for D7
+0183FA  func  draw_tile_block
+0187BC  data  tile_block_places
+# an object's tile block by its kind (+3): the offset into object_tile_blocks (04CBFC "lea $4cbb4.l, A6")
+04CBB4  data  object_tile_block_offsets
+# 10 bytes each: the object's +20 and +46, the tile block draw_tile_block draws (04CC82 "movea.l (A5)+, A6"),
+# its place (D7) and its frames (+46: 0, the last)
+04CBC0  data  object_tile_blocks  record=10 count=6 data=4
+# 12 bytes by an object's kind (04CD8C "lea $4cd44.l, A6" + the kind's offset): its +20, two places (D7) and
+# the two tile blocks draw_tile_block draws there (04CDBE, 04CDCE)
+04CD44  data  object_tile_block_pairs  record=12 count=5 data=4,8
+
+# ======== tables of numbers ========
+# the direction (D0: bits 6-7 the quadrant, the rest from direction_table) from the object in A0 to D1, D2
+047D98  func  direction_to
+# 32 offsets of 16 bits, a row of direction_table each (047DE0 "adda.w (A4,D2.w), A5")
+047DF6  data  direction_rows
+# 32 x 32 bytes: the direction within the quadrant, by dy and dx scaled to under 32 (047DE4)
+047E36  data  direction_table
+
+# ======== the texts ========
+# the text D7 of a table into the fixed layer (001EB2 on: '/' a new line at the address after it, '?' the end;
+# bit 9 of D7 another colour)
+001EAC  func  print_game_text
+001E98  func  print_demo_text
+001EA2  func  print_test_text
+# "PLAYER ONE", "THE END", "PRESS START", "ONE PLAYER ONLY"...
+00292A  data  game_texts
+# "PRESS START DEMO", "OPENING DEMO", "TITLE DEMO", "CHARACTER INFORMATION"...
+0030AE  data  demo_texts
+# the test mode's: "IO READ TEST", the inputs, "COLOR TEST"...
+005E1E  data  test_mode_texts
+# the text D6 of positioned_texts into the layer text_layer_places gives for D7 (& 3), at the offsets it holds
+00275E  func  print_text_at
+0035AC  data  positioned_texts
+0027A2  data  text_layer_places
+# the character D7 of big_font (36 bytes: 9 rows of 8 cells, a nibble each) drawn in tiles: big_font_tiles by the
+# nibble, from big_font_place (a tile RAM address); text_colours, a colour by D7 (00280C)
+0027B2  func  draw_big_character
+002802  data  big_font_place
+002806  data  big_font_tiles
+00388C  data  big_font
+001F1A  data  text_colours
+
+# ======== the scroll ========
+# the area's scroll segment at 0633C0 (a word, 4 a segment) into the layers' limits and speeds
+01A704  func  start_scroll_segment
+0205F2  data  area_scroll_segments
+# the picture in the fixed layer (13 rows of 24 tiles: 01F94E-01F95A), its tiles + D5 and their colours
+01F93C  func  draw_screen_picture
+01FAA8  data  screen_picture_tiles
+01F970  data  screen_picture_colours
+
+# ======== the demos ========
+# the demo 0600B6: its area and settings, and its players' input streams (004D70-004D88 -> 0600AA, 0600AE,
+# 0600D2, 0600D6), which play_demo_inputs (004714 on) reads a pair of bytes at a time
+004D2E  code  start_demo
+004E88  data  demo_settings
+004E94  data  demo_inputs
+# ======== the typed texts ========
+# a text typed a character at a time (the story's screens): A6 its first line's header (the tile RAM address, the
+# frames between characters, a colour), into 063420-06342B; 018340 types it on, '/' a new line, '!' the end
+0183B6  func  start_typed_text
+# the same for one of several at once (the record in A4: 0185D2 types it on)
+01863A  func  start_typed_line
+
+# ======== unused ========
+# unused: no code reads it (no reference, no read in the scenarios); its 307 entries are all animations, the
+# ones the code starts and 25 more no code reaches
+05D03A  data  unused_animation_list
+
+# ======== code no path reaches ========
+# routines the analysis does not reach from the vectors and the tables, and no scenario runs: they decode to a
+# return or a jump, or run on into code the analysis knows (each one unknown bytes in coverage.py until here)
+001D9E  func  unreached_001D9E
+003DAA  func  unreached_003DAA
+004068  func  unreached_004068
+0044EE  func  unreached_0044EE
+# copies the 8 sprites at 005294 into the K051960's sprite RAM (140400)
+005266  func  unreached_005266
+005C0C  func  unreached_005C0C
+005CF6  func  unreached_005CF6
+008F7E  func  unreached_008F7E
+009264  func  unreached_009264
+009AA0  func  unreached_009AA0
+00E364  func  unreached_00E364
+0116A2  func  unreached_0116A2
+0129C0  func  unreached_0129C0
+01845E  func  unreached_01845E
+01AC7E  func  unreached_01AC7E
+01C8E4  func  unreached_01C8E4
+02D1D6  func  unreached_02D1D6
+047B1C  func  unreached_047B1C
+047D0E  func  unreached_047D0E
+048480  func  unreached_048480
+04A202  func  unreached_04A202
+04A338  func  unreached_04A338
+04A396  func  unreached_04A396
+04A3F4  func  unreached_04A3F4
+04A454  func  unreached_04A454
+04A4B2  func  unreached_04A4B2
+04A512  func  unreached_04A512
+04A570  func  unreached_04A570
+04B716  func  unreached_04B716
+04BF5A  func  unreached_04BF5A
+04C086  func  unreached_04C086
+
+# ======== tables of records symbols.txt describes for the walk ========
+# 4 records of an animation and a word for +1C of four objects the loop at 030DCA starts ("movea.l (A5)+, A6",
+# "move.w (A5)+, ($1c,A0)" after "lea $30dfc.l, A5")
+030DFC  data  intro_object_animations  record=6 count=4 data=0
+00218A  func  unreached_00218A
+0025C8  func  unreached_0025C8
+00456A  func  unreached_00456A
+004620  func  unreached_004620
+0099B4  func  unreached_0099B4
+009C18  func  unreached_009C18
+010FEE  func  unreached_010FEE
+0186E2  func  unreached_0186E2
+030062  func  unreached_030062
+0492EC  func  unreached_0492EC
+00462E  func  unreached_00462E
+03006C  func  unreached_03006C
+00463C  func  unreached_00463C
+
+# ======== the enemies' definitions ========
+# 9 records of 136 bytes, one an enemy kind: an object's +24 points at its kind's (048A2C, 04ACFC... store them);
+# +4 four chances (048D26 "move.b ($4,A6,D6.w), D6"), +28 on 12-byte records of its attacks (048D16 reads +8 of
+# them), +58 a byte by the player's direction (048E9A "tst.b (A6,D1.w)" after "adda.w #$58, A6")
+053EFE  data  enemy_definitions
+# unused: no code names or reads it (no reference, no read in the scenarios): the addresses of 8 records of 104
+# bytes (054406 on), 32 bytes all of them point at (+40), and the records: an older shape of enemy_definitions
+0543C6  data  unused_enemy_definitions
+00464A  func  unreached_00464A
+0059F8  func  unreached_0059F8
+004658  func  unreached_004658
+
+# ======== the areas' settings (006710-006766, by the area 060121) ========
+# the K052109's tile banks, registers 1D80 and 1F00 (2 bytes an area: 006746, 006756)
+00676E  data  area_tile_banks
+# the layers' priority -> 0C0001 (00671E)
+006782  data  area_layer_priorities
+# a byte -> 060127 (006736)
+00678C  data  area_settings_060127
