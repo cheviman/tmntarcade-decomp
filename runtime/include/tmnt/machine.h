@@ -1,0 +1,128 @@
+/**
+ *    Name:        machine.h
+ *    Description: the TMNT board (Konami GX963) as the 68000 program sees it: memory map, inputs, interrupts,
+ *                 the video chips' memories and registers
+ *    Version:     0.1.0
+ *    Created:     29-10-2026
+ *    Modified:    29-10-2026
+ *    Author:      Sebastian Toyos
+ *
+ *    license:BSD-3-Clause
+ *    Behavior follows MAME: konami/tmnt.cpp (Nicola Salmoria), konami/k052109.cpp and konami/k051960.cpp
+ *    (Fabio Priuli, Acho A. Tang, R. Belmont, Nicola Salmoria). MAME's terms are in
+ *    tools/core/konami/reference/mame/LICENSE.
+ *
+ *    The 68000 side is reached through tmnt_read16 / tmnt_write16: a big-endian 16-bit bus with 24 address
+ *    lines, every access a word at an even address with MAME's mem_mask (0xFF00 for the even byte, 0x00FF
+ *    for the odd one, 0xFFFF for both). What no device answers reads 0, MAME's default.
+ *
+ *    The names keep the family's prefix, tmnt: MAME's driver of the same name holds this board and its
+ *    relatives (Cue Brick, M.I.A.), which differ in their memory maps.
+ *
+ *    Time: the caller advances tmnt_board.cycles as the CPU runs and calls the frame's events itself
+ *    (tools/core/konami/reference/kref, to follow the real CPU's pace).
+ */
+#ifndef TMNT_MACHINE_H
+#define TMNT_MACHINE_H
+
+#include <stdbool.h>
+#include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define TMNT_CPU_CLOCK        8000000u     /* 24 MHz / 3: the 68000 */
+#define TMNT_VIDEO_CLOCK      24000000u    /* the K052109 and the K051960 */
+#define TMNT_LINE_CYCLES      512u         /* 384 pixels at 6 MHz: 64 us, 512 cycles of the 68000 */
+#define TMNT_LINES            264
+#define TMNT_VBLANK_START     240          /* the visible lines are 16-239 */
+#define TMNT_VBLANK_END       16
+#define TMNT_FRAME_CYCLES     (TMNT_LINE_CYCLES * TMNT_LINES)
+
+#define TMNT_PROGRAM_SIZE     0x60000
+#define TMNT_WORK_RAM_SIZE    0x4000       /* 060000-063FFF */
+#define TMNT_PALETTE_SIZE     0x800        /* 080000-080FFF, the odd bytes: 1024 colors, xBGR 555 */
+#define TMNT_TILE_RAM_SIZE    0x6000       /* the K052109's */
+#define TMNT_SPRITE_RAM_SIZE  0x400        /* the K051960's: 128 sprites of 8 bytes */
+
+/* The inputs, as MAME's ports have them: every bit active low */
+enum
+{
+	TMNT_COIN1 = 0x01, TMNT_COIN2 = 0x02, TMNT_COIN3 = 0x04, TMNT_COIN4 = 0x08,
+	TMNT_SERVICE1 = 0x10, TMNT_SERVICE2 = 0x20, TMNT_SERVICE3 = 0x40, TMNT_SERVICE4 = 0x80
+};
+enum
+{
+	TMNT_LEFT = 0x01, TMNT_RIGHT = 0x02, TMNT_UP = 0x04, TMNT_DOWN = 0x08,
+	TMNT_ATTACK = 0x10, TMNT_JUMP = 0x20      /* (MAME: buttons 1 and 2; the 4-player board has no start) */
+};
+/* The DIP switches as MAME sets them by default: 1 coin 1 credit, 2 lives, normal difficulty, demo sounds on,
+   no flip, test mode off */
+#define TMNT_DSW1_DEFAULT     0xFF
+#define TMNT_DSW2_DEFAULT     0x5E
+#define TMNT_DSW3_DEFAULT     0xFF
+#define TMNT_DSW3_SERVICE     0x04          /* active low: the test mode */
+
+typedef struct
+{
+	uint8_t work_ram[TMNT_WORK_RAM_SIZE];
+	uint8_t palette[TMNT_PALETTE_SIZE];
+
+	/* K052109: three tile layers (codes, colors), their scroll and its registers, all in one RAM */
+	uint8_t tile_ram[TMNT_TILE_RAM_SIZE];
+	uint8_t char_rom_bank[4];      /* 1D80, 1F00 */
+	uint8_t char_rom_bank_2[4];    /* 3D80 */
+	uint8_t rom_subbank;           /* 1E00 */
+	bool read_char_rom;            /* RMRD: the tile RAM's window reads the tile ROM (0A0000 bit 7) */
+
+	/* K051960 / K051937: the sprite list, the copy it draws, and its registers */
+	uint8_t sprite_ram[TMNT_SPRITE_RAM_SIZE];
+	uint8_t sprite_buffer[TMNT_SPRITE_RAM_SIZE];    /* what the VBLANK's DMA copied */
+	uint8_t sprite_control;        /* 051937 register 0 */
+	uint8_t shadow_config;         /* register 1 */
+	uint8_t sprite_rom_bank[3];    /* registers 2-4 */
+	uint16_t sprite_rom_offset;
+	uint64_t sprites_busy_until;   /* the DMA's end, in 24 MHz ticks */
+
+	uint8_t priority;              /* 0C0000 bits 2-3 */
+	uint8_t control;               /* the last byte written to 0A0001 */
+	uint8_t irq5_enabled;          /* its bit 5 */
+	bool irq5;                     /* the 68000's IRQ5, from VBLANK, until the program disables it */
+	uint8_t sound_latch;           /* 0A0009, which the Z80 reads */
+	uint32_t sound_irqs;           /* the Z80's IRQs: 0A0001 bit 3 going low */
+	uint32_t coin_counters[2];
+	uint32_t watchdog_resets;
+
+	/* the inputs, active low */
+	uint8_t coins;
+	uint8_t players[4];
+	uint8_t dsw[3];
+
+	uint64_t cycles;               /* the 68000's, since reset */
+	uint64_t frame;                /* VBLANKs since reset */
+} tmnt_machine;
+
+extern tmnt_machine tmnt_board;
+
+/* The board after its reset, the inputs idle and the DIP switches as MAME sets them (its ROMs are
+   game/data.h's regions) */
+void tmnt_reset(void);
+
+uint16_t tmnt_read16(uint32_t address, uint16_t mem_mask);
+void tmnt_write16(uint32_t address, uint16_t data, uint16_t mem_mask);
+
+/* The interrupt level the 68000 sees: 5 while the IRQ5 line is asserted, else 0 */
+int tmnt_irq_level(void);
+
+/* The screen's VBLANK begins (line 240): the K051960's sprite DMA, and IRQ5 if the program enables it */
+void tmnt_vblank_start(void);
+
+/* A hash of the state the program keeps: work RAM, palette, the video chips' memories and registers */
+uint64_t tmnt_state_hash(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
