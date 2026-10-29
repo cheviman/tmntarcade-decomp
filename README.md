@@ -38,7 +38,11 @@ tools verify it, extract the assets and build your own executable.
       the same text as MAME's at every even offset of the program and of an image of every opcode
       (`python tools/core/konami/reference/compare_m68k_with_mame.py`), with each instruction's operands
       and control flow
-- [ ] Recursive disassembly without traces, and every byte of the program classified
+- [x] Recursive disassembly without traces (`python tools/disassemble.py`, the core's 68000 analysis, from
+      the vectors and `symbols.txt`): it follows what the address registers can hold into the tables of
+      object handlers the program jumps through, and finds 27,892 instructions, all 20,197 addresses the
+      scenarios execute among them and none of them inside another instruction
+- [ ] Every byte of the program classified as code, data or fill
 - [ ] Translation scaffold, the board model in C, and a window port (SDL2) that matches the reference
 - [ ] Decompiler: the program as C with no goto and nothing of the CPU left in it
 - [ ] Assets extracted into common formats (PNG, MIDI, WAV, text), which the game loads by name
@@ -105,7 +109,9 @@ tools/core/         arcade-decomp, the shared core (git submodule); its konami/r
 tools/game_profile.py   what the core needs to know of this game
 tools/tmnt_rom.py   the ROM set: its files by hash, and the regions as the board lays them out
 tools/verify_rom.py the ROM set's check (the core's script)
-tools/check_scenarios.py   every control script on the reference (the core's script)
+tools/check_scenarios.py   every control script on the reference, and the static analysis against them
+tools/disassemble.py       the static analysis: build/listing/tmnt.s and report.txt (the core's)
+symbols.txt         the program's names, and what the static analysis cannot work out alone
 tools/make_scenarios.py    writes the control scripts
 tests/controls/     the control scripts
 ```

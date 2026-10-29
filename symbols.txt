@@ -1,0 +1,23 @@
+# TMNT (MAME set 'tmnt', World 4 Players, version X) - 68000 program symbols
+#
+# Addresses and names only: no game data lives in this file.
+# Format:  ADDRESS  KIND  NAME  [LAYOUT]   [# comment]
+#   KIND: func = function entry, code = code label, data = data label
+# Addresses are the 68000's, 000000-05FFFF (the program has no mirrors).
+#
+# LAYOUT, for data tables that hold code addresses the analysis cannot see the code load
+# (tools/core/m68000/analysis.py reads record=, code= and count=):
+#   record=N        the table is an array of N-byte records
+#   count=N         ... of N records
+#   code=A          every record holds a 32-bit code address at offset A
+# Sizes, offsets and counts are decimal.
+#
+# The analysis starts at the exception vectors (the reset at 001000, the VBLANK's IRQ5 at 003DC4) and finds the
+# code without traces, following what the address registers hold into the tables of handlers; the lines here
+# are what it cannot work out, each with how it was found (kref --jumps: where a jump through a register went).
+
+# ======== tables of records with a code address ========
+
+# four records of three work RAM addresses and a handler, which the loop at 004722 walks from the last one:
+# 00475E calls the handler (kref --jumps: 00475E -> 0048B2, 0048E6, 00491A, 00494E)
+0047C8  data  channel_records  record=16 code=12 count=4

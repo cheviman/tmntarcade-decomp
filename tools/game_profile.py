@@ -27,4 +27,6 @@ CPU = "68000"
 BINARY = "tmnt"                                 # its executables: tmnt_game_headless, tmnt_headless
 GUARD = "TMNT"                                  # the generated headers' include guards: TMNT_GAME_H...
 REFERENCE = "kref"                              # the reference (tools/core/konami/reference)
-STATIC_ANALYSIS = False                         # the 68000 frontend and its analysis are still to come
+ANALYSIS = "m68000.analysis"                    # the static analysis and the disassembler of the 68000
+DISASSEMBLER = "m68000.disassembler"
+CODE_START = 0x1000                             # 000400-000FFF, after the vectors, is all zeros
