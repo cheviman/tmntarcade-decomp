@@ -93,10 +93,53 @@ tools verify it, extract the assets and build your own executable.
       tools/check_structure.py build/structure_check`: 0 problems), and no executable holds a stretch of the
       ROM set. The work RAM the comparisons leave out is what the 68000 itself keeps there and the C has in
       its variables: the two stacks (060700-060AFF) and the registers the VBLANK handler saves (060440-06047B)
-- [ ] The C readable: names for the functions, the variables and the objects' fields, the objects as
-      structures, a comment for each function, files by subject (today 1,987 functions and 4,207 variables
-      are named after their address, and the objects' fields are read through the bus: `python
-      tools/noise_report.py`)
+- [x] The C's types (30-10-2026): the 50 objects (0x50 bytes from 062000) are a structure the C reads by its
+      fields (`OBJECT(object)->frame`), the program's data the sprite engine walks are records with fields
+      (`ANIMATION_FRAME(frame)->sprites`, `SPRITE(sprite)->x`, the attack frames, sprite sizes and body boxes),
+      read from the assets, never the ROM; the longs the 68000 writes a half at a time go to the work RAM as
+      one value. Memory reached through an address the code works out went from 12,127 to 2,228 (the rest:
+      buffers, the video chips' memories and tables the code walks byte by byte)
+- [x] The objects named (30-10-2026): the fields every object has (its attack and the hit it took, health,
+      damage, speeds, floor, depth), and families of objects by the code that runs them, each with the fields
+      as its code uses them (`OBJECT(turtle)->turtle.jump_speed`, `OBJECT(enemy)->enemy.target`): the
+      turtles, the enemies (the Foot soldiers by weapon, Rocksteady, Bebop, the Mousers, Roadkill Rodney,
+      Shredder) with a family for each kind of move that keeps something else in its fields, their
+      projectiles, the doors, lifts and manholes they come out of, the scenery that hits. A family whose name
+      starts with another's reads that one's fields too (`enemy_grab` is an `enemy`). The uses of the
+      objects' fields named after their offset went from 5,618 to 1,782, the functions named after their
+      address from 2,212 to 1,197
+- [x] The other objects named (30-10-2026): Krang's android body with his fist, his lasers and the curtain he
+      appears behind, Baxter Stockman and the Mousers he drops, the two rock soldier bosses of the building
+      site and the Technodrome with their shots, bars and rubble, the helicopters of the skateboard ride, the
+      flying drones, the parked car of the street, the areas' scenery and traps (hydrants, signs, rats, an
+      alligator, pizza, oil drums, turrets, freezing nozzles, electric beams, spiked poles, the sewer's
+      missiles) and the explosions, each kind with its family and fields, every function with a comment, in
+      files by subject (`src/objects/krang.c`, `stockman.c`, `rock_soldiers.c`, `air_attacks.c`, `scenery.c`,
+      `explosions.c`, `helpers.c`); an unused colour editor for the palette found among them
+      (`src/system/palette_editor.c`). The uses of the objects' fields named after their offset went from 1,782
+      to 1,124, the functions named after their address from 1,197 to 795
+- [x] Every function of the 68000 program named (30-10-2026), each with a comment, and every file by subject
+      (`src/unsorted/` is gone): the boot and its RAM and ROM check, the frame's interrupt, the coins and the
+      players' lives, boxes and messages, the jobs the frames queue for the main loop, the texts, the test mode's
+      pages (an unused coin counter test among them), the attract mode (the opening, the title, the coin's
+      screen, the profiles, BEST 10 PLAYERS, the demos), the game's scenes (an area's story and title, the play,
+      the area's exits with their cutscenes, the continue, the ranking with its name entry, the ending with its
+      staff roll), the layers' maps and the scroll held while too many enemies are on screen, the speech
+      balloons, the palettes' requests, fades and effects, and the object engine (`src/scenes/`, `src/stage/`,
+      `src/video/`, `src/system/`, `src/objects/turtles.c`). The functions named after their address went from
+      795 to 230: the sound program's 225 and five that are a lone return nothing tells apart from its
+      neighbours
+- [x] The work RAM named (30-10-2026): 251 variables, and the records the program keeps one after another as
+      structures (`PLAYER(i)->lives`, the coin slots, the palette effects and requests, the three layers with
+      the working one and layers A and B by name, the typed texts); the objects' stats are records of the
+      program's data read by their fields. The uses of variables named after their address went from 3,510 to
+      549, the memory reached through an address the code works out from 2,185 to 1,735
+- [ ] The C readable: names for the rest of the variables, the data tables, the parameters and the locals (today
+      549 uses of variables are named after their address, 1,018 uses of the structures' fields after their
+      offset, 8,518 parameters and locals after a register: `python tools/noise_report.py`), and the sound
+      program's functions
+- [ ] The program's data read by name everywhere: 248 reads still go through an address the code works out,
+      and 378 addresses of the program are written as numbers
 
 ## Getting started
 

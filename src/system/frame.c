@@ -3,7 +3,7 @@
  *    Description: the VBLANK interrupt: the inputs, the frame's work, the game's states and the job queue
  *    Version:     0.1.0
  *    Created:     29-10-2026
- *    Modified:    29-10-2026
+ *    Modified:    30-10-2026
  *    Author:      Sebastian Toyos
  *
  *    Teenage Mutant Ninja Turtles (arcade, Konami 1989): the game's 68000 program decompiled into C by
@@ -11,33 +11,34 @@
  */
 #include "game.h"
 
-void func_003B5C(void)
+/* the coins: the coin counters, the coins inserted turned into credits */
+void update_coins(void)
 {
 	uint32_t carry = 0;
 	uint8_t d0_2 = 0, d7 = 0;
 	uint16_t d6 = 0;
-	uint32_t a0 = 0, d0 = 0;
-	uint16_t t1 = 0, t2 = 0, t3 = 0, t4 = 0;
+	uint32_t a0 = 0, coin_slot = 0, d0 = 0;
+	uint16_t t1 = 0, t2 = 0, credits = 0, t3 = 0;
 
-	unk_060327 = 0u;
-	d7 = unk_060058 | 1u;
-	a0 = 0x60300u;
+	new_credit = 0u;
+	d7 = board_control | 1u;
+	coin_slot = COIN_SLOT_ADDRESS(0);
 	d6 = 3u;
-	if (unk_060302 == 0u)
+	if (COIN_SLOT(COIN_SLOT_ADDRESS(0))->counter_pulse == 0u)
 	{
 		d6 = (uint8_t)(d6 - 1u);
-		a0 += 8u;
-		if (unk_06030A == 0u)
+		coin_slot += 8u;
+		if (COIN_SLOT(COIN_SLOT_ADDRESS(1))->counter_pulse == 0u)
 		{
 			d6 = (uint8_t)(d6 - 1u);
-			a0 += 8u;
-			if (unk_060312 == 0u)
+			coin_slot += 8u;
+			if (COIN_SLOT(COIN_SLOT_ADDRESS(2))->counter_pulse == 0u)
 			{
 				d6 = (uint8_t)(d6 - 1u);
-				a0 += 8u;
-				if (unk_06031A == 0u)
+				coin_slot += 8u;
+				if (COIN_SLOT(COIN_SLOT_ADDRESS(3))->counter_pulse == 0u)
 				{
-					a0 = 0x60300u;
+					coin_slot = COIN_SLOT_ADDRESS(0);
 					d6 = 3u;
 				}
 			}
@@ -45,39 +46,39 @@ void func_003B5C(void)
 	}
 	for (;;)
 	{
-		func_003CB0(a0);
-		if (mem_read8(a0 + 5u) != 0u)
+		pulse_coin_counter(coin_slot);
+		if (COIN_SLOT(coin_slot)->counter_on != 0u)
 			break;
-		if (mem_read8(a0 + 2u) == 0u)
+		if (COIN_SLOT(coin_slot)->counter_pulse == 0u)
 		{
 			t1 = d6 - 1u;
 			d6 = t1;
-			a0 += 8u;
+			coin_slot += 8u;
 			if (t1 != 0xFFFFu)
 				continue;
 		}
 		d7 &= ~1u;
 		break;
 	}
-	unk_060058 = d7;
+	board_control = d7;
 	io_write8(IO_0A0001, d7);
-	d0 = func_003BFE(0u);
-	unk_060325 = d0;
-	d0_2 = unk_060325;
-	a0 = 0x60300u;
+	d0 = new_coin_presses(0u);
+	new_coin_switches = d0;
+	d0_2 = new_coin_switches;
+	a0 = COIN_SLOT_ADDRESS(0);
 	d6 = 3u;
 	do
 	{
 		carry = d0_2 & 1u;
 		d0_2 = d0_2 >> 1;
 		if (carry)
-			func_003CE8(a0);
+			count_coin(a0);
 		t2 = d6 - 1u;
 		d6 = t2;
 		a0 += 8u;
 	} while (t2 != 0xFFFFu);
-	d0_2 = unk_060325 >> 4;
-	a0 = 0x60300u;
+	d0_2 = new_coin_switches >> 4;
+	coin_slot = COIN_SLOT_ADDRESS(0);
 	d6 = 3u;
 	do
 	{
@@ -85,119 +86,122 @@ void func_003B5C(void)
 		d0_2 = d0_2 >> 1;
 		if (carry)
 		{
-			unk_060327 = 1u;
-			t3 = mem_read16(a0 + 6u);
-			carry = (uint16_t)(t3 + 1u) < t3;
-			mem_write16(a0 + 6u, t3 + 1u);
+			new_credit = 1u;
+			credits = COIN_SLOT(coin_slot)->credits;
+			carry = (uint16_t)(credits + 1u) < credits;
+			COIN_SLOT(coin_slot)->credits = credits + 1u;
 			if (carry)
-				mem_write16(a0 + 6u, mem_read16(a0 + 6u) - 1u);
+				COIN_SLOT(coin_slot)->credits--;
 		}
-		t4 = d6 - 1u;
-		d6 = t4;
-		a0 += 8u;
-	} while (t4 != 0xFFFFu);
+		t3 = d6 - 1u;
+		d6 = t3;
+		coin_slot += 8u;
+	} while (t3 != 0xFFFFu);
 }
 
-uint32_t func_003BFE(uint32_t d0)
+/* the coin switches just pressed, with the coin's sound */
+uint32_t new_coin_presses(uint32_t d0)
 {
 	uint8_t d7 = 0;
 	uint32_t d0_2 = 0;
 	uint8_t t1 = 0;
 
-	d0_2 = (d0 & ~0xFFu) | unk_060044;
-	d0_2 = d0_2 | unk_060045;
+	d0_2 = (d0 & ~0xFFu) | coin_switches;
+	d0_2 = d0_2 | coin_switches_last_frame;
 	d0_2 = (d0_2 & ~0xFFu) | (uint8_t)~d0_2;
-	t1 = d0_2 & unk_060046;
+	t1 = d0_2 & coin_switches_2_frames_ago;
 	d0_2 = (d0_2 & ~0xFFu) | t1;
-	if (t1 == 0u || unk_060001 == 3u)
+	if (t1 == 0u || game_state == 3u)
 		return d0_2;
-	if (unk_0600A3 != 0u)
+	if (game_on != 0u)
 	{
 		d7 = 0x86u;
-		func_0091D4(d7);
+		queue_sound_command(d7);
 	}
 	else
 	{
 		d7 = 0xFFu;
-		func_0091D4(d7);
+		queue_sound_command(d7);
 		d7 = 0x86u;
-		func_0091D4(d7);
-		unk_060152 = 1u;
+		queue_sound_command(d7);
+		sound_stopped_by_coin = 1u;
 	}
 	return d0_2;
 }
 
-void func_003CB0(uint32_t a0)
+/* a coin slot's counter pulsed for each coin */
+void pulse_coin_counter(uint32_t a0)
 {
 	uint8_t d0 = 0, d1 = 0;
-	uint8_t t1 = 0;
+	uint8_t counter_pulse = 0;
 
 	d1 = 0u;
-	t1 = mem_read8(a0 + 2u);
-	d0 = t1;
-	if (t1 == 0u)
+	counter_pulse = COIN_SLOT(a0)->counter_pulse;
+	d0 = counter_pulse;
+	if (counter_pulse == 0u)
 	{
-		if (mem_read8(a0) != 0u)
+		if (COIN_SLOT(a0)->coins_to_count != 0u)
 		{
-			mem_write8(a0, mem_read8(a0) - 1u);
-			mem_write8(a0 + 5u, d1 + 1u);
-			mem_write8(a0 + 2u, 0x3Cu);
+			COIN_SLOT(a0)->coins_to_count--;
+			COIN_SLOT(a0)->counter_on = d1 + 1u;
+			COIN_SLOT(a0)->counter_pulse = 0x3Cu;
 		}
 		return;
 	}
 	d0--;
-	mem_write8(a0 + 2u, d0);
+	COIN_SLOT(a0)->counter_pulse = d0;
 	if (d0 != 0x1Eu)
 		return;
-	mem_write8(a0 + 5u, d1);
+	COIN_SLOT(a0)->counter_on = d1;
 }
 
-void func_003CE8(uint32_t a0)
+/* a coin inserted, counted towards the slot's credits */
+void count_coin(uint32_t a0)
 {
 	uint32_t carry = 0;
 	uint16_t d7 = 0;
-	uint16_t t1 = 0;
+	uint16_t credits = 0;
 
-	mem_write8(a0, mem_read8(a0) + 1u);
-	mem_write8(a0 + 1u, mem_read8(a0 + 1u) + 1u);
-	if (mem_read8(a0 + 1u) != unk_060303)
+	COIN_SLOT(a0)->coins_to_count++;
+	COIN_SLOT(a0)->coins++;
+	if (COIN_SLOT(a0)->coins != COIN_SLOT(COIN_SLOT_ADDRESS(0))->coins_per_credit)
 		return;
-	unk_060327 = 1u;
-	d7 = unk_060304;
-	t1 = mem_read16(a0 + 6u);
-	carry = (uint16_t)(d7 + t1) < d7;
-	d7 += t1;
+	new_credit = 1u;
+	d7 = COIN_SLOT(COIN_SLOT_ADDRESS(0))->credits_per_coins;
+	credits = COIN_SLOT(a0)->credits;
+	carry = (uint16_t)(d7 + credits) < d7;
+	d7 += credits;
 	if (carry == 0u)
-		mem_write16(a0 + 6u, d7);
-	mem_write8(a0 + 1u, 0u);
+		COIN_SLOT(a0)->credits = d7;
+	COIN_SLOT(a0)->coins = 0u;
 }
 
-void func_003D1E(uint32_t *p_d4, uint32_t *p_d5, uint32_t *p_d6, uint32_t *p_d7)
+/* each slot's credits added to its player's lives */
+void add_credit_lives(uint32_t *p_d5, uint32_t *p_d6, uint32_t *p_d7)
 {
-	uint16_t d4 = (uint16_t)*p_d4;
 	uint32_t d5 = *p_d5;
 	uint32_t carry = 0, extend = 0;
 	uint8_t d3 = 0;
-	uint16_t d6 = 0, d7 = 0;
-	uint32_t a0 = 0, a1 = 0, d6_2 = 0, d7_2 = 0;
-	uint16_t t1 = 0, t2 = 0, t3 = 0, t4 = 0;
+	uint16_t d4 = 0, d6 = 0, d7 = 0;
+	uint32_t coin_slot = 0, d6_2 = 0, d7_2 = 0, player = 0, player_2 = 0;
+	uint16_t credits = 0, t1 = 0, t2 = 0, t3 = 0;
 
-	a0 = 0x60300u;
-	a1 = unk_060100_ADDRESS;
+	coin_slot = COIN_SLOT_ADDRESS(0);
+	player_2 = PLAYER_ADDRESS(0);
 	d7 = 3u;
 	d3 = 0u;
 	do
 	{
-		t1 = mem_read16(a0 + 6u);
-		d6 = t1;
-		if (t1 != 0u)
+		credits = COIN_SLOT(coin_slot)->credits;
+		d6 = credits;
+		if (credits != 0u)
 		{
-			unk_0600A2 |= shl32(1u, (int)(d3 & 7u));
+			players_credited |= shl32(1u, (int)(d3 & 7u));
 			d6 = (uint16_t)((d6 & ~0xFFu) | (uint8_t)(d6 - 1u));
 			do
 			{
-				d5 = unk_060090;
-				d4 = mem_read16(a1);
+				d5 = lives_per_credit;
+				d4 = PLAYER(player_2)->lives;
 				extend = 0u;
 				carry = m68k_abcd_cy((uint8_t)d4, d5, extend);
 				d4 = (uint16_t)((d4 & ~0xFFu) | m68k_abcd((uint8_t)d4, d5, extend));
@@ -207,34 +211,33 @@ void func_003D1E(uint32_t *p_d4, uint32_t *p_d5, uint32_t *p_d6, uint32_t *p_d7)
 					if (d4 >= 0x999u)
 						d4 = 0x999u;
 				}
-				mem_write16(a1, d4);
-				mem_write16(a0 + 6u, mem_read16(a0 + 6u) - 1u);
-				t2 = d6 - 1u;
-				d6 = t2;
-			} while (t2 != 0xFFFFu);
+				PLAYER(player_2)->lives = d4;
+				COIN_SLOT(coin_slot)->credits--;
+				t1 = d6 - 1u;
+				d6 = t1;
+			} while (t1 != 0xFFFFu);
 		}
 		d3++;
-		t3 = d7 - 1u;
-		d7 = t3;
-		a0 += 8u;
-		a1 += 8u;
-	} while (t3 != 0xFFFFu);
-	a0 = unk_060118_ADDRESS;
+		t2 = d7 - 1u;
+		d7 = t2;
+		coin_slot += 8u;
+		player_2 += 8u;
+	} while (t2 != 0xFFFFu);
+	player = PLAYER_ADDRESS(3);
 	d7_2 = 3u;
 	d6_2 = 0u;
 	do
 	{
-		if (mem_read16(a0) != 0u)
+		if (PLAYER(player)->lives != 0u)
 		{
 			d6_2 |= shl32(1u, (int)(d7_2 & 0x1Fu));
-			unk_0600B3 &= ~shl32(1u, (int)(d7_2 & 7u));
+			players_out_of_lives &= ~shl32(1u, (int)(d7_2 & 7u));
 		}
-		t4 = d7_2 - 1u;
-		d7_2 = t4;
-		a0 -= 8u;
-	} while (t4 != 0xFFFFu);
-	unk_0600B7 = d6_2;
-	*p_d4 = (*p_d4 & 0xFFFF0000u) | d4;
+		t3 = d7_2 - 1u;
+		d7_2 = t3;
+		player -= 8u;
+	} while (t3 != 0xFFFFu);
+	players_with_lives = d6_2;
 	*p_d5 = d5;
 	*p_d6 = d6_2;
 	*p_d7 = d7_2;
@@ -250,88 +253,90 @@ void unreached_003DAA(uint8_t d0)
 	d1 = 0x1Bu;
 	do
 	{
-		mem_write8(a0, 0u);
-		mem_write8(a0 + 1u, d0);
+		io_write8(a0, 0u);
+		io_write8(a0 + 1u, d0);
 		a0 += 0x80u;
 		t1 = d1 - 1u;
 		d1 = t1;
 	} while (t1 != 0xFFFFu);
 }
 
-void func_003DC4(void)
+/* the frame's interrupt: the inputs, the coins, the sound, the palettes and the game state's frame */
+void vblank_interrupt(void)
 {
-	uint32_t a5 = 0, d4 = 0, d5 = 0, d6 = 0, d7 = 0;
+	uint32_t a5 = 0, d5 = 0, d6 = 0, d7 = 0;
 
-	unk_060058 &= 0xDFu;
-	io_write8(IO_0A0001, unk_060058);
+	board_control &= 0xDFu;
+	io_write8(IO_0A0001, board_control);
 	io_write8(IO_0A0011, 0u);
 	write_status(0u);
 	take_interrupts();
-	unk_0600A4++;
-	unk_060152 = 0u;
-	d6 = func_009202(0u);
-	d7 = func_003E70(0u);
-	if (unk_060001 != 3u)
+	frame_count++;
+	sound_stopped_by_coin = 0u;
+	d6 = send_sound_command(0u);
+	d7 = read_inputs(0u);
+	if (game_state != 3u)
 	{
-		func_003B5C();
-		func_003D1E(&d4, &d5, &d6, &d7);
+		update_coins();
+		add_credit_lives(&d5, &d6, &d7);
 	}
-	func_009272(d4, &d5, &d6, &d7, &a5);
+	run_palette_requests(0u, &d5, &d6, &d7, &a5);
 	step_palette_effects();
-	switch (unk_060001)
+	switch (game_state)
 	{
 	case 0:
-		func_003F78();
+		run_startup();
 		break;
 	case 1:
-		func_0040B4(0u, d4, d5, d6, d7, a5);
+		run_attract(0u, (uint16_t)d5, (uint16_t)d6, d7, a5);
 		break;
 	case 2:
-		func_004124(0u, d4, d5, d6, d7, a5);
+		run_game(0u, (uint16_t)d5, (uint16_t)d6, d7, a5);
 		break;
 	case 3:
-		func_00415E();
+		run_test_mode();
 		break;
 	}
-	unk_060058 |= 0x20u;
-	io_write8(IO_0A0001, unk_060058);
+	board_control |= 0x20u;
+	io_write8(IO_0A0001, board_control);
 }
 
-uint32_t func_003E70(uint32_t d7)
+/* the coins and the four players' inputs read, and the layers' scroll written */
+uint32_t read_inputs(uint32_t d7)
 {
 	uint8_t d0 = 0;
 	uint32_t d7_2 = 0;
 
-	unk_060040 = unk_06003C;
-	unk_06003C = (((uint32_t)unk_060038(0) << 24u) | ((uint32_t)unk_060039 << 16u) | ((uint32_t)unk_06003A << 8u) | unk_06003B);
-	unk_060038(0) = unk_060034(0);
-	unk_060039 = unk_060035;
-	unk_06003A = unk_060036;
-	unk_06003B = unk_060037;
-	unk_060047 = unk_060046;
-	unk_060046 = unk_060045;
-	unk_060045 = unk_060044;
-	unk_060044 = ~io_read8(IO_0A0001);
+	player_inputs_3_frames_ago = player_inputs_2_frames_ago;
+	player_inputs_2_frames_ago = (((uint32_t)player_inputs_last_frame(0) << 24u) | ((uint32_t)player_inputs_last_frame(1) << 16u) | ((uint32_t)player_inputs_last_frame(2) << 8u) | player_inputs_last_frame(3));
+	player_inputs_last_frame(0) = player_inputs(0);
+	player_inputs_last_frame(1) = player_inputs(1);
+	player_inputs_last_frame(2) = player_inputs(2);
+	player_inputs_last_frame(3) = player_inputs(3);
+	coin_switches_3_frames_ago = coin_switches_2_frames_ago;
+	coin_switches_2_frames_ago = coin_switches_last_frame;
+	coin_switches_last_frame = coin_switches;
+	coin_switches = ~io_read8(IO_0A0001);
 	d0 = (uint8_t)~io_read8(IO_0A0003);
-	unk_060034(0) = d0;
-	unk_060050 = d0 & ~unk_060038(0);
+	player_inputs(0) = d0;
+	player_presses(0) = d0 & ~player_inputs_last_frame(0);
 	d0 = (uint8_t)~io_read8(IO_0A0005);
-	unk_060035 = d0;
-	unk_060051 = d0 & ~unk_060039;
+	player_inputs(1) = d0;
+	player_presses(1) = d0 & ~player_inputs_last_frame(1);
 	d0 = (uint8_t)~io_read8(IO_0A0007);
-	unk_060036 = d0;
-	unk_060052 = d0 & ~unk_06003A;
+	player_inputs(2) = d0;
+	player_presses(2) = d0 & ~player_inputs_last_frame(2);
 	d0 = (uint8_t)~io_read8(IO_0A0015);
-	unk_060037 = d0;
-	unk_060053 = d0 & ~unk_06003B;
-	io_write8(TILES_106018, (uint8_t)unk_06005E);
-	d7_2 = (d7 & ~0xFFFFu) | unk_06005C;
+	player_inputs(3) = d0;
+	player_presses(3) = d0 & ~player_inputs_last_frame(3);
+	io_write8(TILES_106018, (uint8_t)layer_a_scroll_y);
+	d7_2 = (d7 & ~0xFFFFu) | layer_a_scroll_x;
 	d7_2 = (d7_2 & ~0xFFFFu) | (uint16_t)(d7_2 - 0x60u);
 	io_write8(TILES_106400, d7_2);
 	d7_2 = (d7_2 & ~0xFFFFu) | ((uint16_t)d7_2 >> 8);
 	io_write8(TILES_106402, d7_2);
-	io_write8(TILES_106019, (uint8_t)unk_060062);
-	d7_2 = (d7_2 & ~0xFFFFu) | unk_060060;
+	io_write8(TILES_106019, (uint8_t)layer_b_scroll_y);
+	d7_2 = (d7_2 & ~0xFFFFu) | layer_b_scroll_x;
 	d7_2 = (d7_2 & ~0xFFFFu) | (uint16_t)(d7_2 - 0x60u);
 	io_write8(TILES_106401, d7_2);
 	d7_2 = (d7_2 & ~0xFFFFu) | ((uint16_t)d7_2 >> 8);
@@ -339,227 +344,232 @@ uint32_t func_003E70(uint32_t d7)
 	return d7_2;
 }
 
-void func_003F78(void)
+/* the steps after the reset */
+void run_startup(void)
 {
-	switch (unk_060003)
+	switch (game_step)
 	{
 	case 0:
-		func_003F9A();
+		startup_begin();
 		return;
 	case 1:
-		func_004008();
+		startup_wait();
 		return;
 	case 2:
-		func_00402C();
+		startup_end();
 		return;
 	}
 }
 
-void func_003F9A(void)
+/* the video chips set, the test mode when its switch is on, else the screen cleared */
+void startup_begin(void)
 {
 	uint16_t d7 = 0;
 	uint32_t a6 = 0;
 
-	unk_060064 = 0u;
+	tile_banks_0_1 = 0u;
 	io_write8(TILES_106B00, 0u);
-	unk_060065 = 0u;
+	tile_banks_2_3 = 0u;
 	io_write8(TILES_106E00, 0u);
-	io_write8(SPRITE_CONTROL_140000, unk_06005A);
-	func_004072();
-	unk_0600A3 = 0u;
-	if ((unk_060032 & 4u) != 0u)
+	io_write8(0x140000u, sprite_control);
+	set_screen_flip();
+	game_on = 0u;
+	if ((dip_switches_3 & 4u) != 0u)
 	{
-		unk_060001 = 3u;
+		game_state = 3u;
 		return;
 	}
-	unk_060003++;
-	unk_060082 = 1u;
+	game_step++;
+	jobs_pending = 1u;
 	d7 = 1u;
-	func_004164(d7);
+	queue_job(d7);
 	d7 = 0x20Fu;
 	a6 = 0xA05Eu;
 	post_palette_request(d7, a6);
 }
 
-void func_004008(void)
+/* the screen cleared */
+void startup_wait(void)
 {
-	if (unk_060082 == 0u && unk_060083 == 0u)
+	if (jobs_pending == 0u && palettes_busy == 0u)
 	{
-		unk_060002 = 1u;
-		unk_060003++;
+		step_timer = 1u;
+		game_step++;
 	}
 }
 
-void func_00402C(void)
+/* on to the attract mode */
+void startup_end(void)
 {
 	uint8_t t1 = 0;
 
-	t1 = unk_060002;
-	unk_060002 = t1 - 1u;
-	if (t1 == 1u || unk_060327 != 0u || (unk_060044 != 0u && unk_060091 != 0u))
+	t1 = step_timer;
+	step_timer = t1 - 1u;
+	if (t1 == 1u || new_credit != 0u || (coin_switches != 0u && free_play != 0u))
 	{
-		unk_060001++;
-		unk_060003 = 0u;
+		game_state++;
+		game_step = 0u;
 		return;
 	}
 }
 
 void unreached_004068(void)
 {
-	func_004072();
+	set_screen_flip();
 }
 
-void func_004072(void)
+/* the screen flipped by its DIP switch */
+void set_screen_flip(void)
 {
 	uint8_t d6 = 0, d7 = 0;
 
-	d7 = unk_06005B & ~1u;
-	d6 = unk_06005A & ~8u;
-	if ((unk_060032 & 1u) != 0u)
+	d7 = tile_flip & ~1u;
+	d6 = sprite_control & ~8u;
+	if ((dip_switches_3 & 1u) != 0u)
 	{
 		d7 ^= 1u;
 		d6 ^= 8u;
 	}
-	unk_06005B = d7;
+	tile_flip = d7;
 	io_write8(TILES_106D00, d7);
-	unk_06005A = d6;
-	io_write8(SPRITE_CONTROL_140000, d6);
+	sprite_control = d6;
+	io_write8(0x140000u, d6);
 }
 
-void func_0040B4(uint32_t d1, uint32_t d4, uint32_t d5, uint32_t d6, uint32_t d7, uint32_t a5)
+/* the attract mode's frame, and a game when a player starts */
+void run_attract(uint32_t d1, uint16_t d5, uint16_t d6, uint32_t d7, uint32_t a5)
 {
 	uint8_t d7_2 = 0;
-	uint32_t a0 = 0;
 
-	a0 = indexed_table_of_32_bit_values_004100[unk_060003];
-	switch (a0)
-	{
-	case 0x0049ACu:
-		func_0049AC();
-		break;
-	case 0x004CA4u:
-		func_004CA4(d1, d4, d5, d6, d7, a0, a5);
-		break;
-	case 0x004EC4u:
-		func_004EC4();
-		break;
-	case 0x0051A8u:
-		func_0051A8();
-		break;
-	case 0x0088C0u:
-		func_0088C0();
-		break;
-	case 0x0088DAu:
-		func_0088DA(d1);
-		break;
-	case 0x008CE4u:
-		func_008CE4((uint16_t)d6, a5);
-		break;
-	case 0x008E46u:
-		func_008E46();
-		break;
-	case 0x00919Cu:
-		func_00919C();
-		break;
-	}
-	func_00419C();
-	if (unk_060066 != 0u)
-	{
-		d7_2 = 0u;
-		func_0091A4(d7_2, 0u);
-		unk_060003 = 0u;
-		unk_060005 = 0u;
-		unk_060007 = 0u;
-		unk_060009 = 0u;
-		unk_060001++;
-	}
-}
-
-void func_004124(uint32_t d1, uint32_t d4, uint32_t d5, uint32_t d6, uint32_t d7, uint32_t a5)
-{
-	uint32_t a0 = 0;
-
-	a0 = indexed_table_of_32_bit_values_00413A[unk_060005];
-	switch (a0)
-	{
-	case 0x0061CEu:
-		func_0061CE();
-		return;
-	case 0x006268u:
-		func_006268();
-		return;
-	case 0x0062C8u:
-		func_0062C8();
-		return;
-	case 0x006386u:
-		func_006386(d1);
-		return;
-	case 0x006672u:
-		func_006672(d1, (uint16_t)d5, d7);
-		return;
-	case 0x006B16u:
-		func_006B16(d1, d4, d5, d6, d7, a0);
-		return;
-	case 0x006BE4u:
-		func_006BE4((uint16_t)d6, a5);
-		return;
-	case 0x00781Eu:
-		func_00781E(d1, (uint16_t)d6, a5);
-		return;
-	case 0x007B0Cu:
-		func_007B0C();
-		return;
-	}
-}
-
-void func_00415E(void)
-{
-	switch ((uint32_t)(int8_t)unk_060005)
+	switch (game_step)
 	{
 	case 0:
-		func_0056C2();
+		attract_begin();
 		break;
 	case 1:
-		func_001942();
+		attract_coin_screen(d1);
 		break;
 	case 2:
-		func_005720();
+		attract_opening(d6, a5);
 		break;
 	case 3:
-		func_00577E();
+		attract_title();
 		break;
 	case 4:
-		func_005854();
+		attract_demo(d1, d5, d6, d7, a5);
 		break;
 	case 5:
-		func_0059EA();
+		attract_profile();
 		break;
 	case 6:
-		func_005B48();
+		attract_best_players();
 		break;
 	case 7:
-		func_005C1C();
+		attract_spare_step();
 		break;
 	case 8:
-		func_005D80();
+		attract_end();
 		break;
 	}
-	func_003E70(0u);
+	check_starts();
+	if (scratch_byte != 0u)
+	{
+		d7_2 = 0u;
+		queue_sound(d7_2, 0u);
+		game_step = 0u;
+		scene = 0u;
+		scene_step = 0u;
+		scene_substep = 0u;
+		game_state++;
+	}
 }
 
-void func_004164(uint16_t d7)
+/* the game's frame by its scene */
+void run_game(uint32_t d1, uint16_t d5, uint16_t d6, uint32_t d7, uint32_t a5)
+{
+	switch (scene)
+	{
+	case 0:
+		scene_new_game();
+		return;
+	case 1:
+		scene_choose_turtles();
+		return;
+	case 2:
+		scene_area_setup();
+		return;
+	case 3:
+		scene_area_title(d1);
+		return;
+	case 4:
+		scene_play(d1, d5, d7);
+		return;
+	case 5:
+		scene_area_exit(d1, d7);
+		return;
+	case 6:
+		scene_ending(d6, a5);
+		return;
+	case 7:
+		scene_continue(d1, d6, a5);
+		return;
+	case 8:
+		scene_ranking();
+		return;
+	}
+}
+
+/* the test mode's frame */
+void run_test_mode(void)
+{
+	switch ((uint32_t)(int8_t)scene)
+	{
+	case 0:
+		test_mode_start();
+		break;
+	case 1:
+		mask_rom_check_page();
+		break;
+	case 2:
+		cross_hatch_page();
+		break;
+	case 3:
+		color_test_page();
+		break;
+	case 4:
+		io_test_page();
+		break;
+	case 5:
+		skip_coin_counter_test();
+		break;
+	case 6:
+		sound_test_page();
+		break;
+	case 7:
+		dip_switch_page();
+		break;
+	case 8:
+		test_mode_restart();
+		break;
+	}
+	read_inputs(0u);
+}
+
+/* a job into the main loop's queue */
+void queue_job(uint16_t d7)
 {
 	uint32_t a6 = 0;
 
-	a6 = unk_060010;
+	a6 = job_queue_write;
 	mem_write16(a6, d7);
 	a6 += 2u;
-	if (a6 > 0x603FFu)
-		a6 = 0x60380u;
-	unk_060010 = a6;
+	if (a6 > job_queue_ADDRESS + 0x7Fu)
+		a6 = job_queue_ADDRESS;
+	job_queue_write = a6;
 }
 
-void func_004184(uint32_t a5)
+/* a list of jobs into the main loop's queue */
+void queue_jobs(uint32_t a5)
 {
 	uint16_t d7 = 0;
 
@@ -569,282 +579,298 @@ void func_004184(uint32_t a5)
 		a5 += 2u;
 		if (d7 == 0xFFFFu)
 			break;
-		func_004164(d7);
+		queue_job(d7);
 	}
 }
 
-void func_004190(void)
+/* the second interrupt, which the board never raises */
+void irq6_interrupt(void)
 {
-	unk_0600D0 = 0u;
+	demo_hold_3 = 0u;
 	return_from_exception();
 }
 
-void func_00419C(void)
+/* in the attract mode, the players with lives who press a button start the game */
+void check_starts(void)
 {
 	uint8_t d1 = 0;
 	uint16_t d0 = 0;
-	uint32_t a5 = 0, a6 = 0;
+	uint32_t a5 = 0, player = 0;
 	uint8_t t1 = 0;
 
-	unk_060066 = 0u;
+	scratch_byte = 0u;
 	d0 = 0u;
-	a6 = unk_060100_ADDRESS;
-	a5 = unk_060034_ADDRESS;
+	player = PLAYER_ADDRESS(0);
+	a5 = player_inputs_ADDRESS;
 	do
 	{
-		if (mem_read16(a6) != 0u && (unk_060034(d0) & 0x30u) != 0u && (unk_060038(d0) & 0x30u) == 0u)
-			unk_060066 |= shl32(1u, (int)(d0 & 7u));
+		if (PLAYER(player)->lives != 0u && (player_inputs(d0) & 0x30u) != 0u && (player_inputs_last_frame(d0) & 0x30u) == 0u)
+			scratch_byte |= shl32(1u, (int)(d0 & 7u));
 		d0 = (uint8_t)(d0 + 1u);
-		a6 += 8u;
+		player += 8u;
 	} while (d0 < 4u);
-	t1 = unk_060066;
+	t1 = scratch_byte;
 	d1 = t1;
 	if (t1 != 0u)
 	{
-		unk_0600A1 = d1;
-		unk_0600A6 = d1;
-		unk_0600A3 = 1u;
+		players_in_play = d1;
+		players_joining = d1;
+		game_on = 1u;
 	}
 }
 
-void func_004206(uint32_t *p_d1, uint32_t *p_a5)
+/* in a game, the players with lives who press a button join it */
+uint32_t check_joins(uint32_t d1)
 {
-	uint32_t d1 = *p_d1;
 	uint16_t d0 = 0;
-	uint32_t a6 = 0;
-	uint8_t t2 = 0;
-	uint16_t t1 = 0;
+	uint32_t a5 = 0, player = 0;
+	uint8_t t1 = 0;
+	uint16_t lives = 0;
 
-	if (unk_0600A3 != 0u)
+	if (game_on == 0u)
+		return d1;
+	scratch_byte = 0u;
+	d0 = 0u;
+	player = PLAYER_ADDRESS(0);
+	a5 = player_inputs_ADDRESS;
+	do
 	{
-		unk_060066 = 0u;
-		d0 = 0u;
-		a6 = unk_060100_ADDRESS;
-		*p_a5 = unk_060034_ADDRESS;
-		do
+		if ((players_in_play & shl32(1u, (int)(d0 & 7u))) == 0u)
 		{
-			if ((unk_0600A1 & shl32(1u, (int)(d0 & 7u))) == 0u)
+			lives = PLAYER(player)->lives;
+			d1 = lives;
+			if (lives != 0u)
 			{
-				t1 = mem_read16(a6);
-				d1 = t1;
-				if (t1 != 0u)
+				d1 = (d1 & ~0xFFu) | player_inputs(d0);
+				if ((d1 & 0x30u) != 0u)
 				{
-					d1 = (d1 & ~0xFFu) | unk_060034(d0);
-					if ((d1 & 0x30u) != 0u)
-					{
-						d1 = (d1 & ~0xFFu) | unk_060038(d0);
-						if ((d1 & 0x30u) == 0u)
-							unk_060066 |= shl32(1u, (int)(d0 & 7u));
-					}
+					d1 = (d1 & ~0xFFu) | player_inputs_last_frame(d0);
+					if ((d1 & 0x30u) == 0u)
+						scratch_byte |= shl32(1u, (int)(d0 & 7u));
 				}
 			}
-			d0 = (uint8_t)(d0 + 1u);
-			a6 += 8u;
-		} while (d0 < 4u);
-		t2 = unk_060066;
-		d1 = (d1 & ~0xFFu) | t2;
-		if (t2 != 0u)
-		{
-			unk_0600A1 |= d1;
-			unk_0600A6 |= d1;
-			unk_0600A3 = 1u;
 		}
+		d0 = (uint8_t)(d0 + 1u);
+		player += 8u;
+	} while (d0 < 4u);
+	t1 = scratch_byte;
+	d1 = (d1 & ~0xFFu) | t1;
+	if (t1 != 0u)
+	{
+		players_in_play |= d1;
+		players_joining |= d1;
+		game_on = 1u;
 	}
-	*p_d1 = d1;
+	return d1;
 }
 
-uint32_t func_004284(void)
+/* the first player's score and health reset */
+uint32_t reset_player_1(void)
 {
 	uint32_t a6 = 0;
 
-	a6 = unk_060100_ADDRESS;
-	func_00433E(a6);
-	unk_060106(0) = 0u;
+	a6 = PLAYER_ADDRESS(0);
+	reset_score(a6);
+	PLAYER(PLAYER_ADDRESS(0))->health_bars = 0u;
 	return a6;
 }
 
-uint32_t func_004294(void)
+/* the second player's score and health reset */
+uint32_t reset_player_2(void)
 {
 	uint32_t a6 = 0;
 
-	a6 = unk_060108_ADDRESS;
-	func_00433E(a6);
-	unk_06010E = 0u;
+	a6 = PLAYER_ADDRESS(1);
+	reset_score(a6);
+	PLAYER(PLAYER_ADDRESS(1))->health_bars = 0u;
 	return a6;
 }
 
-uint32_t func_0042A4(void)
+/* the third player's score and health reset */
+uint32_t reset_player_3(void)
 {
 	uint32_t a6 = 0;
 
-	a6 = unk_060110_ADDRESS;
-	func_00433E(a6);
-	unk_060116 = 0u;
+	a6 = PLAYER_ADDRESS(2);
+	reset_score(a6);
+	PLAYER(PLAYER_ADDRESS(2))->health_bars = 0u;
 	return a6;
 }
 
-uint32_t func_0042B4(void)
+/* the fourth player's score and health reset */
+uint32_t reset_player_4(void)
 {
 	uint32_t a6 = 0;
 
-	a6 = unk_060118_ADDRESS;
-	func_00433E(a6);
-	unk_06011E = 0u;
+	a6 = PLAYER_ADDRESS(3);
+	reset_score(a6);
+	PLAYER(PLAYER_ADDRESS(3))->health_bars = 0u;
 	return a6;
 }
 
-void func_0042C4(void)
+/* a life of the first player's used */
+void use_life_player_1(void)
 {
 	uint8_t d7 = 0;
 	uint32_t a6 = 0;
 
-	a6 = unk_060100_ADDRESS;
+	a6 = PLAYER_ADDRESS(0);
 	d7 = 0u;
-	func_004304(d7, a6);
+	use_life(d7, a6);
 }
 
-void func_0042D4(void)
+/* a life of the second player's used */
+void use_life_player_2(void)
 {
 	uint8_t d7 = 0;
 	uint32_t a6 = 0;
 
-	a6 = unk_060108_ADDRESS;
+	a6 = PLAYER_ADDRESS(1);
 	d7 = 1u;
-	func_004304(d7, a6);
+	use_life(d7, a6);
 }
 
-void func_0042E4(void)
+/* a life of the third player's used */
+void use_life_player_3(void)
 {
 	uint8_t d7 = 0;
 	uint32_t a6 = 0;
 
-	a6 = unk_060110_ADDRESS;
+	a6 = PLAYER_ADDRESS(2);
 	d7 = 2u;
-	func_004304(d7, a6);
+	use_life(d7, a6);
 }
 
-void func_0042F4(void)
+/* a life of the fourth player's used */
+void use_life_player_4(void)
 {
 	uint8_t d7 = 0;
 	uint32_t a6 = 0;
 
-	a6 = unk_060118_ADDRESS;
+	a6 = PLAYER_ADDRESS(3);
 	d7 = 3u;
-	func_004304(d7, a6);
+	use_life(d7, a6);
 }
 
-void func_004304(uint8_t d7, uint32_t a6)
+/* a life used and the health full; with none left the player is out */
+void use_life(uint8_t d7, uint32_t a6)
 {
 	uint32_t carry = 0, extend = 0;
 	uint8_t d1 = 0;
 
 	extend = 0u;
-	d1 = mem_read8(a6 + 1u);
+	d1 = PLAYER(a6)->lives_low;
 	carry = m68k_sbcd_cy(d1, 1u, extend);
 	d1 = m68k_sbcd(d1, 1u, extend);
 	if (carry == 0u)
 	{
-		mem_write8(a6 + 1u, d1);
-		mem_write8(a6 + 6u, 0xAu);
+		PLAYER(a6)->lives_low = d1;
+		PLAYER(a6)->health_bars = 0xAu;
 		return;
 	}
-	if (mem_read8(a6) == 0u)
+	if ((uint8_t)(PLAYER(a6)->lives >> 8u) == 0u)
 	{
-		unk_0600A1 &= ~shl32(1u, (int)(d7));
-		unk_0600B3 |= shl32(1u, (int)(d7));
+		players_in_play &= ~shl32(1u, (int)(d7));
+		players_out_of_lives |= shl32(1u, (int)(d7));
 		return;
 	}
-	mem_write8(a6, mem_read8(a6) - 1u);
+	PLAYER(a6)->lives = (PLAYER(a6)->lives & 0xFFu) | (((uint8_t)(PLAYER(a6)->lives >> 8u) - 1u & 0xFFu) << 8u);
 	d1 = 0x99u;
-	mem_write8(a6 + 1u, d1);
-	mem_write8(a6 + 6u, 0xAu);
+	PLAYER(a6)->lives_low = d1;
+	PLAYER(a6)->health_bars = 0xAu;
 }
 
-void func_00433E(uint32_t a6)
+/* a player's score reset */
+void reset_score(uint32_t a6)
 {
-	mem_write16(a6 + 4u, 0u);
-	mem_write16(a6 + 2u, unk_06009A);
+	PLAYER(a6)->score = 0u;
+	PLAYER(a6)->unused_setting_copy = unused_dip_setting;
 }
 
-void func_00434C(uint32_t d1, uint32_t *p_d5, uint32_t *p_d7, uint32_t *p_a1)
+/* the players who join or come back, their boxes and messages */
+void update_players_in_game(uint32_t d1, uint32_t *p_d5, uint32_t *p_d7, uint32_t *p_a1)
 {
 	uint32_t d5 = *p_d5;
 	uint32_t d7 = *p_d7;
 	uint32_t d7_2 = 0, ignored = 0;
 
-	func_004378(d7, &d1, &d5, p_a1);
-	func_00435E(0u, d7, &d1, &d5);
-	func_0043E8(0u, d7, &d1, &d5, p_a1);
-	func_00445E(d1, &d5, &ignored, &d7_2);
+	join_players(d7, &d1, &d5, p_a1);
+	redraw_new_lives(0u, d7, &d1, &d5);
+	respawn_players(0u, d7, &d1, &d5, p_a1);
+	update_player_messages(d1, &d5, &ignored, &d7_2);
 	*p_d5 = (*p_d5 & 0xFFFF0000u) | (d5 & 0xFFFFu);
 	*p_d7 = d7_2;
 }
 
-void func_00435E(uint32_t d4, uint32_t d7, uint32_t *p_d1, uint32_t *p_d5)
+/* the boxes whose lives a coin changed */
+void redraw_new_lives(uint32_t d4, uint32_t d7, uint32_t *p_d1, uint32_t *p_d5)
 {
 	uint32_t d5 = *p_d5;
 	uint32_t d7_2 = 0, ignored = 0, ignored_2 = 0;
 
 	d7_2 = (d7 & ~0xFFFFu) | 0xB00u;
-	d7_2 |= (uint8_t)(d7_2 + unk_0600A2);
+	d7_2 |= (uint8_t)(d7_2 + players_credited);
 	d7_2 = d7_2 | 0x30u;
-	func_002336(d7_2, p_d1, &ignored, &d5, &ignored_2);
-	unk_0600A2 = 0u;
+	draw_player_boxes(d7_2, p_d1, &ignored, &d5, &ignored_2);
+	players_credited = 0u;
 	*p_d5 = (*p_d5 & 0xFFFF0000u) | (d5 & 0xFFFFu);
 }
 
-void func_004378(uint32_t d7, uint32_t *p_d1, uint32_t *p_d5, uint32_t *p_a1)
+/* the players who join: their turtles in, a life each */
+void join_players(uint32_t d7, uint32_t *p_d1, uint32_t *p_d5, uint32_t *p_a1)
 {
 	uint32_t d5 = *p_d5;
 	uint32_t d7_2 = 0, ignored = 0, ignored_2 = 0;
 
-	if (unk_0600A6 == 0u)
+	if (players_joining == 0u)
 		return;
-	d7_2 = (d7 & ~0xFFu) | unk_0600A6;
-	func_019B3A((uint8_t)d7_2, p_d1, &ignored, p_a1);
-	if ((unk_0600A6 & 1u) != 0u)
-		func_0042C4();
-	if ((unk_0600A6 & 2u) != 0u)
-		func_0042D4();
-	if ((unk_0600A6 & 4u) != 0u)
-		func_0042E4();
-	if ((unk_0600A6 & 8u) != 0u)
-		func_0042F4();
+	d7_2 = (d7 & ~0xFFu) | players_joining;
+	turtle_join((uint8_t)d7_2, p_d1, &ignored, p_a1);
+	if ((players_joining & 1u) != 0u)
+		use_life_player_1();
+	if ((players_joining & 2u) != 0u)
+		use_life_player_2();
+	if ((players_joining & 4u) != 0u)
+		use_life_player_3();
+	if ((players_joining & 8u) != 0u)
+		use_life_player_4();
 	d7_2 = (d7_2 & ~0xFFFFu) | 0xB00u;
-	d7_2 |= (uint8_t)(d7_2 + unk_0600A6);
+	d7_2 |= (uint8_t)(d7_2 + players_joining);
 	d7_2 = d7_2 | 0x30u;
-	func_002336(d7_2, p_d1, &ignored, &d5, &ignored_2);
-	unk_0600A6 = 0u;
+	draw_player_boxes(d7_2, p_d1, &ignored, &d5, &ignored_2);
+	players_joining = 0u;
 	*p_d5 = (*p_d5 & 0xFFFF0000u) | (d5 & 0xFFFFu);
 }
 
-void func_0043E8(uint32_t d4, uint32_t d7, uint32_t *p_d1, uint32_t *p_d5, uint32_t *p_a1)
+/* the players whose turtle was knocked out: a life each, the turtle back */
+void respawn_players(uint32_t d4, uint32_t d7, uint32_t *p_d1, uint32_t *p_d5, uint32_t *p_a1)
 {
 	uint32_t d5 = *p_d5;
 	uint32_t d7_2 = 0, ignored = 0, ignored_2 = 0;
 
-	if (unk_0600A0 == 0u)
+	if (players_knocked_out == 0u)
 		return;
-	if ((unk_0600A0 & 1u) != 0u)
-		func_0042C4();
-	if ((unk_0600A0 & 2u) != 0u)
-		func_0042D4();
-	if ((unk_0600A0 & 4u) != 0u)
-		func_0042E4();
-	if ((unk_0600A0 & 8u) != 0u)
-		func_0042F4();
-	d7_2 = (d7 & ~0xFFu) | unk_0600A1;
-	d7_2 = d7_2 & (unk_0600A0 | 0xFFFFFF00u);
-	func_019B92((uint8_t)d7_2, p_d1, &ignored, p_a1);
+	if ((players_knocked_out & 1u) != 0u)
+		use_life_player_1();
+	if ((players_knocked_out & 2u) != 0u)
+		use_life_player_2();
+	if ((players_knocked_out & 4u) != 0u)
+		use_life_player_3();
+	if ((players_knocked_out & 8u) != 0u)
+		use_life_player_4();
+	d7_2 = (d7 & ~0xFFu) | players_in_play;
+	d7_2 = d7_2 & (players_knocked_out | 0xFFFFFF00u);
+	turtle_respawn((uint8_t)d7_2, p_d1, &ignored, p_a1);
 	d7_2 = (d7_2 & ~0xFFFFu) | 0xB00u;
-	d7_2 |= (uint8_t)(d7_2 + unk_0600A0);
+	d7_2 |= (uint8_t)(d7_2 + players_knocked_out);
 	d7_2 = d7_2 | 0x30u;
-	func_002336(d7_2, p_d1, &ignored, &d5, &ignored_2);
-	unk_0600A0 = 0u;
+	draw_player_boxes(d7_2, p_d1, &ignored, &d5, &ignored_2);
+	players_knocked_out = 0u;
 	*p_d5 = (*p_d5 & 0xFFFF0000u) | (d5 & 0xFFFFu);
 }
 
-void func_00445E(uint32_t d1, uint32_t *p_d5, uint32_t *p_d6, uint32_t *p_d7)
+/* the messages under the four boxes */
+void update_player_messages(uint32_t d1, uint32_t *p_d5, uint32_t *p_d6, uint32_t *p_d7)
 {
 	uint32_t d5 = *p_d5;
 	uint16_t d0 = 0;
@@ -853,39 +879,40 @@ void func_00445E(uint32_t d1, uint32_t *p_d5, uint32_t *p_d6, uint32_t *p_d7)
 	d0 = 3u;
 	do
 	{
-		func_00446A((uint8_t)d0, d1, 0u, &d5, p_d6, p_d7);
+		update_player_message((uint8_t)d0, d1, 0u, &d5, p_d6, p_d7);
 		t1 = d0 - 1u;
 		d0 = t1;
 	} while (t1 != 0xFFFFu);
 	*p_d5 = (*p_d5 & 0xFFFFFF00u) | (d5 & 0xFFu);
 }
 
-void func_00446A(uint8_t d0, uint32_t d1, uint32_t d4, uint32_t *p_d5, uint32_t *p_d6, uint32_t *p_d7)
+/* the message under a player's box by how he stands */
+void update_player_message(uint8_t d0, uint32_t d1, uint32_t d4, uint32_t *p_d5, uint32_t *p_d6, uint32_t *p_d7)
 {
 	uint32_t d5 = *p_d5;
 	uint32_t d1_2 = 0, d7 = 0, ignored = 0;
 
-	d1_2 = (d1 & ~0xFFu) | unk_0600B7;
-	d1_2 = d1_2 | unk_0600A6;
-	d1_2 = d1_2 | unk_0600A1;
-	d1_2 = d1_2 | unk_0600A0;
+	d1_2 = (d1 & ~0xFFu) | players_with_lives;
+	d1_2 = d1_2 | players_joining;
+	d1_2 = d1_2 | players_in_play;
+	d1_2 = d1_2 | players_knocked_out;
 	if ((d1_2 & shl32(1u, (int)(d0 & 0x1Fu))) != 0u)
 	{
-		d1_2 = (d1_2 & ~0xFFu) | unk_0600A6;
-		d1_2 = d1_2 | unk_0600A1;
-		d1_2 = d1_2 | unk_0600A0;
-		if (((d1_2 | unk_0600B3) & shl32(1u, (int)(d0 & 0x1Fu))) != 0u || (unk_0600B7 & shl32(1u, (int)(d0 & 7u))) == 0u)
+		d1_2 = (d1_2 & ~0xFFu) | players_joining;
+		d1_2 = d1_2 | players_in_play;
+		d1_2 = d1_2 | players_knocked_out;
+		if (((d1_2 | players_out_of_lives) & shl32(1u, (int)(d0 & 0x1Fu))) != 0u || (players_with_lives & shl32(1u, (int)(d0 & 7u))) == 0u)
 			d7 = 0xCu;
 		else
 			d7 = 4u;
 	}
-	else if ((unk_0600B3 & shl32(1u, (int)(d0 & 7u))) != 0u)
+	else if ((players_out_of_lives & shl32(1u, (int)(d0 & 7u))) != 0u)
 		d7 = 8u;
 	else
 		d7 = 0u;
 	d7 = (uint8_t)(d7 | d0);
 	d7 = (uint16_t)(d7 + 0xD00u);
-	func_00263C(&ignored, &d5, p_d6, &d7);
+	draw_player_message(&ignored, &d5, p_d6, &d7);
 	*p_d5 = (*p_d5 & 0xFFFFFF00u) | (d5 & 0xFFu);
 	*p_d7 = d7;
 }
@@ -893,26 +920,28 @@ void func_00446A(uint8_t d0, uint32_t d1, uint32_t d4, uint32_t *p_d5, uint32_t 
 void unreached_0044EE(uint16_t d7)
 {
 	d7 |= 0xB30u;
-	func_004164(d7);
+	queue_job(d7);
 }
 
-void func_0044F8(void)
+/* the objects, the sprites, the palette effects and the play's variables cleared */
+void clear_play(void)
 {
-	func_009A3A();
-	func_004604();
-	func_004612();
-	func_0045DA();
-	func_00455C();
-	func_0045E8();
+	clear_palette_effects();
+	clear_objects();
+	clear_sprite_ram();
+	clear_engine_variables();
+	clear_area_variables();
+	clear_engine_ram();
 }
 
-void func_004512(uint16_t d0, uint32_t a0)
+/* a stretch of work RAM zeroed */
+void zero_ram_below(uint16_t d0, uint32_t a0)
 {
 	uint32_t a1 = 0, d1 = 0, d2 = 0, d3 = 0, d4 = 0, d5 = 0, d6 = 0, d7 = 0;
 	uint16_t t65 = 0;
 	uint32_t t1 = 0, t2 = 0, t3 = 0, t4 = 0, t5 = 0, t6 = 0, t7 = 0, t8 = 0, t9 = 0, t10 = 0, t11 = 0, t12 = 0, t13 = 0, t14 = 0, t15 = 0, t16 = 0, t17 = 0, t18 = 0, t19 = 0, t20 = 0, t21 = 0, t22 = 0, t23 = 0, t24 = 0, t25 = 0, t26 = 0, t27 = 0, t28 = 0, t29 = 0, t30 = 0, t31 = 0, t32 = 0, t33 = 0, t34 = 0, t35 = 0, t36 = 0, t37 = 0, t38 = 0, t39 = 0, t40 = 0, t41 = 0, t42 = 0, t43 = 0, t44 = 0, t45 = 0, t46 = 0, t47 = 0, t48 = 0, t49 = 0, t50 = 0, t51 = 0, t52 = 0, t53 = 0, t54 = 0, t55 = 0, t56 = 0, t57 = 0, t58 = 0, t59 = 0, t60 = 0, t61 = 0, t62 = 0, t63 = 0, t64 = 0;
 
-	func_00454A(&d1, &d2, &d3, &d4, &d5, &d6, &d7, &a1);
+	zero_fill_registers(&d1, &d2, &d3, &d4, &d5, &d6, &d7, &a1);
 	do
 	{
 		t1 = a0 - 4u;
@@ -1113,7 +1142,8 @@ void func_004512(uint16_t d0, uint32_t a0)
 	} while (t65 != 0xFFFFu);
 }
 
-void func_00454A(uint32_t *p_d1, uint32_t *p_d2, uint32_t *p_d3, uint32_t *p_d4, uint32_t *p_d5, uint32_t *p_d6, uint32_t *p_d7, uint32_t *p_a1)
+/* zeroes for the clearing of the work RAM */
+void zero_fill_registers(uint32_t *p_d1, uint32_t *p_d2, uint32_t *p_d3, uint32_t *p_d4, uint32_t *p_d5, uint32_t *p_d6, uint32_t *p_d7, uint32_t *p_a1)
 {
 	*p_d1 = 0u;
 	*p_d2 = 0u;
@@ -1125,11 +1155,12 @@ void func_00454A(uint32_t *p_d1, uint32_t *p_d2, uint32_t *p_d3, uint32_t *p_d4,
 	*p_a1 = 0u;
 }
 
-void func_00455C(void)
+/* the area's and the play's variables cleared */
+void clear_area_variables(void)
 {
-	func_0045BE();
-	func_0045CC();
-	func_0045F6();
+	clear_area_counters();
+	clear_enemy_variables();
+	clear_spare_ram();
 }
 
 void unreached_00456A(void)
@@ -1137,114 +1168,136 @@ void unreached_00456A(void)
 	uint16_t d0 = 0;
 	uint32_t a0 = 0;
 
-	func_004592();
-	func_00459C();
-	func_0045A6();
-	func_0045B0();
+	clear_player_1();
+	clear_player_2();
+	clear_player_3();
+	clear_player_4();
 	a0 = 0x60200u;
 	d0 = 0u;
-	func_004512(d0, a0);
-	a0 = unk_061100_ADDRESS;
+	zero_ram_below(d0, a0);
+	a0 = marker_times_ADDRESS;
 	d0 = 0u;
-	func_004512(d0, a0);
+	zero_ram_below(d0, a0);
 }
 
-void func_004592(void)
+/* the first player's record cleared */
+void clear_player_1(void)
 {
-	uint32_t a0 = 0;
+	uint32_t player = 0;
 
-	a0 = unk_060100_ADDRESS;
-	AT32(unk_060100(0), -2) = 0u;
-	AT32(unk_060104, -2) = 0u;
+	player = PLAYER_ADDRESS(0);
+	PLAYER(player)->lives = 0u;
+	PLAYER(player)->unused_setting_copy = 0u;
+	PLAYER(player)->score = 0u;
+	PLAYER(player)->health_bars = 0u;
+	PLAYER(player)->message = 0u;
 }
 
-void func_00459C(void)
+/* the second player's record cleared */
+void clear_player_2(void)
 {
-	uint32_t a0 = 0;
+	uint32_t player = 0;
 
-	a0 = unk_060108_ADDRESS;
-	AT32(unk_060108, -3) = 0u;
-	AT32(unk_06010C, -2) = 0u;
+	player = PLAYER_ADDRESS(1);
+	PLAYER(player)->lives = 0u;
+	PLAYER(player)->unused_setting_copy = 0u;
+	PLAYER(player)->score = 0u;
+	PLAYER(player)->health_bars = 0u;
+	PLAYER(player)->message = 0u;
 }
 
-void func_0045A6(void)
+/* the third player's record cleared */
+void clear_player_3(void)
 {
-	uint32_t a0 = 0;
+	uint32_t player = 0;
 
-	a0 = unk_060110_ADDRESS;
-	AT32(unk_060110, -3) = 0u;
-	AT32(unk_060114, -2) = 0u;
+	player = PLAYER_ADDRESS(2);
+	PLAYER(player)->lives = 0u;
+	PLAYER(player)->unused_setting_copy = 0u;
+	PLAYER(player)->score = 0u;
+	PLAYER(player)->health_bars = 0u;
+	PLAYER(player)->message = 0u;
 }
 
-void func_0045B0(void)
+/* the fourth player's record cleared */
+void clear_player_4(void)
 {
-	AT32(unk_060118, -3) = 0u;
-	AT32(unk_06011C, -2) = 0u;
+	PLAYER(PLAYER_ADDRESS(3))->lives = 0u;
+	PLAYER(PLAYER_ADDRESS(3))->unused_setting_copy = 0u;
+	PLAYER(PLAYER_ADDRESS(3))->score = 0u;
+	PLAYER(PLAYER_ADDRESS(3))->health_bars = 0u;
+	PLAYER(PLAYER_ADDRESS(3))->message = 0u;
 }
 
-void func_0045BE(void)
+/* the area's counters cleared */
+void clear_area_counters(void)
 {
 	uint16_t d0 = 0;
 	uint32_t a0 = 0;
 
-	a0 = unk_061200_ADDRESS;
+	a0 = spawn_next_ADDRESS;
 	d0 = 0u;
-	func_004512(d0, a0);
+	zero_ram_below(d0, a0);
 }
 
-void func_0045CC(void)
+/* the spawns' and the enemies' variables cleared */
+void clear_enemy_variables(void)
 {
 	uint16_t d0 = 0;
 	uint32_t a0 = 0;
 
-	a0 = unk_061300_ADDRESS;
+	a0 = hydrant_sprays_left_ADDRESS;
 	d0 = 0u;
-	func_004512(d0, a0);
+	zero_ram_below(d0, a0);
 }
 
-void func_0045DA(void)
+/* the engine's variables cleared */
+void clear_engine_variables(void)
 {
 	uint16_t d0 = 0;
 	uint32_t a0 = 0;
 
-	a0 = 0x61400u;
+	a0 = draw_list_ADDRESS;
 	d0 = 2u;
-	func_004512(d0, a0);
+	zero_ram_below(d0, a0);
 }
 
-void func_0045E8(void)
+/* the engine's variables and the draw list cleared */
+void clear_engine_ram(void)
 {
 	uint16_t d0 = 0;
 	uint32_t a0 = 0;
 
-	a0 = 0x61800u;
+	a0 = floor_map_ADDRESS;
 	d0 = 7u;
-	func_004512(d0, a0);
+	zero_ram_below(d0, a0);
 }
 
-void func_0045F6(void)
+/* a stretch of work RAM nothing uses cleared */
+void clear_spare_ram(void)
 {
 	uint16_t d0 = 0;
 	uint32_t a0 = 0;
 
 	a0 = 0x63200u;
 	d0 = 0u;
-	func_004512(d0, a0);
+	zero_ram_below(d0, a0);
 }
 
-void func_004604(void)
+/* every object cleared */
+void clear_objects(void)
 {
 	uint16_t d0 = 0;
-	uint32_t a0 = 0, a1 = 0, d1 = 0, d2 = 0, d3 = 0, d4 = 0, d5 = 0, d6 = 0, d7 = 0;
+	uint32_t a1 = 0, d1 = 0, d2 = 0, d3 = 0, d4 = 0, d5 = 0, d6 = 0, d7 = 0, objects_end = 0;
 	uint16_t t9 = 0;
 	uint32_t t1 = 0, t2 = 0, t3 = 0, t4 = 0, t5 = 0, t6 = 0, t7 = 0, t8 = 0;
 
-	a0 = unk_062FA0_ADDRESS;
+	objects_end = PLAYER_SLOT_ADDRESS(0);
 	d0 = 0x7Cu;
-	func_00454A(&d1, &d2, &d3, &d4, &d5, &d6, &d7, &a1);
+	zero_fill_registers(&d1, &d2, &d3, &d4, &d5, &d6, &d7, &a1);
 	do
 	{
-		t1 = a0 - 4u;
+		t1 = objects_end - 4u;
 		mem_write16(t1 + 2u, a1);
 		mem_write16(t1, a1 >> 16);
 		t2 = t1 - 4u;
@@ -1268,20 +1321,21 @@ void func_004604(void)
 		t8 = t7 - 4u;
 		mem_write16(t8 + 2u, d1);
 		mem_write16(t8, d1 >> 16);
-		a0 = t8;
+		objects_end = t8;
 		t9 = d0 - 1u;
 		d0 = t9;
 	} while (t9 != 0xFFFFu);
 }
 
-void func_004612(void)
+/* the sprite chip's sprites cleared */
+void clear_sprite_ram(void)
 {
 	uint16_t d0 = 0;
 	uint32_t a0 = 0;
 
 	a0 = 0x140800u;
 	d0 = 3u;
-	func_004512(d0, a0);
+	zero_ram_below(d0, a0);
 }
 
 void unreached_004620(uint16_t d0)
@@ -1291,9 +1345,9 @@ void unreached_004620(uint16_t d0)
 	uint16_t t25 = 0;
 	uint32_t t1 = 0, t2 = 0, t3 = 0, t4 = 0, t5 = 0, t6 = 0, t7 = 0, t8 = 0, t9 = 0, t10 = 0, t11 = 0, t12 = 0, t13 = 0, t14 = 0, t15 = 0, t16 = 0, t17 = 0, t18 = 0, t19 = 0, t20 = 0, t21 = 0, t22 = 0, t23 = 0, t24 = 0;
 
-	a0 = unk_062000_ADDRESS;
+	a0 = OBJECT_ADDRESS(0);
 	d0_2 = (uint16_t)((d0 & ~0xFFu) | 3u);
-	func_00454A(&d1, &d2, &d3, &d4, &d5, &d6, &d7, &a1);
+	zero_fill_registers(&d1, &d2, &d3, &d4, &d5, &d6, &d7, &a1);
 	do
 	{
 		t1 = a0 - 4u;
@@ -1381,9 +1435,9 @@ void unreached_00462E(uint16_t d0)
 	uint16_t t25 = 0;
 	uint32_t t1 = 0, t2 = 0, t3 = 0, t4 = 0, t5 = 0, t6 = 0, t7 = 0, t8 = 0, t9 = 0, t10 = 0, t11 = 0, t12 = 0, t13 = 0, t14 = 0, t15 = 0, t16 = 0, t17 = 0, t18 = 0, t19 = 0, t20 = 0, t21 = 0, t22 = 0, t23 = 0, t24 = 0;
 
-	a0 = unk_0623C0_ADDRESS;
+	a0 = OBJECT_ADDRESS(12);
 	d0_2 = (uint16_t)((d0 & ~0xFFu) | 0xBu);
-	func_00454A(&d1, &d2, &d3, &d4, &d5, &d6, &d7, &a1);
+	zero_fill_registers(&d1, &d2, &d3, &d4, &d5, &d6, &d7, &a1);
 	do
 	{
 		t1 = a0 - 4u;
@@ -1471,9 +1525,9 @@ void unreached_00463C(uint16_t d0)
 	uint16_t t25 = 0;
 	uint32_t t1 = 0, t2 = 0, t3 = 0, t4 = 0, t5 = 0, t6 = 0, t7 = 0, t8 = 0, t9 = 0, t10 = 0, t11 = 0, t12 = 0, t13 = 0, t14 = 0, t15 = 0, t16 = 0, t17 = 0, t18 = 0, t19 = 0, t20 = 0, t21 = 0, t22 = 0, t23 = 0, t24 = 0;
 
-	a0 = 0x62780u;
+	a0 = OBJECT_ADDRESS(24);
 	d0_2 = (uint16_t)((d0 & ~0xFFu) | 7u);
-	func_00454A(&d1, &d2, &d3, &d4, &d5, &d6, &d7, &a1);
+	zero_fill_registers(&d1, &d2, &d3, &d4, &d5, &d6, &d7, &a1);
 	do
 	{
 		t1 = a0 - 4u;
@@ -1561,9 +1615,9 @@ void unreached_00464A(uint16_t d0)
 	uint16_t t25 = 0;
 	uint32_t t1 = 0, t2 = 0, t3 = 0, t4 = 0, t5 = 0, t6 = 0, t7 = 0, t8 = 0, t9 = 0, t10 = 0, t11 = 0, t12 = 0, t13 = 0, t14 = 0, t15 = 0, t16 = 0, t17 = 0, t18 = 0, t19 = 0, t20 = 0, t21 = 0, t22 = 0, t23 = 0, t24 = 0;
 
-	a0 = 0x62140u;
+	a0 = OBJECT_ADDRESS(4);
 	d0_2 = (uint16_t)((d0 & ~0xFFu) | 7u);
-	func_00454A(&d1, &d2, &d3, &d4, &d5, &d6, &d7, &a1);
+	zero_fill_registers(&d1, &d2, &d3, &d4, &d5, &d6, &d7, &a1);
 	do
 	{
 		t1 = a0 - 4u;
@@ -1651,9 +1705,9 @@ void unreached_004658(uint16_t d0)
 	uint16_t t25 = 0;
 	uint32_t t1 = 0, t2 = 0, t3 = 0, t4 = 0, t5 = 0, t6 = 0, t7 = 0, t8 = 0, t9 = 0, t10 = 0, t11 = 0, t12 = 0, t13 = 0, t14 = 0, t15 = 0, t16 = 0, t17 = 0, t18 = 0, t19 = 0, t20 = 0, t21 = 0, t22 = 0, t23 = 0, t24 = 0;
 
-	a0 = 0x62A00u;
+	a0 = OBJECT_ADDRESS(32);
 	d0_2 = (uint16_t)((d0 & ~0xFFu) | 7u);
-	func_00454A(&d1, &d2, &d3, &d4, &d5, &d6, &d7, &a1);
+	zero_fill_registers(&d1, &d2, &d3, &d4, &d5, &d6, &d7, &a1);
 	do
 	{
 		t1 = a0 - 4u;

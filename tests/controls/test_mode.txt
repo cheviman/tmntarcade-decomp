@@ -1,33 +1,33 @@
 # The test mode (DIP switch 3:3 on): the RAM and ROM check and the mask ROM check, then the
-# screens the first player's attack button moves through: the cross hatch, the color test, the
+# screens the first player's jump button moves through: the cross hatch, the color test, the
 # I/O test (every input pressed), the sound test, the DIP switch screen, and the mask ROM check
 # again
 0 dip 3 3 on
-9000 press attack1    # the cross hatch: on to the color test
-9300 press attack1    # on to the I/O test, where every input is pressed in turn
+9000 press jump1    # the cross hatch: on to the color test
+9300 press jump1    # on to the I/O test, where every input is pressed in turn
 9400 press left1 8
 9415 press right1 8
 9430 press up1 8
 9445 press down1 8
-9460 press jump1 8
+9460 press attack1 8
 9475 press left2 8
 9490 press right2 8
 9505 press up2 8
 9520 press down2 8
-9535 press jump2 8
-9550 press attack2 8
+9535 press attack2 8
+9550 press jump2 8
 9565 press left3 8
 9580 press right3 8
 9595 press up3 8
 9610 press down3 8
-9625 press jump3 8
-9640 press attack3 8
+9625 press attack3 8
+9640 press jump3 8
 9655 press left4 8
 9670 press right4 8
 9685 press up4 8
 9700 press down4 8
-9715 press jump4 8
-9730 press attack4 8
+9715 press attack4 8
+9730 press jump4 8
 9745 press coin1 8
 9760 press coin2 8
 9775 press coin3 8
@@ -36,9 +36,9 @@
 9820 press service2 8
 9835 press service3 8
 9850 press service4 8
-9925 press attack1    # on to the sound test: the first two sounds
-9985 press jump1
-10105 press jump1
-10265 press attack1    # on to the DIP switch screen
-10565 press attack1    # back to the mask ROM check
+9925 press jump1    # on to the sound test: the first two sounds
+9985 press attack1
+10105 press attack1
+10265 press jump1    # on to the DIP switch screen
+10565 press jump1    # back to the mask ROM check
 10865 end

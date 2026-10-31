@@ -122,7 +122,9 @@ const uint8_t *data_at(uint32_t address)
 
 /* A record of the program's data, its bytes the other way round (game/support.h): in the reversed copy of the
    piece it is in; one across two pieces, from their bytes into one of a few copies (a record is read where the
-   C names it: no pointer to one outlives its expression) */
+   C names it: no pointer to one outlives its expression). A record the code reads only in part may run past the
+   pieces: an animation frame of 10 bytes read as an attack_frame (18), whose attack box the code reads only once
+   its attack_depth says it has one. Those bytes are no data of the program's, and read 0 */
 #define RECORD_COPIES 32
 #define RECORD_MAX    64u
 
@@ -147,7 +149,11 @@ const void *data_record(uint32_t address, uint32_t size)
 	}
 	copy = copies[next++ % RECORD_COPIES];
 	for (uint32_t at = 0; at < size; at++)
-		copy[size - 1u - at] = *data_at(address + at);
+	{
+		const uint8_t *byte = assets_data_at(address + at);
+
+		copy[size - 1u - at] = byte ? *byte : 0u;
+	}
 	return copy;
 }
 

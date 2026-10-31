@@ -77,7 +77,7 @@ FIXED = (("direction_rows", 64, "direction rows"), ("direction_table", 1024, "di
          ("big_font_tiles", 6, "big font tiles"), ("big_font", 20 * 36, "big font"), ("text_colours", 16, "text colours"),
          ("enemy_definitions", 9 * 136, "enemy definitions"), ("unused_enemy_definitions", 0x380, "unused enemy definitions"),
          ("area_tile_banks", 2 * 10, "area tile banks"), ("area_layer_priorities", 10, "area layer priorities"),
-         ("area_settings_060127", 10, "area settings"))
+         ("area_entry_without_blink", 10, "area settings"))
 # the texts print_text_at writes (positioned_texts, by D6): a 16-bit offset in the layer text_layer_places gives
 # for D7, then the characters, '/' and the next line's offset, '?' the end
 POSITIONED_TEXTS = "positioned_texts"
@@ -98,7 +98,7 @@ MAX_TYPED = 1024
 # what is left: a table the code reads by an index from a fixed address (lea T, An then (d,An,Xn), or
 # (d,PC,Xn)), its elements as wide as the read, up to the next thing walked, code, or place the code names
 ELEMENT_SIZES = {"b": 1, "w": 2, "l": 4}
-# the picture draw_screen_picture puts in the fixed layer: 13 rows of 24 tiles, and their colours
+# the picture draw_screen_picture puts in layer A: 13 rows of 24 tiles' colours, and their codes
 PICTURE = 13 * 24
 # the palette effects (start_palette_effects takes a list in A6: a 16-bit count, then the addresses of that many
 # effects): an effect is its colour (bank << 8 | palette << 4 | colour number), then steps of 4 bytes, a 16-bit

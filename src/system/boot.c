@@ -3,7 +3,7 @@
  *    Description: the reset, the RAM and ROM tests, and the main loop that runs the jobs the frames queue
  *    Version:     0.1.0
  *    Created:     29-10-2026
- *    Modified:    29-10-2026
+ *    Modified:    30-10-2026
  *    Author:      Sebastian Toyos
  *
  *    Teenage Mutant Ninja Turtles (arcade, Konami 1989): the game's 68000 program decompiled into C by
@@ -11,12 +11,14 @@
  */
 #include "game.h"
 
-void func_001000(void)
+/* the board's start: the RAM and ROM check, the work RAM, the DIP switches, then the main loop that runs
+   the queued jobs */
+void reset(void)
 {
 	uint32_t negative = 0;
 	uint8_t d0 = 0, d1 = 0, d2 = 0, d3 = 0, d4 = 0;
 	uint16_t d0_2 = 0, d1_2 = 0, d2_3 = 0, d4_3 = 0, d6 = 0, d7_2 = 0;
-	uint32_t a0 = 0, a1 = 0, a2 = 0, a3 = 0, a4 = 0, a6 = 0, d0_3 = 0, d1_3 = 0, d2_2 = 0, d3_2 = 0, d4_2 = 0, d5 = 0, d6_2 = 0, d7 = 0, ignored = 0, ignored_2 = 0, ignored_3 = 0, ignored_4 = 0;
+	uint32_t a0 = 0, a1 = 0, a2 = 0, a3 = 0, a4 = 0, a6 = 0, d0_3 = 0, d1_3 = 0, d2_2 = 0, d3_2 = 0, d4_2 = 0, d5 = 0, d6_2 = 0, d7 = 0, ignored = 0, ignored_2 = 0, ignored_3 = 0, ignored_4 = 0, ignored_5 = 0;
 	uint16_t t1 = 0, t3 = 0, t4 = 0, t5 = 0, t6 = 0, t7 = 0, t8 = 0, t9 = 0, t10 = 0, t19 = 0, t20 = 0, t21 = 0;
 	uint32_t t2 = 0, t11 = 0, t12 = 0, t13 = 0, t14 = 0, t15 = 0, t16 = 0, t17 = 0, t18 = 0;
 
@@ -25,7 +27,7 @@ void func_001000(void)
 	io_write8(IO_0A0011, 0u);
 	io_write8(UNMAPPED_10E801, 0x13u);
 	io_write8(IO_0A0001, 0u);
-	io_write8(SPRITE_CONTROL_140000, 0x10u);
+	io_write8(0x140000u, 0x10u);
 	io_write8(TILES_106402, 0u);
 	io_write8(TILES_106400, 0u);
 	io_write8(TILES_106403, 0u);
@@ -36,7 +38,7 @@ void func_001000(void)
 	if ((io_read8(IO_0A0019) & 1u) == 0u)
 	{
 		d1 |= 1u;
-		io_write8(SPRITE_CONTROL_140000, 0x18u);
+		io_write8(0x140000u, 0x18u);
 	}
 	io_write8(TILES_106D00, d1);
 	write_status(0x2500u);
@@ -45,16 +47,16 @@ void func_001000(void)
 	a2 = 0x16C4u;
 	a0 = PALETTE_RAM;
 	d0_2 = 0u;
-	d7 = func_0017F6(d0_2, d7, a0, a2);
+	d7 = test_palette_ram(d0_2, d7, a0, a2);
 	a2 = 0x16C6u;
 	a0 = TILE_RAM;
 	d0_2 = 0x17u;
-	d7 = func_0017A6(d0_2, d7, a0, a2);
-	func_001708();
+	d7 = test_ram(d0_2, d7, a0, a2);
+	start_boot_screen();
 	a2 = 0x16C8u;
 	a0 = 0x60000u;
 	d0_2 = 0xFu;
-	d7 = func_0017A6(d0_2, d7, a0, a2);
+	d7 = test_ram(d0_2, d7, a0, a2);
 	d0_2 = 0x1000u;
 	do
 	{
@@ -64,9 +66,9 @@ void func_001000(void)
 	a2 = 0x16CAu;
 	a0 = SPRITE_RAM;
 	d0_2 = 0u;
-	d7 = func_0017A6(d0_2, d7, a0, a2);
+	d7 = test_ram(d0_2, d7, a0, a2);
 	sum_program_chips();
-	a2 = unk_060018_ADDRESS;
+	a2 = sound_queue_write_ADDRESS;
 	a3 = 0x16F8u;
 	d0_2 = 3u;
 	do
@@ -81,11 +83,11 @@ void func_001000(void)
 		t3 = d0_2 - 1u;
 		d0_2 = t3;
 	} while (t3 != 0xFFFFu);
-	unk_060010 = d7;
-	d7 = func_001890(d7);
+	job_queue_write = d7;
+	d7 = show_boot_check(d7);
 	if (d7 != 0u)
 	{
-		a0 = unk_060018_ADDRESS;
+		a0 = sound_queue_write_ADDRESS;
 		a1 = 0x16E8u;
 		d0_2 = 3u;
 		do
@@ -94,7 +96,7 @@ void func_001000(void)
 			d4_3 = mem_read16(a0);
 			a1 += 4u;
 			a0 += 2u;
-			func_001782(d4_3, a4);
+			print_boot_hex(d4_3, a4);
 			t4 = d0_2 - 1u;
 			d0_2 = t4;
 		} while (t4 != 0xFFFFu);
@@ -116,18 +118,18 @@ void func_001000(void)
 	} while (t6 != 0xFFFFu);
 	if (d7 == 0u)
 	{
-		io_write8(SPRITE_CONTROL_140000, 0x10u);
+		io_write8(0x140000u, 0x10u);
 		io_write16(TILES_106B00, 0u);
 		io_write16(TILES_106E00, 0u);
-		func_0010BC();
-		func_004612();
-		func_004604();
-		ignored = func_0010D2();
-		func_0010EE();
+		clear_sprite_chip_registers();
+		clear_sprite_ram();
+		clear_objects();
+		ignored = clear_tile_chip_registers();
+		clear_tile_ram();
 		a6 = 0xA01Eu;
 		d7 = 1u;
-		unk_060BFB = 0u;
-		func_0093EE(a6, &ignored_2, &ignored_3, &d7, &ignored_4);
+		palette_second_half = 0u;
+		palette_request_set(a6, &ignored_2, &ignored_3, &d7, &ignored_4);
 		a6 = TILE_RAM;
 		d0 = 0u;
 		d1 = 0x2Cu;
@@ -140,17 +142,17 @@ void func_001000(void)
 			d7_2 = 0x1Fu;
 			do
 			{
-				mem_write8(a6 + 0x80u, d0);
-				mem_write8(a6 + 0x81u, d1);
-				mem_write8(a6 + 0x82u, d0);
-				mem_write8(a6 + 0x83u, d2);
-				mem_write8(a6, d0);
+				io_write8(a6 + 0x80u, d0);
+				io_write8(a6 + 0x81u, d1);
+				io_write8(a6 + 0x82u, d0);
+				io_write8(a6 + 0x83u, d2);
+				io_write8(a6, d0);
 				a6++;
-				mem_write8(a6, d3);
+				io_write8(a6, d3);
 				a6++;
-				mem_write8(a6, d0);
+				io_write8(a6, d0);
 				a6++;
-				mem_write8(a6, d4);
+				io_write8(a6, d4);
 				t7 = d7_2 - 1u;
 				d7_2 = t7;
 				a6++;
@@ -175,7 +177,7 @@ void func_001000(void)
 		} while (t10 != 0xFFFFu);
 		a0 = 0x64000u;
 		d7_2 = 0x1FFu;
-		func_00114C(&d1_3, &d2_2, &d3_2, &d4_2, &d5, &d6_2, &a1, &a2);
+		zero_boot_fill_registers(&d1_3, &d2_2, &d3_2, &d4_2, &d5, &d6_2, &a1, &a2);
 		do
 		{
 			t11 = a0 - 4u;
@@ -207,19 +209,18 @@ void func_001000(void)
 			d7_2 = t19;
 		} while (t19 != 0xFFFFu);
 		io_write8(IO_0A0011, (uint8_t)d0_2);
-		unk_06001C = 0x60400u;
-		unk_060018 = 0x60400u;
-		unk_060BF0 = 0x60B00u;
-		unk_060BF4 = 0x60B00u;
-		unk_060BFA = 0u;
-		unk_060BFB = 0u;
-		unk_060BF8 = 0u;
-		unk_060BF9 = 0u;
-		unk_060BFC &= 0xFFFF0000u;
-		unk_060BFC &= 0xFFFFu;
-		a0 = 0x60380u;
-		unk_060014 = 0x60380u;
-		unk_060010 = 0x60380u;
+		sound_queue_read = sound_queue_ADDRESS;
+		sound_queue_write = sound_queue_ADDRESS;
+		palette_queue_write = PALETTE_REQUEST_ADDRESS(0);
+		palette_queue_read = PALETTE_REQUEST_ADDRESS(0);
+		palette_area_banks = 0u;
+		palette_set_banks = 0u;
+		palette_black_banks = 0u;
+		palette_second_half = 0u;
+		palette_set = 0u;
+		a0 = job_queue_ADDRESS;
+		job_queue_read = job_queue_ADDRESS;
+		job_queue_write = job_queue_ADDRESS;
 		d0_3 = 0xFFFFFFFFu;
 		d1_2 = 0x1Fu;
 		do
@@ -229,93 +230,151 @@ void func_001000(void)
 			d1_2 = t20;
 			a0 += 4u;
 		} while (t20 != 0xFFFFu);
-		func_0082B8();
-		unk_060030 = ~io_read8(IO_0A0011);
-		unk_060031 = ~io_read8(IO_0A0013);
-		unk_060032 = ~io_read8(IO_0A0019);
+		reset_ranking();
+		dip_switches_1 = ~io_read8(IO_0A0011);
+		dip_switches_2 = ~io_read8(IO_0A0013);
+		dip_switches_3 = ~io_read8(IO_0A0019);
 		d0 = 0u;
-		d1_2 = unk_060030;
+		d1_2 = dip_switches_1;
 		d2_3 = (uint16_t)d1_2;
 		d1_2 = d1_2 & 0xFu;
-		unk_060091 = d0;
+		free_play = d0;
 		d1_2 = (uint16_t)((uint32_t)d1_2 << 1);
-		unk_060303 = rom_001452[d1_2];
-		unk_060304 = rom_001453[d1_2];
+		COIN_SLOT(COIN_SLOT_ADDRESS(0))->coins_per_credit = rom_001452[d1_2];
+		COIN_SLOT(COIN_SLOT_ADDRESS(0))->credits_per_coins = rom_001453[d1_2];
 		d2_3 = (d2_3 & ~0xFu) >> 3;
-		unk_06030B = rom_001472[d2_3];
-		unk_06030C = rom_001473[d2_3];
-		d0_2 = unk_060031;
-		unk_060090 = rom_001426[d0_2 & 3u];
+		COIN_SLOT(COIN_SLOT_ADDRESS(1))->coins_per_credit = rom_001472[d2_3];
+		COIN_SLOT(COIN_SLOT_ADDRESS(1))->credits_per_coins = rom_001473[d2_3];
+		d0_2 = dip_switches_2;
+		lives_per_credit = rom_001426[d0_2 & 3u];
 		d0_2 = 0u;
-		if ((unk_060031 & 4u) == 0u)
+		if ((dip_switches_2 & 4u) == 0u)
 			d0_2 = (uint8_t)(d0_2 + 1u);
-		unk_060093 = (uint8_t)d0_2;
-		unk_06009F = 0u;
-		d0_2 = unk_060031;
+		unused_dip_flag = (uint8_t)d0_2;
+		version = 0u;
+		d0_2 = dip_switches_2;
 		d0_2 = d0_2 & 0x18u;
 		a0 = 0x142Au + (uint16_t)(d0_2 + (d0_2 >> 2));
-		unk_060095 = (uint8_t)DATA16(a0);
+		unused_dip_setting_flag = (uint8_t)DATA16(a0);
 		a0 += 2u;
-		unk_060096 = DATA32(a0);
-		AT32(unk_06009A, -2) = mem_read32(a0 + 4u);
-		unk_060094 = (unk_060031 & 0x60u) >> 5;
-		unk_060092 = unk_060031 & 0x80u;
+		unused_dip_setting_value = DATA32(a0);
+		AT32(unused_dip_setting, -2) = mem_read32(a0 + 4u);
+		difficulty_setting = (dip_switches_2 & 0x60u) >> 5;
+		demo_sounds = dip_switches_2 & 0x80u;
 		d0 = 4u;
-		if ((unk_060032 & 8u) != 0u)
+		if ((dip_switches_3 & 8u) != 0u)
 			d0 = 6u;
-		unk_0600B9 = d0;
-		unk_060058 = 0u;
+		unused_dip_number = d0;
+		board_control = 0u;
 		io_write8(IO_0A0009, 0u);
 		io_write8(IO_0A0001, 8u);
 		d1 = 0u;
 		d2 = 0u;
-		if ((unk_060032 & 1u) != 0u)
+		if ((dip_switches_3 & 1u) != 0u)
 		{
 			d1 |= 7u;
 			d2 |= 8u;
 		}
-		unk_060059 = d1;
+		layer_priority = d1;
 		io_write8(PRIORITY_0C0001, d1);
-		unk_06005A = d2;
-		io_write8(SPRITE_CONTROL_140000, d2);
+		sprite_control = d2;
+		io_write8(0x140000u, d2);
 		write_status(0u);
 		take_interrupts();
-		unk_060058 |= 0x20u;
-		io_write8(IO_0A0001, unk_060058);
-		do
+		board_control |= 0x20u;
+		io_write8(IO_0A0001, board_control);
+		for (;;)
 		{
 			animate_fire_tiles(&d5, &d6_2);
-			a0 = unk_060014;
+			a0 = job_queue_read;
 			frame_wait();
 			t21 = mem_read16(a0);
 			negative = t21 >> 15;
 			d1_2 = t21;
 			take_interrupts();
-		} while (negative);
-		d7 = (uint8_t)d1_2;
-		d1_2 = (d1_2 & 0x3F00u) >> 6;
-		mem_write16(a0, 0xFFFFu);
-		a0 += 2u;
-		if (a0 > 0x603FFu)
-			a0 = 0x60380u;
-		unk_060014 = a0;
-		a0 = TABLE32(indexed_table_of_32_bit_values_0013DE, d1_2);
-		func_0013C0(d4_2, d5, d6_2, d7, a0);
-		return;
+			if (negative)
+				continue;
+			d7 = (uint8_t)d1_2;
+			d1_2 = (d1_2 & 0x3F00u) >> 6;
+			mem_write16(a0, 0xFFFFu);
+			a0 += 2u;
+			if (a0 > job_queue_ADDRESS + 0x7Fu)
+				a0 = job_queue_ADDRESS;
+			job_queue_read = a0;
+			switch (d1_2)
+			{
+			case 0:
+				clear_layers_job((uint8_t)d7);
+				break;
+			case 4:
+				print_game_text((uint16_t)d7);
+				break;
+			case 8:
+				set_text_colour((uint16_t)d7);
+				break;
+			case 12:
+				set_spare_text_colour((uint16_t)d7);
+				break;
+			case 16:
+				d4_2 = add_point(d4_2, d7);
+				break;
+			case 20:
+				clear_scores((uint8_t)d7);
+				break;
+			case 24:
+				draw_score_labels((uint8_t)d7);
+				break;
+			case 28:
+				func_001E40();
+				break;
+			case 32:
+				func_0022FE();
+				break;
+			case 36:
+				d4_2 = draw_tile_picture((uint16_t)d7);
+				break;
+			case 40:
+				func_002334();
+				break;
+			case 44:
+				draw_player_boxes(d7, &ignored_5, &d4_2, &d5, &d6_2);
+				break;
+			case 48:
+				print_stage_title();
+				break;
+			case 52:
+				draw_player_message(&d4_2, &d5, &d6_2, &d7);
+				break;
+			case 56:
+				print_demo_text((uint16_t)d7);
+				break;
+			case 60:
+				print_tall_text((uint8_t)d7, &d4_2, &d6_2);
+				break;
+			case 64:
+				print_test_text((uint16_t)d7);
+				break;
+			case 68:
+				d5 = sum_mask_roms(d4_2, d5, d6_2, d7);
+				break;
+			}
+		}
 	}
 	for (;;)
 	{
 	}
 }
 
-void func_0010BC(void)
+/* the sprite chip's registers cleared */
+void clear_sprite_chip_registers(void)
 {
 	io_write8(SPRITE_CONTROL_140001, 0u);
 	io_write8(SPRITE_CONTROL_140003, 0u);
 	io_write8(SPRITE_CONTROL_140002, 0u);
 }
 
-uint32_t func_0010D2(void)
+/* the tile chip's registers cleared */
+uint32_t clear_tile_chip_registers(void)
 {
 	uint32_t d7 = 0;
 
@@ -327,7 +386,8 @@ uint32_t func_0010D2(void)
 	return d7;
 }
 
-void func_0010EE(void)
+/* the three tile layers blank and their scroll at 0 */
+void clear_tile_ram(void)
 {
 	uint8_t d0 = 0, d1 = 0;
 	uint16_t d7 = 0;
@@ -340,9 +400,9 @@ void func_0010EE(void)
 	d7 = 0x7FFu;
 	do
 	{
-		mem_write8(a0, d0);
+		io_write8(a0, d0);
 		a0++;
-		mem_write8(a0, d1);
+		io_write8(a0, d1);
 		t1 = d7 - 1u;
 		d7 = t1;
 		a0++;
@@ -352,9 +412,9 @@ void func_0010EE(void)
 	d7 = 0x1FFFu;
 	do
 	{
-		mem_write8(a0, d0);
+		io_write8(a0, d0);
 		a0++;
-		mem_write8(a0, d1);
+		io_write8(a0, d1);
 		t2 = d7 - 1u;
 		d7 = t2;
 		a0++;
@@ -368,7 +428,8 @@ void func_0010EE(void)
 	io_write8(IO_0A0011, 0u);
 }
 
-void func_00114C(uint32_t *p_d1, uint32_t *p_d2, uint32_t *p_d3, uint32_t *p_d4, uint32_t *p_d5, uint32_t *p_d6, uint32_t *p_a1, uint32_t *p_a2)
+/* zeroes for the boot's clearing of the work RAM */
+void zero_boot_fill_registers(uint32_t *p_d1, uint32_t *p_d2, uint32_t *p_d3, uint32_t *p_d4, uint32_t *p_d5, uint32_t *p_d6, uint32_t *p_a1, uint32_t *p_a2)
 {
 	*p_d1 = 0u;
 	*p_d2 = 0u;
@@ -380,94 +441,8 @@ void func_00114C(uint32_t *p_d1, uint32_t *p_d2, uint32_t *p_d3, uint32_t *p_d4,
 	*p_a2 = 0u;
 }
 
-uint32_t func_0013C0(uint32_t d4, uint32_t d5, uint32_t d6, uint32_t d7, uint32_t a0)
-{
-	uint32_t negative = 0;
-	uint16_t d1 = 0;
-	uint32_t a0_2 = 0, ignored = 0;
-	uint16_t t1 = 0;
-
-	for (;;)
-	{
-		switch (a0)
-		{
-		case 0x001A7Eu:
-			d5 = func_001A7E(d4, d5, d6, d7);
-			break;
-		case 0x001E40u:
-			func_001E40();
-			break;
-		case 0x001E42u:
-			func_001E42((uint8_t)d7);
-			break;
-		case 0x001E98u:
-			print_demo_text((uint16_t)d7);
-			break;
-		case 0x001EA2u:
-			print_test_text((uint16_t)d7);
-			break;
-		case 0x001EACu:
-			print_game_text((uint16_t)d7);
-			break;
-		case 0x001F0Au:
-			func_001F0A((uint16_t)d7);
-			break;
-		case 0x001F2Au:
-			func_001F2A((uint16_t)d7);
-			break;
-		case 0x001F3Au:
-			d4 = func_001F3A(d4, d7);
-			break;
-		case 0x002098u:
-			func_002098((uint8_t)d7);
-			break;
-		case 0x002102u:
-			func_002102((uint8_t)d7);
-			break;
-		case 0x0022FEu:
-			func_0022FE();
-			break;
-		case 0x002300u:
-			d4 = func_002300((uint16_t)d7);
-			break;
-		case 0x002334u:
-			func_002334();
-			break;
-		case 0x002336u:
-			func_002336(d7, &ignored, &d4, &d5, &d6);
-			break;
-		case 0x002604u:
-			func_002604();
-			break;
-		case 0x00263Cu:
-			func_00263C(&d4, &d5, &d6, &d7);
-			break;
-		case 0x002818u:
-			func_002818((uint8_t)d7, &d4, &d6);
-			break;
-		}
-		do
-		{
-			animate_fire_tiles(&d5, &d6);
-			a0_2 = unk_060014;
-			frame_wait();
-			t1 = mem_read16(a0_2);
-			negative = t1 >> 15;
-			d1 = t1;
-			take_interrupts();
-		} while (negative);
-		d7 = (uint8_t)d1;
-		d1 = (d1 & 0x3F00u) >> 6;
-		mem_write16(a0_2, 0xFFFFu);
-		a0_2 += 2u;
-		if (a0_2 > 0x603FFu)
-			a0_2 = 0x60380u;
-		unk_060014 = a0_2;
-		a0 = TABLE32(indexed_table_of_32_bit_values_0013DE, d1);
-	}
-}
-
-void func_001708(void)
+/* the boot's screen: a palette, the fixed layer blank and "RAM ROM CHECK" */
+void start_boot_screen(void)
 {
 	uint8_t d3 = 0, d6 = 0;
 	uint16_t d0 = 0, d1 = 0;
@@ -482,9 +457,9 @@ void func_001708(void)
 		d1 = 0xFu;
 		do
 		{
-			mem_write8(a6 + 1u, DATA8(a1));
+			io_write8(a6 + 1u, DATA8(a1));
 			a1++;
-			mem_write8(a6 + 3u, DATA8(a1));
+			io_write8(a6 + 3u, DATA8(a1));
 			a6 += 4u;
 			t1 = d1 - 1u;
 			d1 = t1;
@@ -498,8 +473,8 @@ void func_001708(void)
 	d6 = 0u;
 	do
 	{
-		mem_write8(a6 + 1u, d6);
-		mem_write8(a6 + 3u, d6);
+		io_write8(a6 + 1u, d6);
+		io_write8(a6 + 3u, d6);
 		a6 += 4u;
 		t3 = d0 - 1u;
 		d0 = t3;
@@ -509,22 +484,23 @@ void func_001708(void)
 	d0 = 0x3FFu;
 	do
 	{
-		mem_write8(a6, 0u);
+		io_write8(a6, 0u);
 		a6++;
-		mem_write8(a6, 0x10u);
+		io_write8(a6, 0x10u);
 		a6++;
-		mem_write8(a6, 0u);
+		io_write8(a6, 0u);
 		a6++;
-		mem_write8(a6, 0x10u);
+		io_write8(a6, 0x10u);
 		t4 = d0 - 1u;
 		d0 = t4;
 		a6++;
 	} while (t4 != 0xFFFFu);
 	d3 = 0u;
-	func_0018E2(d3);
+	print_boot_text(d3);
 }
 
-void func_001782(uint16_t d4, uint32_t a4)
+/* a number as four hexadecimal digits, for a bad program chip's sum */
+void print_boot_hex(uint16_t d4, uint32_t a4)
 {
 	uint16_t d5 = 0, d6 = 0;
 	uint16_t t1 = 0;
@@ -545,7 +521,8 @@ void func_001782(uint16_t d4, uint32_t a4)
 	} while (t1 != 0xFFFFu);
 }
 
-uint32_t func_0017A6(uint16_t d0, uint32_t d7, uint32_t a0, uint32_t a2)
+/* a RAM written and read back with four patterns, its bad chips marked */
+uint32_t test_ram(uint16_t d0, uint32_t d7, uint32_t a0, uint32_t a2)
 {
 	uint8_t d1 = 0;
 	uint16_t d2 = 0, d3 = 0;
@@ -589,7 +566,8 @@ uint32_t func_0017A6(uint16_t d0, uint32_t d7, uint32_t a0, uint32_t a2)
 	return d7;
 }
 
-uint32_t func_0017F6(uint16_t d0, uint32_t d7, uint32_t a0, uint32_t a2)
+/* the palette RAM written and read back with four patterns */
+uint32_t test_palette_ram(uint16_t d0, uint32_t d7, uint32_t a0, uint32_t a2)
 {
 	uint16_t d2 = 0, d3 = 0;
 	uint32_t a1 = 0, d1 = 0;
@@ -606,11 +584,11 @@ uint32_t func_0017F6(uint16_t d0, uint32_t d7, uint32_t a0, uint32_t a2)
 			d3 = 0x3FFu;
 			do
 			{
-				mem_write8(a1 + 1u, d1);
-				if (mem_read8(a1 + 1u) != (uint8_t)d1)
+				io_write8(a1 + 1u, d1);
+				if (io_read8(a1 + 1u) != (uint8_t)d1)
 					d7 = d7 | mem_read8(a2);
-				mem_write8(a1 + 3u, d1);
-				if (mem_read8(a1 + 3u) != (uint8_t)d1)
+				io_write8(a1 + 3u, d1);
+				if (io_read8(a1 + 3u) != (uint8_t)d1)
 					d7 = d7 | mem_read8(a2 + 1u);
 				a1 += 4u;
 				t1 = d3 - 1u;
@@ -634,7 +612,7 @@ void BOARD_ORIGINAL(sum_program_chips)(void)
 	uint16_t t2 = 0, t3 = 0;
 	uint32_t t1 = 0;
 
-	a2 = unk_060018_ADDRESS;
+	a2 = sound_queue_write_ADDRESS;
 	a0 = 0x16CCu;
 	for (;;)
 	{
@@ -672,7 +650,8 @@ void BOARD_ORIGINAL(sum_program_chips)(void)
 	}
 }
 
-uint32_t func_001890(uint32_t d7)
+/* the check's results: each chip OK or BAD */
+uint32_t show_boot_check(uint32_t d7)
 {
 	uint32_t carry = 0;
 	uint8_t d3 = 0;
@@ -684,19 +663,19 @@ uint32_t func_001890(uint32_t d7)
 	d0 = 0x3FFu;
 	do
 	{
-		mem_write8(a6, 0u);
+		io_write8(a6, 0u);
 		a6++;
-		mem_write8(a6, 0x10u);
+		io_write8(a6, 0x10u);
 		a6++;
-		mem_write8(a6, 0u);
+		io_write8(a6, 0u);
 		a6++;
-		mem_write8(a6, 0x10u);
+		io_write8(a6, 0x10u);
 		t1 = d0 - 1u;
 		d0 = t1;
 		a6++;
 	} while (t1 != 0xFFFFu);
 	d3 = 1u;
-	func_0018E2(d3);
+	print_boot_text(d3);
 	d5 = 0xBu;
 	d3 = 2u;
 	d7 = d7 >> 1;
@@ -706,7 +685,7 @@ uint32_t func_001890(uint32_t d7)
 		carry = d6 & 1u;
 		d6 = d6 >> 1;
 		if (carry)
-			func_0018E2(d3);
+			print_boot_text(d3);
 		d3++;
 		t2 = d5 - 1u;
 		d5 = t2;
@@ -714,7 +693,8 @@ uint32_t func_001890(uint32_t d7)
 	return d7;
 }
 
-void func_0018E2(uint8_t d3)
+/* a text of the boot's screen */
+void print_boot_text(uint8_t d3)
 {
 	uint8_t d4 = 0;
 	uint32_t a5 = 0, a6 = 0;

@@ -3,7 +3,7 @@
  *    Description: the game's variables, tables, board registers and structures
  *    Version:     0.1.0
  *    Created:     29-10-2026
- *    Modified:    29-10-2026
+ *    Modified:    30-10-2026
  *    Author:      Sebastian Toyos
  *
  *    Teenage Mutant Ninja Turtles (arcade, Konami 1989): the game's 68000 program decompiled into C by
@@ -13,102 +13,73 @@
 #define TMNT_RAM_H
 
 /* the game's variables in work RAM (060000-063FFF) */
-#define unk_060001_ADDRESS 0x060001u
-#define unk_060001 RAM8(unk_060001_ADDRESS)
-#define unk_060002_ADDRESS 0x060002u
-#define unk_060002 RAM8(unk_060002_ADDRESS)
-#define unk_060003_ADDRESS 0x060003u
-#define unk_060003 RAM8(unk_060003_ADDRESS)
-#define unk_060004_ADDRESS 0x060004u
-#define unk_060004 RAM8(unk_060004_ADDRESS)
-#define unk_060005_ADDRESS 0x060005u
-#define unk_060005 RAM8(unk_060005_ADDRESS)
-#define unk_060006_ADDRESS 0x060006u
-#define unk_060006 RAM8(unk_060006_ADDRESS)
-#define unk_060007_ADDRESS 0x060007u
-#define unk_060007 RAM8(unk_060007_ADDRESS)
-#define unk_060008_ADDRESS 0x060008u
-#define unk_060008 RAM8(unk_060008_ADDRESS)
-#define unk_060009_ADDRESS 0x060009u
-#define unk_060009 RAM8(unk_060009_ADDRESS)
-#define unk_06000B_ADDRESS 0x06000Bu
-#define unk_06000B RAM8(unk_06000B_ADDRESS)
-#define unk_060010_ADDRESS 0x060010u
-#define unk_060010 RAM32(unk_060010_ADDRESS)
-#define unk_060014_ADDRESS 0x060014u
-#define unk_060014 RAM32(unk_060014_ADDRESS)
-#define unk_060018_ADDRESS 0x060018u
-#define unk_060018 RAM32(unk_060018_ADDRESS)
-#define unk_06001C_ADDRESS 0x06001Cu
-#define unk_06001C RAM32(unk_06001C_ADDRESS)
-#define unk_060020_ADDRESS 0x060020u
-#define unk_060020(index) RAM8(unk_060020_ADDRESS + (index))
-#define unk_060021_ADDRESS 0x060021u
-#define unk_060021 RAM8(unk_060021_ADDRESS)
-#define unk_060022_ADDRESS 0x060022u
-#define unk_060022 RAM8(unk_060022_ADDRESS)
-#define unk_060023_ADDRESS 0x060023u
-#define unk_060023 RAM8(unk_060023_ADDRESS)
-#define unk_060024_ADDRESS 0x060024u
-#define unk_060024 RAM32(unk_060024_ADDRESS)
-#define unk_060028_ADDRESS 0x060028u
-#define unk_060028 RAM32(unk_060028_ADDRESS)
-#define unk_06002C_ADDRESS 0x06002Cu
-#define unk_06002C RAM32(unk_06002C_ADDRESS)
-#define unk_060030_ADDRESS 0x060030u
-#define unk_060030 RAM8(unk_060030_ADDRESS)
-#define unk_060031_ADDRESS 0x060031u
-#define unk_060031 RAM8(unk_060031_ADDRESS)
-#define unk_060032_ADDRESS 0x060032u
-#define unk_060032 RAM8(unk_060032_ADDRESS)
-#define unk_060034_ADDRESS 0x060034u
-#define unk_060034(index) RAM8(unk_060034_ADDRESS + (index))
-#define unk_060035_ADDRESS 0x060035u
-#define unk_060035 RAM8(unk_060035_ADDRESS)
-#define unk_060036_ADDRESS 0x060036u
-#define unk_060036 RAM8(unk_060036_ADDRESS)
-#define unk_060037_ADDRESS 0x060037u
-#define unk_060037 RAM8(unk_060037_ADDRESS)
-#define unk_060038_ADDRESS 0x060038u
-#define unk_060038(index) RAM8(unk_060038_ADDRESS + (index))
-#define unk_060039_ADDRESS 0x060039u
-#define unk_060039 RAM8(unk_060039_ADDRESS)
-#define unk_06003A_ADDRESS 0x06003Au
-#define unk_06003A RAM8(unk_06003A_ADDRESS)
-#define unk_06003B_ADDRESS 0x06003Bu
-#define unk_06003B RAM8(unk_06003B_ADDRESS)
-#define unk_06003C_ADDRESS 0x06003Cu
-#define unk_06003C RAM32(unk_06003C_ADDRESS)
-#define unk_060040_ADDRESS 0x060040u
-#define unk_060040 RAM32(unk_060040_ADDRESS)
-#define unk_060044_ADDRESS 0x060044u
-#define unk_060044 RAM8(unk_060044_ADDRESS)
-#define unk_060045_ADDRESS 0x060045u
-#define unk_060045 RAM8(unk_060045_ADDRESS)
-#define unk_060046_ADDRESS 0x060046u
-#define unk_060046 RAM8(unk_060046_ADDRESS)
-#define unk_060047_ADDRESS 0x060047u
-#define unk_060047 RAM8(unk_060047_ADDRESS)
-#define unk_060048_ADDRESS 0x060048u
-#define unk_060048 RAM16(unk_060048_ADDRESS)
-#define unk_06004A_ADDRESS 0x06004Au
-#define unk_06004A RAM16(unk_06004A_ADDRESS)
-#define unk_06004C_ADDRESS 0x06004Cu
-#define unk_06004C RAM8(unk_06004C_ADDRESS)
-#define unk_06004D_ADDRESS 0x06004Du
-#define unk_06004D RAM8(unk_06004D_ADDRESS)
-#define unk_06004E_ADDRESS 0x06004Eu
-#define unk_06004E RAM8(unk_06004E_ADDRESS)
-#define unk_06004F_ADDRESS 0x06004Fu
-#define unk_06004F RAM8(unk_06004F_ADDRESS)
-#define unk_060050_ADDRESS 0x060050u
-#define unk_060050 RAM8(unk_060050_ADDRESS)
-#define unk_060051_ADDRESS 0x060051u
-#define unk_060051 RAM8(unk_060051_ADDRESS)
-#define unk_060052_ADDRESS 0x060052u
-#define unk_060052 RAM8(unk_060052_ADDRESS)
-#define unk_060053_ADDRESS 0x060053u
-#define unk_060053 RAM8(unk_060053_ADDRESS)
+#define WORKING_LAYER 0x063300u
+#define LAYER_A 0x063340u
+#define LAYER_B 0x063380u
+#define game_state_ADDRESS 0x060001u
+#define game_state RAM8(game_state_ADDRESS)
+#define step_timer_ADDRESS 0x060002u
+#define step_timer RAM8(step_timer_ADDRESS)
+#define game_step_ADDRESS 0x060003u
+#define game_step RAM8(game_step_ADDRESS)
+#define scene_timer_ADDRESS 0x060004u
+#define scene_timer RAM8(scene_timer_ADDRESS)
+#define scene_ADDRESS 0x060005u
+#define scene RAM8(scene_ADDRESS)
+#define continue_count_ADDRESS 0x060006u
+#define continue_count RAM8(continue_count_ADDRESS)
+#define scene_step_ADDRESS 0x060007u
+#define scene_step RAM8(scene_step_ADDRESS)
+#define continue_count_time_ADDRESS 0x060008u
+#define continue_count_time RAM8(continue_count_time_ADDRESS)
+#define scene_substep_ADDRESS 0x060009u
+#define scene_substep RAM8(scene_substep_ADDRESS)
+#define scene_subsubstep_ADDRESS 0x06000Bu
+#define scene_subsubstep RAM8(scene_subsubstep_ADDRESS)
+#define job_queue_write_ADDRESS 0x060010u
+#define job_queue_write RAM32(job_queue_write_ADDRESS)
+#define job_queue_read_ADDRESS 0x060014u
+#define job_queue_read RAM32(job_queue_read_ADDRESS)
+#define sound_queue_write_ADDRESS 0x060018u
+#define sound_queue_write RAM32(sound_queue_write_ADDRESS)
+#define sound_queue_read_ADDRESS 0x06001Cu
+#define sound_queue_read RAM32(sound_queue_read_ADDRESS)
+#define turtle_inputs_ADDRESS 0x060020u
+#define turtle_inputs(index) RAM8(turtle_inputs_ADDRESS + (index))
+#define turtle_inputs_last_frame_ADDRESS 0x060024u
+#define turtle_inputs_last_frame RAM32(turtle_inputs_last_frame_ADDRESS)
+#define turtle_inputs_2_frames_ago_ADDRESS 0x060028u
+#define turtle_inputs_2_frames_ago RAM32(turtle_inputs_2_frames_ago_ADDRESS)
+#define turtle_inputs_3_frames_ago_ADDRESS 0x06002Cu
+#define turtle_inputs_3_frames_ago RAM32(turtle_inputs_3_frames_ago_ADDRESS)
+#define dip_switches_1_ADDRESS 0x060030u
+#define dip_switches_1 RAM8(dip_switches_1_ADDRESS)
+#define dip_switches_2_ADDRESS 0x060031u
+#define dip_switches_2 RAM8(dip_switches_2_ADDRESS)
+#define dip_switches_3_ADDRESS 0x060032u
+#define dip_switches_3 RAM8(dip_switches_3_ADDRESS)
+#define player_inputs_ADDRESS 0x060034u
+#define player_inputs(index) RAM8(player_inputs_ADDRESS + (index))
+#define player_inputs_last_frame_ADDRESS 0x060038u
+#define player_inputs_last_frame(index) RAM8(player_inputs_last_frame_ADDRESS + (index))
+#define player_inputs_2_frames_ago_ADDRESS 0x06003Cu
+#define player_inputs_2_frames_ago RAM32(player_inputs_2_frames_ago_ADDRESS)
+#define player_inputs_3_frames_ago_ADDRESS 0x060040u
+#define player_inputs_3_frames_ago RAM32(player_inputs_3_frames_ago_ADDRESS)
+#define coin_switches_ADDRESS 0x060044u
+#define coin_switches RAM8(coin_switches_ADDRESS)
+#define coin_switches_last_frame_ADDRESS 0x060045u
+#define coin_switches_last_frame RAM8(coin_switches_last_frame_ADDRESS)
+#define coin_switches_2_frames_ago_ADDRESS 0x060046u
+#define coin_switches_2_frames_ago RAM8(coin_switches_2_frames_ago_ADDRESS)
+#define coin_switches_3_frames_ago_ADDRESS 0x060047u
+#define coin_switches_3_frames_ago RAM8(coin_switches_3_frames_ago_ADDRESS)
+#define demo_held_inputs_ADDRESS 0x060048u
+#define demo_held_inputs(index) RAM8(demo_held_inputs_ADDRESS + (index))
+#define turtle_presses_ADDRESS 0x06004Cu
+#define turtle_presses(index) RAM8(turtle_presses_ADDRESS + (index))
+#define player_presses_ADDRESS 0x060050u
+#define player_presses(index) RAM8(player_presses_ADDRESS + (index))
 #define unk_060054_ADDRESS 0x060054u
 #define unk_060054 RAM8(unk_060054_ADDRESS)
 #define unk_060055_ADDRESS 0x060055u
@@ -117,122 +88,126 @@
 #define unk_060056 RAM8(unk_060056_ADDRESS)
 #define unk_060057_ADDRESS 0x060057u
 #define unk_060057 RAM8(unk_060057_ADDRESS)
-#define unk_060058_ADDRESS 0x060058u
-#define unk_060058 RAM8(unk_060058_ADDRESS)
-#define unk_060059_ADDRESS 0x060059u
-#define unk_060059 RAM8(unk_060059_ADDRESS)
-#define unk_06005A_ADDRESS 0x06005Au
-#define unk_06005A RAM8(unk_06005A_ADDRESS)
-#define unk_06005B_ADDRESS 0x06005Bu
-#define unk_06005B RAM8(unk_06005B_ADDRESS)
-#define unk_06005C_ADDRESS 0x06005Cu
-#define unk_06005C RAM16(unk_06005C_ADDRESS)
-#define unk_06005E_ADDRESS 0x06005Eu
-#define unk_06005E RAM16(unk_06005E_ADDRESS)
-#define unk_060060_ADDRESS 0x060060u
-#define unk_060060 RAM16(unk_060060_ADDRESS)
-#define unk_060062_ADDRESS 0x060062u
-#define unk_060062 RAM16(unk_060062_ADDRESS)
-#define unk_060064_ADDRESS 0x060064u
-#define unk_060064 RAM8(unk_060064_ADDRESS)
-#define unk_060065_ADDRESS 0x060065u
-#define unk_060065 RAM8(unk_060065_ADDRESS)
-#define unk_060066_ADDRESS 0x060066u
-#define unk_060066 RAM8(unk_060066_ADDRESS)
-#define unk_060068_ADDRESS 0x060068u
-#define unk_060068 RAM16(unk_060068_ADDRESS)
-#define unk_06006A_ADDRESS 0x06006Au
-#define unk_06006A RAM16(unk_06006A_ADDRESS)
-#define unk_06006C_ADDRESS 0x06006Cu
-#define unk_06006C RAM16(unk_06006C_ADDRESS)
-#define unk_060076_ADDRESS 0x060076u
-#define unk_060076 RAM16(unk_060076_ADDRESS)
-#define unk_06007A_ADDRESS 0x06007Au
-#define unk_06007A RAM8(unk_06007A_ADDRESS)
-#define unk_06007B_ADDRESS 0x06007Bu
-#define unk_06007B RAM8(unk_06007B_ADDRESS)
-#define unk_060080_ADDRESS 0x060080u
-#define unk_060080 RAM8(unk_060080_ADDRESS)
+#define board_control_ADDRESS 0x060058u
+#define board_control RAM8(board_control_ADDRESS)
+#define layer_priority_ADDRESS 0x060059u
+#define layer_priority RAM8(layer_priority_ADDRESS)
+#define sprite_control_ADDRESS 0x06005Au
+#define sprite_control RAM8(sprite_control_ADDRESS)
+#define tile_flip_ADDRESS 0x06005Bu
+#define tile_flip RAM8(tile_flip_ADDRESS)
+#define layer_a_scroll_x_ADDRESS 0x06005Cu
+#define layer_a_scroll_x RAM16(layer_a_scroll_x_ADDRESS)
+#define layer_a_scroll_y_ADDRESS 0x06005Eu
+#define layer_a_scroll_y RAM16(layer_a_scroll_y_ADDRESS)
+#define layer_b_scroll_x_ADDRESS 0x060060u
+#define layer_b_scroll_x RAM16(layer_b_scroll_x_ADDRESS)
+#define layer_b_scroll_y_ADDRESS 0x060062u
+#define layer_b_scroll_y RAM16(layer_b_scroll_y_ADDRESS)
+#define tile_banks_0_1_ADDRESS 0x060064u
+#define tile_banks_0_1 RAM8(tile_banks_0_1_ADDRESS)
+#define tile_banks_2_3_ADDRESS 0x060065u
+#define tile_banks_2_3 RAM8(tile_banks_2_3_ADDRESS)
+#define scratch_ADDRESS 0x060066u
+#define scratch RAM32(scratch_ADDRESS)
+#define scratch_byte_ADDRESS 0x060066u
+#define scratch_byte RAM8(scratch_byte_ADDRESS)
+#define scratch_word_ADDRESS 0x060066u
+#define scratch_word RAM16(scratch_word_ADDRESS)
+#define balloon_kept_y_ADDRESS 0x060068u
+#define balloon_kept_y RAM16(balloon_kept_y_ADDRESS)
+#define balloon_kept_line_ADDRESS 0x06006Au
+#define balloon_kept_line RAM16(balloon_kept_line_ADDRESS)
+#define balloon_kept_bank_ADDRESS 0x06006Cu
+#define balloon_kept_bank RAM16(balloon_kept_bank_ADDRESS)
+#define top_score_ADDRESS 0x060076u
+#define top_score RAM16(top_score_ADDRESS)
+#define text_colour_ADDRESS 0x06007Au
+#define text_colour RAM8(text_colour_ADDRESS)
+#define spare_text_colour_ADDRESS 0x06007Bu
+#define spare_text_colour RAM8(spare_text_colour_ADDRESS)
+#define music_ADDRESS 0x060080u
+#define music RAM8(music_ADDRESS)
 #define unk_060081_ADDRESS 0x060081u
 #define unk_060081 RAM8(unk_060081_ADDRESS)
-#define unk_060082_ADDRESS 0x060082u
-#define unk_060082 RAM8(unk_060082_ADDRESS)
-#define unk_060083_ADDRESS 0x060083u
-#define unk_060083 RAM8(unk_060083_ADDRESS)
-#define unk_060090_ADDRESS 0x060090u
-#define unk_060090 RAM8(unk_060090_ADDRESS)
-#define unk_060091_ADDRESS 0x060091u
-#define unk_060091 RAM8(unk_060091_ADDRESS)
-#define unk_060092_ADDRESS 0x060092u
-#define unk_060092 RAM8(unk_060092_ADDRESS)
-#define unk_060093_ADDRESS 0x060093u
-#define unk_060093 RAM8(unk_060093_ADDRESS)
-#define unk_060094_ADDRESS 0x060094u
-#define unk_060094 RAM8(unk_060094_ADDRESS)
-#define unk_060095_ADDRESS 0x060095u
-#define unk_060095 RAM8(unk_060095_ADDRESS)
-#define unk_060096_ADDRESS 0x060096u
-#define unk_060096 RAM32(unk_060096_ADDRESS)
-#define unk_06009A_ADDRESS 0x06009Au
-#define unk_06009A RAM16(unk_06009A_ADDRESS)
-#define unk_06009F_ADDRESS 0x06009Fu
-#define unk_06009F RAM8(unk_06009F_ADDRESS)
-#define unk_0600A0_ADDRESS 0x0600A0u
-#define unk_0600A0 RAM8(unk_0600A0_ADDRESS)
-#define unk_0600A1_ADDRESS 0x0600A1u
-#define unk_0600A1 RAM8(unk_0600A1_ADDRESS)
-#define unk_0600A2_ADDRESS 0x0600A2u
-#define unk_0600A2 RAM8(unk_0600A2_ADDRESS)
-#define unk_0600A3_ADDRESS 0x0600A3u
-#define unk_0600A3 RAM8(unk_0600A3_ADDRESS)
-#define unk_0600A4_ADDRESS 0x0600A4u
-#define unk_0600A4 RAM16(unk_0600A4_ADDRESS)
-#define unk_0600A6_ADDRESS 0x0600A6u
-#define unk_0600A6 RAM8(unk_0600A6_ADDRESS)
-#define unk_0600A8_ADDRESS 0x0600A8u
-#define unk_0600A8 RAM8(unk_0600A8_ADDRESS)
-#define unk_0600A9_ADDRESS 0x0600A9u
-#define unk_0600A9 RAM8(unk_0600A9_ADDRESS)
-#define unk_0600AA_ADDRESS 0x0600AAu
-#define unk_0600AA RAM32(unk_0600AA_ADDRESS)
-#define unk_0600AE_ADDRESS 0x0600AEu
-#define unk_0600AE RAM32(unk_0600AE_ADDRESS)
-#define unk_0600B3_ADDRESS 0x0600B3u
-#define unk_0600B3 RAM8(unk_0600B3_ADDRESS)
-#define unk_0600B6_ADDRESS 0x0600B6u
-#define unk_0600B6 RAM8(unk_0600B6_ADDRESS)
-#define unk_0600B7_ADDRESS 0x0600B7u
-#define unk_0600B7 RAM8(unk_0600B7_ADDRESS)
-#define unk_0600B8_ADDRESS 0x0600B8u
-#define unk_0600B8 RAM8(unk_0600B8_ADDRESS)
-#define unk_0600B9_ADDRESS 0x0600B9u
-#define unk_0600B9 RAM8(unk_0600B9_ADDRESS)
-#define unk_0600BD_ADDRESS 0x0600BDu
-#define unk_0600BD RAM8(unk_0600BD_ADDRESS)
-#define unk_0600BE_ADDRESS 0x0600BEu
-#define unk_0600BE RAM16(unk_0600BE_ADDRESS)
-#define unk_0600C0_ADDRESS 0x0600C0u
-#define unk_0600C0 RAM16(unk_0600C0_ADDRESS)
-#define unk_0600C2_ADDRESS 0x0600C2u
-#define unk_0600C2 RAM8(unk_0600C2_ADDRESS)
-#define unk_0600C4_ADDRESS 0x0600C4u
-#define unk_0600C4 RAM32(unk_0600C4_ADDRESS)
-#define unk_0600C8_ADDRESS 0x0600C8u
-#define unk_0600C8 RAM16(unk_0600C8_ADDRESS)
-#define unk_0600CA_ADDRESS 0x0600CAu
-#define unk_0600CA RAM16(unk_0600CA_ADDRESS)
-#define unk_0600CC_ADDRESS 0x0600CCu
-#define unk_0600CC RAM16(unk_0600CC_ADDRESS)
-#define unk_0600CE_ADDRESS 0x0600CEu
-#define unk_0600CE RAM16(unk_0600CE_ADDRESS)
-#define unk_0600D0_ADDRESS 0x0600D0u
-#define unk_0600D0 RAM8(unk_0600D0_ADDRESS)
-#define unk_0600D1_ADDRESS 0x0600D1u
-#define unk_0600D1 RAM8(unk_0600D1_ADDRESS)
-#define unk_0600D2_ADDRESS 0x0600D2u
-#define unk_0600D2 RAM32(unk_0600D2_ADDRESS)
-#define unk_0600D6_ADDRESS 0x0600D6u
-#define unk_0600D6 RAM32(unk_0600D6_ADDRESS)
+#define jobs_pending_ADDRESS 0x060082u
+#define jobs_pending RAM8(jobs_pending_ADDRESS)
+#define palettes_busy_ADDRESS 0x060083u
+#define palettes_busy RAM8(palettes_busy_ADDRESS)
+#define lives_per_credit_ADDRESS 0x060090u
+#define lives_per_credit RAM8(lives_per_credit_ADDRESS)
+#define free_play_ADDRESS 0x060091u
+#define free_play RAM8(free_play_ADDRESS)
+#define demo_sounds_ADDRESS 0x060092u
+#define demo_sounds RAM8(demo_sounds_ADDRESS)
+#define unused_dip_flag_ADDRESS 0x060093u
+#define unused_dip_flag RAM8(unused_dip_flag_ADDRESS)
+#define difficulty_setting_ADDRESS 0x060094u
+#define difficulty_setting RAM8(difficulty_setting_ADDRESS)
+#define unused_dip_setting_flag_ADDRESS 0x060095u
+#define unused_dip_setting_flag RAM8(unused_dip_setting_flag_ADDRESS)
+#define unused_dip_setting_value_ADDRESS 0x060096u
+#define unused_dip_setting_value RAM32(unused_dip_setting_value_ADDRESS)
+#define unused_dip_setting_ADDRESS 0x06009Au
+#define unused_dip_setting RAM16(unused_dip_setting_ADDRESS)
+#define version_ADDRESS 0x06009Fu
+#define version RAM8(version_ADDRESS)
+#define players_knocked_out_ADDRESS 0x0600A0u
+#define players_knocked_out RAM8(players_knocked_out_ADDRESS)
+#define players_in_play_ADDRESS 0x0600A1u
+#define players_in_play RAM8(players_in_play_ADDRESS)
+#define players_credited_ADDRESS 0x0600A2u
+#define players_credited RAM8(players_credited_ADDRESS)
+#define game_on_ADDRESS 0x0600A3u
+#define game_on RAM8(game_on_ADDRESS)
+#define frame_count_ADDRESS 0x0600A4u
+#define frame_count RAM16(frame_count_ADDRESS)
+#define players_joining_ADDRESS 0x0600A6u
+#define players_joining RAM8(players_joining_ADDRESS)
+#define attract_timer_ADDRESS 0x0600A8u
+#define attract_timer RAM8(attract_timer_ADDRESS)
+#define demo_hold_2_ADDRESS 0x0600A9u
+#define demo_hold_2 RAM8(demo_hold_2_ADDRESS)
+#define demo_inputs_1_ADDRESS 0x0600AAu
+#define demo_inputs_1 RAM32(demo_inputs_1_ADDRESS)
+#define demo_inputs_2_ADDRESS 0x0600AEu
+#define demo_inputs_2 RAM32(demo_inputs_2_ADDRESS)
+#define players_out_of_lives_ADDRESS 0x0600B3u
+#define players_out_of_lives RAM8(players_out_of_lives_ADDRESS)
+#define demo_ADDRESS 0x0600B6u
+#define demo RAM8(demo_ADDRESS)
+#define players_with_lives_ADDRESS 0x0600B7u
+#define players_with_lives RAM8(players_with_lives_ADDRESS)
+#define hide_press_start_ADDRESS 0x0600B8u
+#define hide_press_start RAM8(hide_press_start_ADDRESS)
+#define unused_dip_number_ADDRESS 0x0600B9u
+#define unused_dip_number RAM8(unused_dip_number_ADDRESS)
+#define area_cleared_ADDRESS 0x0600BDu
+#define area_cleared RAM8(area_cleared_ADDRESS)
+#define saved_frame_count_ADDRESS 0x0600BEu
+#define saved_frame_count RAM16(saved_frame_count_ADDRESS)
+#define demo_frames_ADDRESS 0x0600C0u
+#define demo_frames RAM16(demo_frames_ADDRESS)
+#define game_scene_timer_ADDRESS 0x0600C2u
+#define game_scene_timer RAM8(game_scene_timer_ADDRESS)
+#define player_turtles_ADDRESS 0x0600C4u
+#define player_turtles(index) RAM8(player_turtles_ADDRESS + (index))
+#define unused_layer_a_scroll_x_copy_ADDRESS 0x0600C8u
+#define unused_layer_a_scroll_x_copy RAM16(unused_layer_a_scroll_x_copy_ADDRESS)
+#define unused_layer_a_scroll_y_copy_ADDRESS 0x0600CAu
+#define unused_layer_a_scroll_y_copy RAM16(unused_layer_a_scroll_y_copy_ADDRESS)
+#define unused_layer_b_scroll_x_copy_ADDRESS 0x0600CCu
+#define unused_layer_b_scroll_x_copy RAM16(unused_layer_b_scroll_x_copy_ADDRESS)
+#define unused_layer_b_scroll_y_copy_ADDRESS 0x0600CEu
+#define unused_layer_b_scroll_y_copy RAM16(unused_layer_b_scroll_y_copy_ADDRESS)
+#define demo_hold_3_ADDRESS 0x0600D0u
+#define demo_hold_3 RAM8(demo_hold_3_ADDRESS)
+#define demo_hold_4_ADDRESS 0x0600D1u
+#define demo_hold_4 RAM8(demo_hold_4_ADDRESS)
+#define demo_inputs_3_ADDRESS 0x0600D2u
+#define demo_inputs_3 RAM32(demo_inputs_3_ADDRESS)
+#define demo_inputs_4_ADDRESS 0x0600D6u
+#define demo_inputs_4 RAM32(demo_inputs_4_ADDRESS)
 #define unk_060100_ADDRESS 0x060100u
 #define unk_060100(index) RAM16(unk_060100_ADDRESS + (index) * 2u)
 #define unk_060104_ADDRESS 0x060104u
@@ -257,30 +232,30 @@
 #define unk_06011C RAM16(unk_06011C_ADDRESS)
 #define unk_06011E_ADDRESS 0x06011Eu
 #define unk_06011E RAM8(unk_06011E_ADDRESS)
-#define unk_060120_ADDRESS 0x060120u
-#define unk_060120 RAM8(unk_060120_ADDRESS)
-#define unk_060121_ADDRESS 0x060121u
-#define unk_060121 RAM8(unk_060121_ADDRESS)
-#define unk_060122_ADDRESS 0x060122u
-#define unk_060122 RAM8(unk_060122_ADDRESS)
+#define area_ADDRESS 0x060120u
+#define area RAM8(area_ADDRESS)
+#define stage_ADDRESS 0x060121u
+#define stage RAM8(stage_ADDRESS)
+#define area_continues_scene_ADDRESS 0x060122u
+#define area_continues_scene RAM8(area_continues_scene_ADDRESS)
 #define unk_060123_ADDRESS 0x060123u
 #define unk_060123 RAM8(unk_060123_ADDRESS)
 #define unk_060124_ADDRESS 0x060124u
 #define unk_060124 RAM8(unk_060124_ADDRESS)
-#define unk_060127_ADDRESS 0x060127u
-#define unk_060127 RAM8(unk_060127_ADDRESS)
-#define unk_060128_ADDRESS 0x060128u
-#define unk_060128 RAM8(unk_060128_ADDRESS)
-#define unk_060129_ADDRESS 0x060129u
-#define unk_060129 RAM8(unk_060129_ADDRESS)
-#define unk_060130_ADDRESS 0x060130u
-#define unk_060130 RAM8(unk_060130_ADDRESS)
-#define unk_06014C_ADDRESS 0x06014Cu
-#define unk_06014C(index) RAM8(unk_06014C_ADDRESS + (index))
-#define unk_060150_ADDRESS 0x060150u
-#define unk_060150 RAM16(unk_060150_ADDRESS)
-#define unk_060152_ADDRESS 0x060152u
-#define unk_060152 RAM8(unk_060152_ADDRESS)
+#define entry_without_blink_ADDRESS 0x060127u
+#define entry_without_blink RAM8(entry_without_blink_ADDRESS)
+#define profile_character_ADDRESS 0x060128u
+#define profile_character RAM8(profile_character_ADDRESS)
+#define exit_cutscene_ADDRESS 0x060129u
+#define exit_cutscene RAM8(exit_cutscene_ADDRESS)
+#define difficulty_ADDRESS 0x060130u
+#define difficulty RAM8(difficulty_ADDRESS)
+#define prompt_shown_ADDRESS 0x06014Cu
+#define prompt_shown(index) RAM8(prompt_shown_ADDRESS + (index))
+#define time_without_knockout_ADDRESS 0x060150u
+#define time_without_knockout RAM16(time_without_knockout_ADDRESS)
+#define sound_stopped_by_coin_ADDRESS 0x060152u
+#define sound_stopped_by_coin RAM8(sound_stopped_by_coin_ADDRESS)
 #define unk_060302_ADDRESS 0x060302u
 #define unk_060302 RAM8(unk_060302_ADDRESS)
 #define unk_060303_ADDRESS 0x060303u
@@ -297,166 +272,172 @@
 #define unk_060312 RAM8(unk_060312_ADDRESS)
 #define unk_06031A_ADDRESS 0x06031Au
 #define unk_06031A RAM8(unk_06031A_ADDRESS)
-#define unk_060320_ADDRESS 0x060320u
-#define unk_060320 RAM8(unk_060320_ADDRESS)
-#define unk_060325_ADDRESS 0x060325u
-#define unk_060325 RAM8(unk_060325_ADDRESS)
-#define unk_060327_ADDRESS 0x060327u
-#define unk_060327 RAM8(unk_060327_ADDRESS)
-#define unk_060BF0_ADDRESS 0x060BF0u
-#define unk_060BF0 RAM32(unk_060BF0_ADDRESS)
-#define unk_060BF4_ADDRESS 0x060BF4u
-#define unk_060BF4 RAM32(unk_060BF4_ADDRESS)
-#define unk_060BF8_ADDRESS 0x060BF8u
-#define unk_060BF8 RAM8(unk_060BF8_ADDRESS)
-#define unk_060BF9_ADDRESS 0x060BF9u
-#define unk_060BF9 RAM8(unk_060BF9_ADDRESS)
-#define unk_060BFA_ADDRESS 0x060BFAu
-#define unk_060BFA RAM8(unk_060BFA_ADDRESS)
-#define unk_060BFB_ADDRESS 0x060BFBu
-#define unk_060BFB RAM8(unk_060BFB_ADDRESS)
-#define unk_060BFC_ADDRESS 0x060BFCu
-#define unk_060BFC RAM32(unk_060BFC_ADDRESS)
-#define unk_061100_ADDRESS 0x061100u
-#define unk_061100(index) RAM8(unk_061100_ADDRESS + (index))
-#define unk_061104_ADDRESS 0x061104u
-#define unk_061104 RAM16(unk_061104_ADDRESS)
-#define unk_061106_ADDRESS 0x061106u
-#define unk_061106 RAM8(unk_061106_ADDRESS)
-#define unk_061107_ADDRESS 0x061107u
-#define unk_061107 RAM8(unk_061107_ADDRESS)
-#define unk_061108_ADDRESS 0x061108u
-#define unk_061108 RAM8(unk_061108_ADDRESS)
-#define unk_061109_ADDRESS 0x061109u
-#define unk_061109 RAM8(unk_061109_ADDRESS)
+#define extra_credits_ADDRESS 0x060320u
+#define extra_credits RAM8(extra_credits_ADDRESS)
+#define new_coin_switches_ADDRESS 0x060325u
+#define new_coin_switches RAM8(new_coin_switches_ADDRESS)
+#define new_credit_ADDRESS 0x060327u
+#define new_credit RAM8(new_credit_ADDRESS)
+#define job_queue_ADDRESS 0x060380u
+#define job_queue(index) RAM16(job_queue_ADDRESS + (index) * 2u)
+#define sound_queue_ADDRESS 0x060400u
+#define sound_queue(index) RAM8(sound_queue_ADDRESS + (index))
+#define vblank_registers_ADDRESS 0x060440u
+#define vblank_registers(index) RAM32(vblank_registers_ADDRESS + (index) * 4u)
+#define palette_queue_write_ADDRESS 0x060BF0u
+#define palette_queue_write RAM32(palette_queue_write_ADDRESS)
+#define palette_queue_read_ADDRESS 0x060BF4u
+#define palette_queue_read RAM32(palette_queue_read_ADDRESS)
+#define palette_area_banks_ADDRESS 0x060BF8u
+#define palette_area_banks RAM8(palette_area_banks_ADDRESS)
+#define palette_set_banks_ADDRESS 0x060BF9u
+#define palette_set_banks RAM8(palette_set_banks_ADDRESS)
+#define palette_black_banks_ADDRESS 0x060BFAu
+#define palette_black_banks RAM8(palette_black_banks_ADDRESS)
+#define palette_second_half_ADDRESS 0x060BFBu
+#define palette_second_half RAM8(palette_second_half_ADDRESS)
+#define palette_set_ADDRESS 0x060BFCu
+#define palette_set RAM32(palette_set_ADDRESS)
+#define marker_times_ADDRESS 0x061100u
+#define marker_times(index) RAM8(marker_times_ADDRESS + (index))
+#define time_since_balloon_ADDRESS 0x061104u
+#define time_since_balloon RAM16(time_since_balloon_ADDRESS)
+#define balloons_said_ADDRESS 0x061106u
+#define balloons_said RAM8(balloons_said_ADDRESS)
+#define diagonal_scroll_ADDRESS 0x061107u
+#define diagonal_scroll RAM8S(diagonal_scroll_ADDRESS)
+#define intro_over_ADDRESS 0x061108u
+#define intro_over RAM8(intro_over_ADDRESS)
+#define area_entry_done_ADDRESS 0x061109u
+#define area_entry_done RAM8(area_entry_done_ADDRESS)
 #define unk_06110A_ADDRESS 0x06110Au
 #define unk_06110A RAM16(unk_06110A_ADDRESS)
 #define unk_06110C_ADDRESS 0x06110Cu
 #define unk_06110C RAM16(unk_06110C_ADDRESS)
-#define unk_06110E_ADDRESS 0x06110Eu
-#define unk_06110E RAM8(unk_06110E_ADDRESS)
-#define unk_06110F_ADDRESS 0x06110Fu
-#define unk_06110F RAM8(unk_06110F_ADDRESS)
-#define unk_061110_ADDRESS 0x061110u
-#define unk_061110 RAM16(unk_061110_ADDRESS)
-#define unk_061112_ADDRESS 0x061112u
-#define unk_061112 RAM8(unk_061112_ADDRESS)
-#define unk_061113_ADDRESS 0x061113u
-#define unk_061113 RAM8(unk_061113_ADDRESS)
+#define drill_arrival_time_ADDRESS 0x06110Eu
+#define drill_arrival_time RAM8(drill_arrival_time_ADDRESS)
+#define shake_step_ADDRESS 0x06110Fu
+#define shake_step RAM8(shake_step_ADDRESS)
+#define tv_time_ADDRESS 0x061110u
+#define tv_time RAM16(tv_time_ADDRESS)
+#define bebop_exchange_lines_ADDRESS 0x061112u
+#define bebop_exchange_lines RAM8(bebop_exchange_lines_ADDRESS)
+#define balloon_on_right_ADDRESS 0x061113u
+#define balloon_on_right RAM8(balloon_on_right_ADDRESS)
 #define unk_061114_ADDRESS 0x061114u
 #define unk_061114 RAM16(unk_061114_ADDRESS)
 #define unk_061116_ADDRESS 0x061116u
 #define unk_061116 RAM16(unk_061116_ADDRESS)
-#define unk_061118_ADDRESS 0x061118u
-#define unk_061118 RAM8(unk_061118_ADDRESS)
-#define unk_06111E_ADDRESS 0x06111Eu
-#define unk_06111E RAM8(unk_06111E_ADDRESS)
-#define unk_061200_ADDRESS 0x061200u
-#define unk_061200 RAM32(unk_061200_ADDRESS)
-#define unk_061204_ADDRESS 0x061204u
-#define unk_061204 RAM16(unk_061204_ADDRESS)
-#define unk_061206_ADDRESS 0x061206u
-#define unk_061206 RAM8(unk_061206_ADDRESS)
-#define unk_061207_ADDRESS 0x061207u
-#define unk_061207 RAM8(unk_061207_ADDRESS)
-#define unk_061208_ADDRESS 0x061208u
-#define unk_061208 RAM32(unk_061208_ADDRESS)
-#define unk_06120C_ADDRESS 0x06120Cu
-#define unk_06120C RAM8(unk_06120C_ADDRESS)
-#define unk_06120D_ADDRESS 0x06120Du
-#define unk_06120D RAM8(unk_06120D_ADDRESS)
-#define unk_06120E_ADDRESS 0x06120Eu
-#define unk_06120E RAM16(unk_06120E_ADDRESS)
-#define unk_061210_ADDRESS 0x061210u
-#define unk_061210 RAM32(unk_061210_ADDRESS)
-#define unk_061214_ADDRESS 0x061214u
-#define unk_061214 RAM32(unk_061214_ADDRESS)
-#define unk_061218_ADDRESS 0x061218u
-#define unk_061218 RAM32(unk_061218_ADDRESS)
-#define unk_06121C_ADDRESS 0x06121Cu
-#define unk_06121C RAM32(unk_06121C_ADDRESS)
-#define unk_061220_ADDRESS 0x061220u
-#define unk_061220 RAM32(unk_061220_ADDRESS)
-#define unk_061224_ADDRESS 0x061224u
-#define unk_061224 RAM16(unk_061224_ADDRESS)
-#define unk_061226_ADDRESS 0x061226u
-#define unk_061226 RAM32(unk_061226_ADDRESS)
-#define unk_06122A_ADDRESS 0x06122Au
-#define unk_06122A RAM32(unk_06122A_ADDRESS)
-#define unk_06122E_ADDRESS 0x06122Eu
-#define unk_06122E RAM32(unk_06122E_ADDRESS)
-#define unk_061232_ADDRESS 0x061232u
-#define unk_061232 RAM32(unk_061232_ADDRESS)
-#define unk_061236_ADDRESS 0x061236u
-#define unk_061236 RAM8(unk_061236_ADDRESS)
-#define unk_061237_ADDRESS 0x061237u
-#define unk_061237 RAM8(unk_061237_ADDRESS)
-#define unk_061238_ADDRESS 0x061238u
-#define unk_061238 RAM16(unk_061238_ADDRESS)
-#define unk_06123A_ADDRESS 0x06123Au
-#define unk_06123A RAM8(unk_06123A_ADDRESS)
-#define unk_06123B_ADDRESS 0x06123Bu
-#define unk_06123B RAM8(unk_06123B_ADDRESS)
-#define unk_06123C_ADDRESS 0x06123Cu
-#define unk_06123C RAM8(unk_06123C_ADDRESS)
-#define unk_06123D_ADDRESS 0x06123Du
-#define unk_06123D RAM8(unk_06123D_ADDRESS)
-#define unk_06123E_ADDRESS 0x06123Eu
-#define unk_06123E RAM16(unk_06123E_ADDRESS)
-#define unk_061240_ADDRESS 0x061240u
-#define unk_061240 RAM8(unk_061240_ADDRESS)
-#define unk_061241_ADDRESS 0x061241u
-#define unk_061241 RAM8(unk_061241_ADDRESS)
-#define unk_061242_ADDRESS 0x061242u
-#define unk_061242 RAM8(unk_061242_ADDRESS)
-#define unk_061243_ADDRESS 0x061243u
-#define unk_061243 RAM8(unk_061243_ADDRESS)
-#define unk_061244_ADDRESS 0x061244u
-#define unk_061244 RAM8(unk_061244_ADDRESS)
-#define unk_061247_ADDRESS 0x061247u
-#define unk_061247 RAM8(unk_061247_ADDRESS)
-#define unk_061248_ADDRESS 0x061248u
-#define unk_061248 RAM32(unk_061248_ADDRESS)
-#define unk_06124C_ADDRESS 0x06124Cu
-#define unk_06124C RAM8(unk_06124C_ADDRESS)
-#define unk_061300_ADDRESS 0x061300u
-#define unk_061300 RAM8(unk_061300_ADDRESS)
-#define unk_061302_ADDRESS 0x061302u
-#define unk_061302 RAM32(unk_061302_ADDRESS)
-#define unk_061306_ADDRESS 0x061306u
-#define unk_061306(index) RAM8(unk_061306_ADDRESS + (index))
-#define unk_061308_ADDRESS 0x061308u
-#define unk_061308 RAM16(unk_061308_ADDRESS)
-#define unk_06130A_ADDRESS 0x06130Au
-#define unk_06130A RAM8(unk_06130A_ADDRESS)
-#define unk_06130B_ADDRESS 0x06130Bu
-#define unk_06130B RAM8(unk_06130B_ADDRESS)
-#define unk_06130C_ADDRESS 0x06130Cu
-#define unk_06130C RAM8(unk_06130C_ADDRESS)
-#define unk_061310_ADDRESS 0x061310u
-#define unk_061310 RAM8(unk_061310_ADDRESS)
-#define unk_061311_ADDRESS 0x061311u
-#define unk_061311 RAM8(unk_061311_ADDRESS)
-#define unk_061312_ADDRESS 0x061312u
-#define unk_061312 RAM8(unk_061312_ADDRESS)
-#define unk_061313_ADDRESS 0x061313u
-#define unk_061313 RAM8(unk_061313_ADDRESS)
-#define unk_061314_ADDRESS 0x061314u
-#define unk_061314 RAM32(unk_061314_ADDRESS)
-#define unk_061318_ADDRESS 0x061318u
-#define unk_061318 RAM8(unk_061318_ADDRESS)
-#define unk_061319_ADDRESS 0x061319u
-#define unk_061319 RAM8(unk_061319_ADDRESS)
-#define unk_06131A_ADDRESS 0x06131Au
-#define unk_06131A RAM8(unk_06131A_ADDRESS)
-#define unk_06131B_ADDRESS 0x06131Bu
-#define unk_06131B RAM8(unk_06131B_ADDRESS)
-#define unk_06131C_ADDRESS 0x06131Cu
-#define unk_06131C RAM8(unk_06131C_ADDRESS)
-#define unk_06131D_ADDRESS 0x06131Du
-#define unk_06131D RAM8(unk_06131D_ADDRESS)
-#define unk_061830_ADDRESS 0x061830u
-#define unk_061830 RAM8(unk_061830_ADDRESS)
+#define floor_cell_down_ADDRESS 0x061118u
+#define floor_cell_down RAM8(floor_cell_down_ADDRESS)
+#define difficulty_from_time_ADDRESS 0x06111Eu
+#define difficulty_from_time RAM8(difficulty_from_time_ADDRESS)
+#define spawn_next_ADDRESS 0x061200u
+#define spawn_next RAM32(spawn_next_ADDRESS)
+#define draw_first_ADDRESS 0x061204u
+#define draw_first RAM16(draw_first_ADDRESS)
+#define draw_count_ADDRESS 0x061206u
+#define draw_count RAM8(draw_count_ADDRESS)
+#define turtles_in_play_ADDRESS 0x061207u
+#define turtles_in_play RAM8(turtles_in_play_ADDRESS)
+#define least_crowded_slot_ADDRESS 0x061208u
+#define least_crowded_slot RAM32(least_crowded_slot_ADDRESS)
+#define enemies_on_screen_ADDRESS 0x06120Cu
+#define enemies_on_screen RAM8(enemies_on_screen_ADDRESS)
+#define enemies_per_turtle_ADDRESS 0x06120Du
+#define enemies_per_turtle RAM8(enemies_per_turtle_ADDRESS)
+#define random_seed_ADDRESS 0x06120Eu
+#define random_seed RAM16(random_seed_ADDRESS)
+#define spawn_speeds_ADDRESS 0x061210u
+#define spawn_speeds RAM32(spawn_speeds_ADDRESS)
+#define spawn_directions_ADDRESS 0x061214u
+#define spawn_directions RAM32(spawn_directions_ADDRESS)
+#define spawn_x_ADDRESS 0x061218u
+#define spawn_x RAM32(spawn_x_ADDRESS)
+#define spawn_y_ADDRESS 0x06121Cu
+#define spawn_y RAM32(spawn_y_ADDRESS)
+#define rocksteady_ADDRESS 0x061220u
+#define rocksteady RAM32(rocksteady_ADDRESS)
+#define pincer_charge_wait_ADDRESS 0x061224u
+#define pincer_charge_wait RAM16(pincer_charge_wait_ADDRESS)
+#define nearest_slot_ADDRESS 0x061226u
+#define nearest_slot RAM32(nearest_slot_ADDRESS)
+#define second_nearest_slot_ADDRESS 0x06122Au
+#define second_nearest_slot RAM32(second_nearest_slot_ADDRESS)
+#define nearest_turtle_ADDRESS 0x06122Eu
+#define nearest_turtle RAM32(nearest_turtle_ADDRESS)
+#define second_nearest_turtle_ADDRESS 0x061232u
+#define second_nearest_turtle RAM32(second_nearest_turtle_ADDRESS)
+#define bosses_left_ADDRESS 0x061236u
+#define bosses_left RAM8(bosses_left_ADDRESS)
+#define rocksteady_hits_to_strike_back_ADDRESS 0x061237u
+#define rocksteady_hits_to_strike_back RAM8(rocksteady_hits_to_strike_back_ADDRESS)
+#define rocksteady_last_attack_ADDRESS 0x061238u
+#define rocksteady_last_attack RAM16(rocksteady_last_attack_ADDRESS)
+#define shredder_beaten_ADDRESS 0x06123Au
+#define shredder_beaten RAM8(shredder_beaten_ADDRESS)
+#define shredder_firing_ray_ADDRESS 0x06123Bu
+#define shredder_firing_ray RAM8(shredder_firing_ray_ADDRESS)
+#define shredder_clones_made_ADDRESS 0x06123Cu
+#define shredder_clones_made RAM8(shredder_clones_made_ADDRESS)
+#define bosses_come_out_ADDRESS 0x06123Du
+#define bosses_come_out RAM8(bosses_come_out_ADDRESS)
+#define pincer_charge_target_ADDRESS 0x06123Eu
+#define pincer_charge_target RAM16(pincer_charge_target_ADDRESS)
+#define pincer_charge_ADDRESS 0x061240u
+#define pincer_charge RAM8(pincer_charge_ADDRESS)
+#define pincer_charge_edges_ADDRESS 0x061241u
+#define pincer_charge_edges RAM8(pincer_charge_edges_ADDRESS)
+#define pincer_charge_at_edges_ADDRESS 0x061242u
+#define pincer_charge_at_edges RAM8(pincer_charge_at_edges_ADDRESS)
+#define no_pincer_charge_ADDRESS 0x061243u
+#define no_pincer_charge RAM8(no_pincer_charge_ADDRESS)
+#define rodney_line_said_ADDRESS 0x061244u
+#define rodney_line_said RAM8(rodney_line_said_ADDRESS)
+#define pincer_charge_crash_ADDRESS 0x061247u
+#define pincer_charge_crash RAM8(pincer_charge_crash_ADDRESS)
+#define enemy_floor_cell_place_ADDRESS 0x061248u
+#define enemy_floor_cell_place RAM32(enemy_floor_cell_place_ADDRESS)
+#define stairs_top_height_ADDRESS 0x06124Cu
+#define stairs_top_height RAM8(stairs_top_height_ADDRESS)
+#define hydrant_sprays_left_ADDRESS 0x061300u
+#define hydrant_sprays_left RAM8(hydrant_sprays_left_ADDRESS)
+#define unused_grille_ADDRESS 0x061302u
+#define unused_grille RAM32(unused_grille_ADDRESS)
+#define boss_target_choices_ADDRESS 0x061306u
+#define boss_target_choices(index) RAM8(boss_target_choices_ADDRESS + (index))
+#define helicopter_count_ADDRESS 0x06130Au
+#define helicopter_count RAM8(helicopter_count_ADDRESS)
+#define missile_out_ADDRESS 0x06130Bu
+#define missile_out RAM8(missile_out_ADDRESS)
+#define hold_spent_missiles_ADDRESS 0x06130Cu
+#define hold_spent_missiles RAM8(hold_spent_missiles_ADDRESS)
+#define spiked_poles_phase_ADDRESS 0x061310u
+#define spiked_poles_phase RAM8(spiked_poles_phase_ADDRESS)
+#define flying_drones_released_ADDRESS 0x061311u
+#define flying_drones_released RAM8(flying_drones_released_ADDRESS)
+#define flying_drone_count_ADDRESS 0x061312u
+#define flying_drone_count RAM8(flying_drone_count_ADDRESS)
+#define mousers_break_down_ADDRESS 0x061313u
+#define mousers_break_down RAM8(mousers_break_down_ADDRESS)
+#define krang_curtain_ADDRESS 0x061314u
+#define krang_curtain RAM32(krang_curtain_ADDRESS)
+#define drone_sound_on_ADDRESS 0x061318u
+#define drone_sound_on RAM8(drone_sound_on_ADDRESS)
+#define drone_sound_wait_ADDRESS 0x061319u
+#define drone_sound_wait RAM8(drone_sound_wait_ADDRESS)
+#define krang_lasers_waiting_ADDRESS 0x06131Au
+#define krang_lasers_waiting RAM8(krang_lasers_waiting_ADDRESS)
+#define krang_fist_flying_ADDRESS 0x06131Bu
+#define krang_fist_flying RAM8(krang_fist_flying_ADDRESS)
+#define krang_posed_last_ADDRESS 0x06131Cu
+#define krang_posed_last RAM8(krang_posed_last_ADDRESS)
+#define boss_defeated_ADDRESS 0x06131Du
+#define boss_defeated RAM8(boss_defeated_ADDRESS)
+#define draw_list_ADDRESS 0x061400u
+#define draw_list(index) RAM16(draw_list_ADDRESS + (index) * 2u)
+#define floor_map_ADDRESS 0x061800u
+#define floor_map(index) RAM8(floor_map_ADDRESS + (index))
 #define unk_062000_ADDRESS 0x062000u
 #define unk_062000 RAM8(unk_062000_ADDRESS)
 #define unk_062001_ADDRESS 0x062001u
@@ -470,13 +451,9 @@
 #define unk_062010_ADDRESS 0x062010u
 #define unk_062010 RAM16(unk_062010_ADDRESS)
 #define unk_062012_ADDRESS 0x062012u
-#define unk_062012 RAM16(unk_062012_ADDRESS)
-#define unk_062014_ADDRESS 0x062014u
-#define unk_062014 RAM16(unk_062014_ADDRESS)
+#define unk_062012 RAM32(unk_062012_ADDRESS)
 #define unk_062016_ADDRESS 0x062016u
-#define unk_062016 RAM16(unk_062016_ADDRESS)
-#define unk_062018_ADDRESS 0x062018u
-#define unk_062018 RAM16(unk_062018_ADDRESS)
+#define unk_062016 RAM32(unk_062016_ADDRESS)
 #define unk_06202C_ADDRESS 0x06202Cu
 #define unk_06202C RAM8(unk_06202C_ADDRESS)
 #define unk_062042_ADDRESS 0x062042u
@@ -494,13 +471,9 @@
 #define unk_062060_ADDRESS 0x062060u
 #define unk_062060 RAM16(unk_062060_ADDRESS)
 #define unk_062062_ADDRESS 0x062062u
-#define unk_062062 RAM16(unk_062062_ADDRESS)
-#define unk_062064_ADDRESS 0x062064u
-#define unk_062064 RAM16(unk_062064_ADDRESS)
+#define unk_062062 RAM32(unk_062062_ADDRESS)
 #define unk_062066_ADDRESS 0x062066u
-#define unk_062066 RAM16(unk_062066_ADDRESS)
-#define unk_062068_ADDRESS 0x062068u
-#define unk_062068 RAM16(unk_062068_ADDRESS)
+#define unk_062066 RAM32(unk_062066_ADDRESS)
 #define unk_06207C_ADDRESS 0x06207Cu
 #define unk_06207C RAM8(unk_06207C_ADDRESS)
 #define unk_062092_ADDRESS 0x062092u
@@ -514,13 +487,9 @@
 #define unk_0620AC_ADDRESS 0x0620ACu
 #define unk_0620AC RAM16(unk_0620AC_ADDRESS)
 #define unk_0620B2_ADDRESS 0x0620B2u
-#define unk_0620B2 RAM16(unk_0620B2_ADDRESS)
-#define unk_0620B4_ADDRESS 0x0620B4u
-#define unk_0620B4 RAM16(unk_0620B4_ADDRESS)
+#define unk_0620B2 RAM32(unk_0620B2_ADDRESS)
 #define unk_0620B6_ADDRESS 0x0620B6u
-#define unk_0620B6 RAM16(unk_0620B6_ADDRESS)
-#define unk_0620B8_ADDRESS 0x0620B8u
-#define unk_0620B8 RAM16(unk_0620B8_ADDRESS)
+#define unk_0620B6 RAM32(unk_0620B6_ADDRESS)
 #define unk_0620CC_ADDRESS 0x0620CCu
 #define unk_0620CC RAM8(unk_0620CC_ADDRESS)
 #define unk_0620F0_ADDRESS 0x0620F0u
@@ -530,13 +499,9 @@
 #define unk_0620F8_ADDRESS 0x0620F8u
 #define unk_0620F8 RAM8(unk_0620F8_ADDRESS)
 #define unk_062102_ADDRESS 0x062102u
-#define unk_062102 RAM16(unk_062102_ADDRESS)
-#define unk_062104_ADDRESS 0x062104u
-#define unk_062104 RAM16(unk_062104_ADDRESS)
+#define unk_062102 RAM32(unk_062102_ADDRESS)
 #define unk_062106_ADDRESS 0x062106u
-#define unk_062106 RAM16(unk_062106_ADDRESS)
-#define unk_062108_ADDRESS 0x062108u
-#define unk_062108 RAM16(unk_062108_ADDRESS)
+#define unk_062106 RAM32(unk_062106_ADDRESS)
 #define unk_06211C_ADDRESS 0x06211Cu
 #define unk_06211C RAM8(unk_06211C_ADDRESS)
 #define unk_0621E0_ADDRESS 0x0621E0u
@@ -617,8 +582,6 @@
 #define unk_062D12 RAM8(unk_062D12_ADDRESS)
 #define unk_062DC0_ADDRESS 0x062DC0u
 #define unk_062DC0 RAM8(unk_062DC0_ADDRESS)
-#define unk_062DC1_ADDRESS 0x062DC1u
-#define unk_062DC1 RAM8(unk_062DC1_ADDRESS)
 #define unk_062DCC_ADDRESS 0x062DCCu
 #define unk_062DCC RAM16(unk_062DCC_ADDRESS)
 #define unk_062DCE_ADDRESS 0x062DCEu
@@ -629,14 +592,6 @@
 #define unk_062DD2 RAM32(unk_062DD2_ADDRESS)
 #define unk_062DD6_ADDRESS 0x062DD6u
 #define unk_062DD6 RAM32(unk_062DD6_ADDRESS)
-#define unk_062DDA_ADDRESS 0x062DDAu
-#define unk_062DDA RAM16(unk_062DDA_ADDRESS)
-#define unk_062DDC_ADDRESS 0x062DDCu
-#define unk_062DDC RAM8(unk_062DDC_ADDRESS)
-#define unk_062DF3_ADDRESS 0x062DF3u
-#define unk_062DF3 RAM8(unk_062DF3_ADDRESS)
-#define unk_062DFA_ADDRESS 0x062DFAu
-#define unk_062DFA RAM32(unk_062DFA_ADDRESS)
 #define unk_062E02_ADDRESS 0x062E02u
 #define unk_062E02 RAM16(unk_062E02_ADDRESS)
 #define unk_062E10_ADDRESS 0x062E10u
@@ -651,8 +606,6 @@
 #define unk_062E22 RAM32(unk_062E22_ADDRESS)
 #define unk_062E26_ADDRESS 0x062E26u
 #define unk_062E26 RAM32(unk_062E26_ADDRESS)
-#define unk_062E43_ADDRESS 0x062E43u
-#define unk_062E43 RAM8(unk_062E43_ADDRESS)
 #define unk_062E52_ADDRESS 0x062E52u
 #define unk_062E52 RAM8(unk_062E52_ADDRESS)
 #define unk_062E60_ADDRESS 0x062E60u
@@ -679,8 +632,6 @@
 #define unk_062EC6 RAM32(unk_062EC6_ADDRESS)
 #define unk_062ECA_ADDRESS 0x062ECAu
 #define unk_062ECA RAM8(unk_062ECA_ADDRESS)
-#define unk_062EE3_ADDRESS 0x062EE3u
-#define unk_062EE3 RAM8(unk_062EE3_ADDRESS)
 #define unk_062EF2_ADDRESS 0x062EF2u
 #define unk_062EF2 RAM16(unk_062EF2_ADDRESS)
 #define unk_062F00_ADDRESS 0x062F00u
@@ -695,10 +646,6 @@
 #define unk_062F12 RAM32(unk_062F12_ADDRESS)
 #define unk_062F16_ADDRESS 0x062F16u
 #define unk_062F16 RAM32(unk_062F16_ADDRESS)
-#define unk_062F1A_ADDRESS 0x062F1Au
-#define unk_062F1A RAM16(unk_062F1A_ADDRESS)
-#define unk_062F1C_ADDRESS 0x062F1Cu
-#define unk_062F1C RAM8(unk_062F1C_ADDRESS)
 #define unk_062F32_ADDRESS 0x062F32u
 #define unk_062F32 RAM8(unk_062F32_ADDRESS)
 #define unk_062F33_ADDRESS 0x062F33u
@@ -707,14 +654,6 @@
 #define unk_062F42 RAM16(unk_062F42_ADDRESS)
 #define unk_062F50_ADDRESS 0x062F50u
 #define unk_062F50 RAM8(unk_062F50_ADDRESS)
-#define unk_062F5C_ADDRESS 0x062F5Cu
-#define unk_062F5C RAM16(unk_062F5C_ADDRESS)
-#define unk_062F5E_ADDRESS 0x062F5Eu
-#define unk_062F5E RAM16(unk_062F5E_ADDRESS)
-#define unk_062F60_ADDRESS 0x062F60u
-#define unk_062F60 RAM16(unk_062F60_ADDRESS)
-#define unk_062F92_ADDRESS 0x062F92u
-#define unk_062F92 RAM16(unk_062F92_ADDRESS)
 #define unk_062FA0_ADDRESS 0x062FA0u
 #define unk_062FA0 RAM32(unk_062FA0_ADDRESS)
 #define unk_062FA4_ADDRESS 0x062FA4u
@@ -861,206 +800,194 @@
 #define unk_0633B4 RAM8(unk_0633B4_ADDRESS)
 #define unk_0633B5_ADDRESS 0x0633B5u
 #define unk_0633B5 RAM8(unk_0633B5_ADDRESS)
-#define unk_0633C0_ADDRESS 0x0633C0u
-#define unk_0633C0 RAM16(unk_0633C0_ADDRESS)
-#define unk_0633C2_ADDRESS 0x0633C2u
-#define unk_0633C2 RAM32(unk_0633C2_ADDRESS)
-#define unk_0633C6_ADDRESS 0x0633C6u
-#define unk_0633C6 RAM8(unk_0633C6_ADDRESS)
-#define unk_0633C7_ADDRESS 0x0633C7u
-#define unk_0633C7 RAM8(unk_0633C7_ADDRESS)
-#define unk_0633C8_ADDRESS 0x0633C8u
-#define unk_0633C8 RAM8(unk_0633C8_ADDRESS)
-#define unk_0633C9_ADDRESS 0x0633C9u
-#define unk_0633C9 RAM8(unk_0633C9_ADDRESS)
-#define unk_0633CA_ADDRESS 0x0633CAu
-#define unk_0633CA RAM8(unk_0633CA_ADDRESS)
-#define unk_0633CB_ADDRESS 0x0633CBu
-#define unk_0633CB RAM8(unk_0633CB_ADDRESS)
-#define unk_0633CC_ADDRESS 0x0633CCu
-#define unk_0633CC RAM32(unk_0633CC_ADDRESS)
-#define unk_0633D0_ADDRESS 0x0633D0u
-#define unk_0633D0 RAM8(unk_0633D0_ADDRESS)
-#define unk_0633D2_ADDRESS 0x0633D2u
-#define unk_0633D2 RAM8(unk_0633D2_ADDRESS)
-#define unk_0633D3_ADDRESS 0x0633D3u
-#define unk_0633D3 RAM8(unk_0633D3_ADDRESS)
-#define unk_0633D4_ADDRESS 0x0633D4u
-#define unk_0633D4 RAM8(unk_0633D4_ADDRESS)
-#define unk_0633D5_ADDRESS 0x0633D5u
-#define unk_0633D5 RAM8(unk_0633D5_ADDRESS)
-#define unk_0633D6_ADDRESS 0x0633D6u
-#define unk_0633D6 RAM8(unk_0633D6_ADDRESS)
-#define unk_0633D7_ADDRESS 0x0633D7u
-#define unk_0633D7 RAM8(unk_0633D7_ADDRESS)
-#define unk_0633D8_ADDRESS 0x0633D8u
-#define unk_0633D8 RAM8(unk_0633D8_ADDRESS)
-#define unk_0633D9_ADDRESS 0x0633D9u
-#define unk_0633D9 RAM8(unk_0633D9_ADDRESS)
-#define unk_0633DA_ADDRESS 0x0633DAu
-#define unk_0633DA RAM8(unk_0633DA_ADDRESS)
-#define unk_0633DB_ADDRESS 0x0633DBu
-#define unk_0633DB RAM8(unk_0633DB_ADDRESS)
-#define unk_0633DC_ADDRESS 0x0633DCu
-#define unk_0633DC RAM8(unk_0633DC_ADDRESS)
-#define unk_0633DD_ADDRESS 0x0633DDu
-#define unk_0633DD RAM8(unk_0633DD_ADDRESS)
-#define unk_0633DE_ADDRESS 0x0633DEu
-#define unk_0633DE RAM8(unk_0633DE_ADDRESS)
-#define unk_0633DF_ADDRESS 0x0633DFu
-#define unk_0633DF RAM8(unk_0633DF_ADDRESS)
-#define unk_0633E2_ADDRESS 0x0633E2u
-#define unk_0633E2 RAM8(unk_0633E2_ADDRESS)
-#define unk_0633E6_ADDRESS 0x0633E6u
-#define unk_0633E6 RAM32(unk_0633E6_ADDRESS)
-#define unk_0633EA_ADDRESS 0x0633EAu
-#define unk_0633EA RAM8(unk_0633EA_ADDRESS)
-#define unk_0633EB_ADDRESS 0x0633EBu
-#define unk_0633EB RAM8(unk_0633EB_ADDRESS)
-#define unk_0633EC_ADDRESS 0x0633ECu
-#define unk_0633EC RAM8(unk_0633EC_ADDRESS)
-#define unk_0633ED_ADDRESS 0x0633EDu
-#define unk_0633ED RAM8(unk_0633ED_ADDRESS)
+#define scroll_segment_ADDRESS 0x0633C0u
+#define scroll_segment RAM16(scroll_segment_ADDRESS)
+#define scroll_held_ADDRESS 0x0633C2u
+#define scroll_held RAM32(scroll_held_ADDRESS)
+#define scroll_held_left_ADDRESS 0x0633C2u
+#define scroll_held_left RAM8(scroll_held_left_ADDRESS)
+#define scroll_held_right_ADDRESS 0x0633C3u
+#define scroll_held_right RAM8(scroll_held_right_ADDRESS)
+#define scroll_held_up_ADDRESS 0x0633C4u
+#define scroll_held_up RAM8(scroll_held_up_ADDRESS)
+#define scroll_held_down_ADDRESS 0x0633C5u
+#define scroll_held_down RAM8(scroll_held_down_ADDRESS)
+#define apartment_fire_spot_ADDRESS 0x0633C6u
+#define apartment_fire_spot RAM8(apartment_fire_spot_ADDRESS)
+#define apartment_fire_frame_ADDRESS 0x0633C7u
+#define apartment_fire_frame RAM8(apartment_fire_frame_ADDRESS)
+#define area_beaten_ADDRESS 0x0633C8u
+#define area_beaten RAM8(area_beaten_ADDRESS)
+#define scroll_mode_ADDRESS 0x0633C9u
+#define scroll_mode RAM8S(scroll_mode_ADDRESS)
+#define turtles_busy_ADDRESS 0x0633CAu
+#define turtles_busy RAM8(turtles_busy_ADDRESS)
+#define turtles_on_the_way_ADDRESS 0x0633CBu
+#define turtles_on_the_way RAM8(turtles_on_the_way_ADDRESS)
+#define working_layer_tiles_ADDRESS 0x0633CCu
+#define working_layer_tiles RAM32(working_layer_tiles_ADDRESS)
+#define layer_loops_ADDRESS 0x0633D0u
+#define layer_loops RAM8S(layer_loops_ADDRESS)
+#define layers_step_ADDRESS 0x0633D2u
+#define layers_step RAM8(layers_step_ADDRESS)
+#define floor_cell_ADDRESS 0x0633D3u
+#define floor_cell RAM8(floor_cell_ADDRESS)
+#define floor_cell_up_ADDRESS 0x0633D4u
+#define floor_cell_up RAM8(floor_cell_up_ADDRESS)
+#define floor_cell_right_ADDRESS 0x0633D5u
+#define floor_cell_right RAM8(floor_cell_right_ADDRESS)
+#define floor_cell_left_ADDRESS 0x0633D6u
+#define floor_cell_left RAM8(floor_cell_left_ADDRESS)
+#define floor_cell_up_right_ADDRESS 0x0633D7u
+#define floor_cell_up_right RAM8(floor_cell_up_right_ADDRESS)
+#define floor_cell_up_left_ADDRESS 0x0633D8u
+#define floor_cell_up_left RAM8(floor_cell_up_left_ADDRESS)
+#define height_cell_up_ADDRESS 0x0633D9u
+#define height_cell_up RAM8(height_cell_up_ADDRESS)
+#define height_cell_right_ADDRESS 0x0633DAu
+#define height_cell_right RAM8(height_cell_right_ADDRESS)
+#define height_cell_left_ADDRESS 0x0633DBu
+#define height_cell_left RAM8(height_cell_left_ADDRESS)
+#define height_cell_up_right_ADDRESS 0x0633DCu
+#define height_cell_up_right RAM8(height_cell_up_right_ADDRESS)
+#define height_cell_up_left_ADDRESS 0x0633DDu
+#define height_cell_up_left RAM8(height_cell_up_left_ADDRESS)
+#define saved_turtle_ADDRESS 0x0633DEu
+#define saved_turtle RAM32(saved_turtle_ADDRESS)
+#define cutscene_wait_ADDRESS 0x0633DEu
+#define cutscene_wait RAM8(cutscene_wait_ADDRESS)
+#define cutscene_time_ADDRESS 0x0633DEu
+#define cutscene_time RAM16(cutscene_time_ADDRESS)
+#define cutscene_count_ADDRESS 0x0633DFu
+#define cutscene_count RAM8(cutscene_count_ADDRESS)
+#define cutscene_counter_ADDRESS 0x0633E2u
+#define cutscene_counter RAM8(cutscene_counter_ADDRESS)
+#define hug_turtle_colours_ADDRESS 0x0633E6u
+#define hug_turtle_colours(index) RAM8(hug_turtle_colours_ADDRESS + (index))
+#define cutscene_step_ADDRESS 0x0633EAu
+#define cutscene_step RAM8(cutscene_step_ADDRESS)
+#define turtles_not_waiting_ADDRESS 0x0633EBu
+#define turtles_not_waiting RAM8(turtles_not_waiting_ADDRESS)
+#define last_segment_ADDRESS 0x0633ECu
+#define last_segment RAM8(last_segment_ADDRESS)
+#define building_clear_wait_ADDRESS 0x0633EDu
+#define building_clear_wait RAM8(building_clear_wait_ADDRESS)
 #define unk_0633F0_ADDRESS 0x0633F0u
 #define unk_0633F0 RAM8(unk_0633F0_ADDRESS)
-#define unk_0633F1_ADDRESS 0x0633F1u
-#define unk_0633F1 RAM8(unk_0633F1_ADDRESS)
-#define unk_0633F2_ADDRESS 0x0633F2u
-#define unk_0633F2 RAM8(unk_0633F2_ADDRESS)
-#define unk_0633F3_ADDRESS 0x0633F3u
-#define unk_0633F3 RAM8(unk_0633F3_ADDRESS)
-#define unk_0633F4_ADDRESS 0x0633F4u
-#define unk_0633F4 RAM8(unk_0633F4_ADDRESS)
-#define unk_0633F5_ADDRESS 0x0633F5u
-#define unk_0633F5 RAM8(unk_0633F5_ADDRESS)
-#define unk_0633F6_ADDRESS 0x0633F6u
-#define unk_0633F6 RAM16(unk_0633F6_ADDRESS)
-#define unk_0633F8_ADDRESS 0x0633F8u
-#define unk_0633F8 RAM32(unk_0633F8_ADDRESS)
-#define unk_0633FC_ADDRESS 0x0633FCu
-#define unk_0633FC RAM8(unk_0633FC_ADDRESS)
-#define unk_0633FD_ADDRESS 0x0633FDu
-#define unk_0633FD RAM8(unk_0633FD_ADDRESS)
-#define unk_0633FE_ADDRESS 0x0633FEu
-#define unk_0633FE RAM8(unk_0633FE_ADDRESS)
-#define unk_0633FF_ADDRESS 0x0633FFu
-#define unk_0633FF RAM8(unk_0633FF_ADDRESS)
-#define unk_063400_ADDRESS 0x063400u
-#define unk_063400(index) RAM8(unk_063400_ADDRESS + (index))
-#define unk_063401_ADDRESS 0x063401u
-#define unk_063401 RAM8(unk_063401_ADDRESS)
-#define unk_063402_ADDRESS 0x063402u
-#define unk_063402 RAM8(unk_063402_ADDRESS)
-#define unk_063403_ADDRESS 0x063403u
-#define unk_063403 RAM8(unk_063403_ADDRESS)
-#define unk_063404_ADDRESS 0x063404u
-#define unk_063404 RAM8(unk_063404_ADDRESS)
-#define unk_063405_ADDRESS 0x063405u
-#define unk_063405 RAM8(unk_063405_ADDRESS)
-#define unk_063406_ADDRESS 0x063406u
-#define unk_063406 RAM16(unk_063406_ADDRESS)
-#define unk_063408_ADDRESS 0x063408u
-#define unk_063408 RAM8(unk_063408_ADDRESS)
-#define unk_063410_ADDRESS 0x063410u
-#define unk_063410 RAM16(unk_063410_ADDRESS)
-#define unk_063412_ADDRESS 0x063412u
-#define unk_063412 RAM8(unk_063412_ADDRESS)
-#define unk_063413_ADDRESS 0x063413u
-#define unk_063413 RAM8(unk_063413_ADDRESS)
-#define unk_063414_ADDRESS 0x063414u
-#define unk_063414 RAM32(unk_063414_ADDRESS)
-#define unk_063418_ADDRESS 0x063418u
-#define unk_063418 RAM8(unk_063418_ADDRESS)
-#define unk_063419_ADDRESS 0x063419u
-#define unk_063419 RAM8(unk_063419_ADDRESS)
-#define unk_06341A_ADDRESS 0x06341Au
-#define unk_06341A RAM32(unk_06341A_ADDRESS)
-#define unk_063420_ADDRESS 0x063420u
-#define unk_063420 RAM32(unk_063420_ADDRESS)
-#define unk_063424_ADDRESS 0x063424u
-#define unk_063424 RAM32(unk_063424_ADDRESS)
-#define unk_063428_ADDRESS 0x063428u
-#define unk_063428 RAM8(unk_063428_ADDRESS)
-#define unk_063429_ADDRESS 0x063429u
-#define unk_063429 RAM8(unk_063429_ADDRESS)
-#define unk_06342A_ADDRESS 0x06342Au
-#define unk_06342A RAM8(unk_06342A_ADDRESS)
-#define unk_06342B_ADDRESS 0x06342Bu
-#define unk_06342B RAM8(unk_06342B_ADDRESS)
-#define unk_06342E_ADDRESS 0x06342Eu
-#define unk_06342E RAM8(unk_06342E_ADDRESS)
-#define unk_06342F_ADDRESS 0x06342Fu
-#define unk_06342F RAM8(unk_06342F_ADDRESS)
+#define fire_last_frame_ADDRESS 0x0633F1u
+#define fire_last_frame RAM8(fire_last_frame_ADDRESS)
+#define building_fire_spot_ADDRESS 0x0633F2u
+#define building_fire_spot RAM8(building_fire_spot_ADDRESS)
+#define building_fire_frame_ADDRESS 0x0633F3u
+#define building_fire_frame RAM8(building_fire_frame_ADDRESS)
+#define height_cell_ADDRESS 0x0633F4u
+#define height_cell RAM8(height_cell_ADDRESS)
+#define building_scroll_hold_ADDRESS 0x0633F5u
+#define building_scroll_hold RAM8(building_scroll_hold_ADDRESS)
+#define hurry_time_ADDRESS 0x0633F6u
+#define hurry_time RAM16(hurry_time_ADDRESS)
+#define balloon_place_ADDRESS 0x0633F8u
+#define balloon_place RAM32(balloon_place_ADDRESS)
+#define balloon_time_ADDRESS 0x0633FCu
+#define balloon_time RAM8(balloon_time_ADDRESS)
+#define floor_end_walled_ADDRESS 0x0633FDu
+#define floor_end_walled RAM8(floor_end_walled_ADDRESS)
+#define drill_arrival_ADDRESS 0x0633FEu
+#define drill_arrival RAM8S(drill_arrival_ADDRESS)
+#define drill_arrival_step_ADDRESS 0x0633FFu
+#define drill_arrival_step RAM8(drill_arrival_step_ADDRESS)
+#define palette_editor_numbers_ADDRESS 0x063400u
+#define palette_editor_numbers(index) RAM8(palette_editor_numbers_ADDRESS + (index))
+#define palette_editor_pick_ADDRESS 0x063404u
+#define palette_editor_pick RAM8(palette_editor_pick_ADDRESS)
+#define palette_editor_last_pick_ADDRESS 0x063405u
+#define palette_editor_last_pick RAM8(palette_editor_last_pick_ADDRESS)
+#define palette_editor_part_ADDRESS 0x063407u
+#define palette_editor_part RAM8(palette_editor_part_ADDRESS)
+#define palette_editor_step_ADDRESS 0x063408u
+#define palette_editor_step RAM8(palette_editor_step_ADDRESS)
+#define fade_state_ADDRESS 0x063410u
+#define fade_state RAM32(fade_state_ADDRESS)
+#define fading_ADDRESS 0x063410u
+#define fading RAM8(fading_ADDRESS)
+#define fade_pass_step_ADDRESS 0x063411u
+#define fade_pass_step RAM8(fade_pass_step_ADDRESS)
+#define fade_part_ADDRESS 0x063412u
+#define fade_part RAM8(fade_part_ADDRESS)
+#define fade_lists_left_ADDRESS 0x063413u
+#define fade_lists_left RAM8(fade_lists_left_ADDRESS)
+#define fade_target_ADDRESS 0x063414u
+#define fade_target RAM32(fade_target_ADDRESS)
+#define fade_part_mask_ADDRESS 0x063418u
+#define fade_part_mask RAM8(fade_part_mask_ADDRESS)
+#define fade_rate_ADDRESS 0x063419u
+#define fade_rate RAM8(fade_rate_ADDRESS)
+#define fade_buffer_place_ADDRESS 0x06341Au
+#define fade_buffer_place RAM32(fade_buffer_place_ADDRESS)
+#define typed_text_place_ADDRESS 0x063420u
+#define typed_text_place RAM32(typed_text_place_ADDRESS)
+#define typed_text_ADDRESS 0x063424u
+#define typed_text RAM32(typed_text_ADDRESS)
+#define typed_text_wait_ADDRESS 0x063428u
+#define typed_text_wait RAM8(typed_text_wait_ADDRESS)
+#define typed_text_delay_ADDRESS 0x063429u
+#define typed_text_delay RAM8(typed_text_delay_ADDRESS)
+#define unused_typed_text_flag_ADDRESS 0x06342Au
+#define unused_typed_text_flag RAM8(unused_typed_text_flag_ADDRESS)
+#define typed_text_colour_ADDRESS 0x06342Bu
+#define typed_text_colour RAM8(typed_text_colour_ADDRESS)
+#define staff_roll_credit_ADDRESS 0x06342Eu
+#define staff_roll_credit RAM8(staff_roll_credit_ADDRESS)
+#define typed_passes_left_ADDRESS 0x06342Fu
+#define typed_passes_left RAM8(typed_passes_left_ADDRESS)
 #define unk_063434_ADDRESS 0x063434u
 #define unk_063434 RAM32(unk_063434_ADDRESS)
-#define unk_063480_ADDRESS 0x063480u
-#define unk_063480 RAM8(unk_063480_ADDRESS)
-#define unk_063488_ADDRESS 0x063488u
-#define unk_063488 RAM8(unk_063488_ADDRESS)
-#define unk_063490_ADDRESS 0x063490u
-#define unk_063490 RAM32(unk_063490_ADDRESS)
-#define unk_063494_ADDRESS 0x063494u
-#define unk_063494 RAM8(unk_063494_ADDRESS)
-#define unk_063495_ADDRESS 0x063495u
-#define unk_063495 RAM8(unk_063495_ADDRESS)
-#define unk_063496_ADDRESS 0x063496u
-#define unk_063496 RAM8(unk_063496_ADDRESS)
-#define unk_063497_ADDRESS 0x063497u
-#define unk_063497 RAM8(unk_063497_ADDRESS)
-#define unk_0634A0_ADDRESS 0x0634A0u
-#define unk_0634A0 RAM8(unk_0634A0_ADDRESS)
-#define unk_063500_ADDRESS 0x063500u
-#define unk_063500 RAM16(unk_063500_ADDRESS)
-#define unk_063502_ADDRESS 0x063502u
-#define unk_063502 RAM16(unk_063502_ADDRESS)
-#define unk_063504_ADDRESS 0x063504u
-#define unk_063504 RAM16(unk_063504_ADDRESS)
-#define unk_063506_ADDRESS 0x063506u
-#define unk_063506 RAM16(unk_063506_ADDRESS)
-#define unk_063508_ADDRESS 0x063508u
-#define unk_063508 RAM16(unk_063508_ADDRESS)
-#define unk_06350A_ADDRESS 0x06350Au
-#define unk_06350A RAM16(unk_06350A_ADDRESS)
-#define unk_06350E_ADDRESS 0x06350Eu
-#define unk_06350E RAM8(unk_06350E_ADDRESS)
-#define unk_06350F_ADDRESS 0x06350Fu
-#define unk_06350F RAM8(unk_06350F_ADDRESS)
-#define unk_063510_ADDRESS 0x063510u
-#define unk_063510 RAM16(unk_063510_ADDRESS)
-#define unk_063512_ADDRESS 0x063512u
-#define unk_063512 RAM16(unk_063512_ADDRESS)
-#define unk_063514_ADDRESS 0x063514u
-#define unk_063514 RAM16(unk_063514_ADDRESS)
-#define unk_063516_ADDRESS 0x063516u
-#define unk_063516 RAM16(unk_063516_ADDRESS)
-#define unk_063518_ADDRESS 0x063518u
-#define unk_063518 RAM8(unk_063518_ADDRESS)
-#define unk_063519_ADDRESS 0x063519u
-#define unk_063519 RAM8(unk_063519_ADDRESS)
-#define unk_0635C6_ADDRESS 0x0635C6u
-#define unk_0635C6 RAM16(unk_0635C6_ADDRESS)
-#define unk_0635C8_ADDRESS 0x0635C8u
-#define unk_0635C8(index) RAM8(unk_0635C8_ADDRESS + (index))
-#define unk_0635C9_ADDRESS 0x0635C9u
-#define unk_0635C9(index) RAM8(unk_0635C9_ADDRESS + (index))
-#define unk_0635CA_ADDRESS 0x0635CAu
-#define unk_0635CA(index) RAM8(unk_0635CA_ADDRESS + (index))
-#define unk_0635F0_ADDRESS 0x0635F0u
-#define unk_0635F0 RAM32(unk_0635F0_ADDRESS)
-#define unk_0635F4_ADDRESS 0x0635F4u
-#define unk_0635F4 RAM32(unk_0635F4_ADDRESS)
-#define unk_0635F8_ADDRESS 0x0635F8u
-#define unk_0635F8 RAM16(unk_0635F8_ADDRESS)
-#define unk_0635FA_ADDRESS 0x0635FAu
-#define unk_0635FA(index) RAM8(unk_0635FA_ADDRESS + (index))
-#define unk_0635FB_ADDRESS 0x0635FBu
-#define unk_0635FB RAM8(unk_0635FB_ADDRESS)
-#define unk_0635FC_ADDRESS 0x0635FCu
-#define unk_0635FC RAM8(unk_0635FC_ADDRESS)
-#define unk_0635FE_ADDRESS 0x0635FEu
-#define unk_0635FE RAM8(unk_0635FE_ADDRESS)
-#define unk_0635FF_ADDRESS 0x0635FFu
-#define unk_0635FF RAM8(unk_0635FF_ADDRESS)
+#define technodrome_explosions_ADDRESS 0x063480u
+#define technodrome_explosions RAM8(technodrome_explosions_ADDRESS)
+#define drill_rumbling_ADDRESS 0x063488u
+#define drill_rumbling RAM8(drill_rumbling_ADDRESS)
+#define box_place_ADDRESS 0x063490u
+#define box_place RAM32(box_place_ADDRESS)
+#define box_width_ADDRESS 0x063494u
+#define box_width RAM8(box_width_ADDRESS)
+#define box_height_ADDRESS 0x063495u
+#define box_height RAM8(box_height_ADDRESS)
+#define box_tile_ADDRESS 0x063496u
+#define box_tile RAM8(box_tile_ADDRESS)
+#define box_frames_left_ADDRESS 0x063497u
+#define box_frames_left RAM8(box_frames_left_ADDRESS)
+#define name_entered_ADDRESS 0x0634A0u
+#define name_entered RAM8(name_entered_ADDRESS)
+#define ranking_scores_ADDRESS 0x063500u
+#define ranking_scores(index) RAM16(ranking_scores_ADDRESS + (index) * 2u)
+#define mask_rom_bank_ADDRESS 0x06350Eu
+#define mask_rom_bank RAM8(mask_rom_bank_ADDRESS)
+#define mask_rom_bits_ADDRESS 0x06350Fu
+#define mask_rom_bits RAM8(mask_rom_bits_ADDRESS)
+#define mask_rom_part_sums_ADDRESS 0x063510u
+#define mask_rom_part_sums(index) RAM16(mask_rom_part_sums_ADDRESS + (index) * 2u)
+#define mask_rom_first_bank_ADDRESS 0x063518u
+#define mask_rom_first_bank RAM8(mask_rom_first_bank_ADDRESS)
+#define mask_rom_last_bank_ADDRESS 0x063519u
+#define mask_rom_last_bank RAM8(mask_rom_last_bank_ADDRESS)
+#define ranking_new_score_ADDRESS 0x0635C6u
+#define ranking_new_score RAM16(ranking_new_score_ADDRESS)
+#define ranking_initials_ADDRESS 0x0635C8u
+#define ranking_initials(index) RAM8(ranking_initials_ADDRESS + (index))
+#define ranking_new_initials_ADDRESS 0x0635F0u
+#define ranking_new_initials RAM32(ranking_new_initials_ADDRESS)
+#define ranking_places_ADDRESS 0x0635F4u
+#define ranking_places(index) RAM8(ranking_places_ADDRESS + (index))
+#define ranking_time_ADDRESS 0x0635F8u
+#define ranking_time RAM16(ranking_time_ADDRESS)
+#define turtles_in_black_ADDRESS 0x0635F8u
+#define turtles_in_black RAM8(turtles_in_black_ADDRESS)
+#define initials_entered_ADDRESS 0x0635FAu
+#define initials_entered(index) RAM8(initials_entered_ADDRESS + (index))
+#define players_entering_names_ADDRESS 0x0635FEu
+#define players_entering_names RAM8(players_entering_names_ADDRESS)
+#define initials_buttons_held_ADDRESS 0x0635FFu
+#define initials_buttons_held RAM8(initials_buttons_held_ADDRESS)
 
 /* the program's data the code reads by name, which the game loads from its assets */
 #define indexed_table_of_32_bit_values_0013DE_ADDRESS 0x0013DEu
@@ -1105,6 +1032,9 @@ extern const void *indexed_table_of_8_bit_values_002884_data;
 #define rom_002885_ADDRESS 0x002885u
 extern const void *rom_002885_data;
 #define rom_002885 ((const uint8_t *)rom_002885_data)
+#define indexed_table_of_32_bit_values_0031F2_ADDRESS 0x0031F2u
+extern const void *indexed_table_of_32_bit_values_0031F2_data;
+#define indexed_table_of_32_bit_values_0031F2 ((const uint32_t *)indexed_table_of_32_bit_values_0031F2_data)
 #define rom_00332A_ADDRESS 0x00332Au
 extern const void *rom_00332A_data;
 #define rom_00332A ((const uint32_t *)rom_00332A_data)
@@ -1414,9 +1344,9 @@ extern const void *indexed_table_of_32_bit_values_010616_data;
 #define indexed_table_of_8_bit_values_0107AE_ADDRESS 0x0107AEu
 extern const void *indexed_table_of_8_bit_values_0107AE_data;
 #define indexed_table_of_8_bit_values_0107AE ((const uint8_t *)indexed_table_of_8_bit_values_0107AE_data)
-#define indexed_table_of_32_bit_values_010A0E_ADDRESS 0x010A0Eu
-extern const void *indexed_table_of_32_bit_values_010A0E_data;
-#define indexed_table_of_32_bit_values_010A0E ((const uint32_t *)indexed_table_of_32_bit_values_010A0E_data)
+#define nozzle_row_routines_ADDRESS 0x010A0Eu
+extern const void *nozzle_row_routines_data;
+#define nozzle_row_routines ((const uint32_t *)nozzle_row_routines_data)
 #define indexed_table_of_32_bit_values_010AB2_ADDRESS 0x010AB2u
 extern const void *indexed_table_of_32_bit_values_010AB2_data;
 #define indexed_table_of_32_bit_values_010AB2 ((const uint32_t *)indexed_table_of_32_bit_values_010AB2_data)
@@ -2116,15 +2046,15 @@ extern const void *indexed_table_of_32_bit_values_030996_data;
 #define indexed_table_of_32_bit_values_031152_ADDRESS 0x031152u
 extern const void *indexed_table_of_32_bit_values_031152_data;
 #define indexed_table_of_32_bit_values_031152 ((const uint32_t *)indexed_table_of_32_bit_values_031152_data)
-#define rom_0471F4_ADDRESS 0x0471F4u
-extern const void *rom_0471F4_data;
-#define rom_0471F4 ((const uint32_t *)rom_0471F4_data)
-#define indexed_table_of_8_bit_values_047BDE_ADDRESS 0x047BDEu
-extern const void *indexed_table_of_8_bit_values_047BDE_data;
-#define indexed_table_of_8_bit_values_047BDE ((const uint8_t *)indexed_table_of_8_bit_values_047BDE_data)
-#define rom_047BE2_ADDRESS 0x047BE2u
-extern const void *rom_047BE2_data;
-#define rom_047BE2 ((const uint32_t *)rom_047BE2_data)
+#define attack_check_objects_ADDRESS 0x0471F4u
+extern const void *attack_check_objects_data;
+#define attack_check_objects ((const uint32_t *)attack_check_objects_data)
+#define object_group_counts_ADDRESS 0x047BDEu
+extern const void *object_group_counts_data;
+#define object_group_counts ((const uint8_t *)object_group_counts_data)
+#define object_groups_ADDRESS 0x047BE2u
+extern const void *object_groups_data;
+#define object_groups ((const uint32_t *)object_groups_data)
 #define rom_04881C_ADDRESS 0x04881Cu
 extern const void *rom_04881C_data;
 #define rom_04881C ((const uint16_t *)rom_04881C_data)
@@ -2323,7 +2253,6 @@ extern const void *rom_053896_data;
 #define texts_00310E_ADDRESS 0x00310Eu
 #define unexplained_00311D_ADDRESS 0x00311Du
 #define texts_00311E_ADDRESS 0x00311Eu
-#define indexed_table_of_32_bit_values_0031F2_ADDRESS 0x0031F2u
 #define indexed_table_of_32_bit_values_00375C_ADDRESS 0x00375Cu
 #define big_font_ADDRESS 0x00388Cu
 #define channel_records_ADDRESS 0x0047C8u
@@ -2494,6 +2423,49 @@ extern const void *rom_053896_data;
 #define code_table_0142C2_ADDRESS 0x0142C2u
 #define sprite_lists_015FE0_ADDRESS 0x015FE0u
 #define record_0180FA_ADDRESS 0x0180FAu
+#define hydrant_struck_stats_ADDRESS 0x018104u
+#define hydrant_water_stats_ADDRESS 0x01810Eu
+#define roadside_pole_stats_ADDRESS 0x018118u
+#define alligator_stats_ADDRESS 0x018122u
+#define billboard_stats_ADDRESS 0x01812Cu
+#define oil_drum_stats_ADDRESS 0x01815Eu
+#define explosion_stats_ADDRESS 0x018168u
+#define skateboarder_stats_ADDRESS 0x018172u
+#define turret_stats_ADDRESS 0x01817Cu
+#define turret_struck_stats_ADDRESS 0x018186u
+#define turret_shot_stats_ADDRESS 0x018190u
+#define waiting_soldier_stats_ADDRESS 0x01819Au
+#define inert_stats_ADDRESS 0x0181A4u
+#define freeze_nozzle_stats_ADDRESS 0x0181AEu
+#define electric_beam_stats_ADDRESS 0x0181C2u
+#define rock_soldier_site_stats_ADDRESS 0x0181CCu
+#define gun_blast_stats_ADDRESS 0x0181D6u
+#define car_hit_box_stats_ADDRESS 0x0181E0u
+#define electric_column_stats_ADDRESS 0x0181EAu
+#define helicopter_stats_ADDRESS 0x0181FEu
+#define copter_bullet_stats_ADDRESS 0x018208u
+#define falling_missile_stats_ADDRESS 0x018212u
+#define falling_missile_at_turtle_stats_ADDRESS 0x01821Cu
+#define rock_soldier_technodrome_stats_ADDRESS 0x018226u
+#define missile_stats_ADDRESS 0x018230u
+#define wall_slab_stats_ADDRESS 0x01823Au
+#define shock_bars_hit_box_stats_ADDRESS 0x018244u
+#define sewer_missile_stats_ADDRESS 0x01824Eu
+#define spiked_pole_stats_ADDRESS 0x018258u
+#define flying_drone_stats_ADDRESS 0x018262u
+#define drone_shot_stats_ADDRESS 0x01826Cu
+#define roadside_cone_stats_ADDRESS 0x018276u
+#define one_way_sign_stats_ADDRESS 0x018280u
+#define stockman_stats_ADDRESS 0x01828Au
+#define falling_mouser_stats_ADDRESS 0x018294u
+#define ball_stats_ADDRESS 0x01829Eu
+#define technodrome_ball_stats_ADDRESS 0x0182A8u
+#define ball_dropper_stats_ADDRESS 0x0182B2u
+#define road_barrier_stats_ADDRESS 0x0182BCu
+#define tire_stack_stats_ADDRESS 0x0182C6u
+#define krang_stats_ADDRESS 0x0182D0u
+#define krang_laser_stats_ADDRESS 0x0182DAu
+#define krang_fist_stats_ADDRESS 0x0182E4u
 #define indexed_table_of_8_bit_values_018550_ADDRESS 0x018550u
 #define tile_block_places_ADDRESS 0x0187BCu
 #define unexplained_01948B_ADDRESS 0x01948Bu
@@ -2518,8 +2490,8 @@ extern const void *rom_053896_data;
 #define table_loaded_by_lea_01D35C_ADDRESS 0x01D35Cu
 #define record_01F0D8_ADDRESS 0x01F0D8u
 #define table_loaded_by_lea_01F242_ADDRESS 0x01F242u
-#define screen_picture_colours_ADDRESS 0x01F970u
-#define screen_picture_tiles_ADDRESS 0x01FAA8u
+#define screen_picture_tiles_ADDRESS 0x01F970u
+#define screen_picture_colours_ADDRESS 0x01FAA8u
 #define table_loaded_by_lea_01FBE0_ADDRESS 0x01FBE0u
 #define sprite_lists_021920_ADDRESS 0x021920u
 #define animations_0231F8_ADDRESS 0x0231F8u
@@ -3022,8 +2994,1417 @@ extern const void *rom_053896_data;
 
 /* the game's structures in work RAM */
 #pragma pack(push, 1)
+struct object
+{
+	union
+	{
+		struct
+		{
+			uint16_t hit_object;
+			uint16_t attacker;
+			uint8_t throw;
+			uint8_t unk_4A;
+			uint8_t unk_49;
+			uint8_t unk_48;
+			uint8_t unk_47;
+			uint8_t unk_46;
+			uint8_t unk_45;
+			uint8_t unk_44;
+			uint8_t animation_delay;
+			uint8_t colour;
+			union
+			{
+				uint16_t hit_routine;
+				uint8_t hit_state;
+			};
+			uint16_t draw_next;
+			uint32_t shadow;
+			uint32_t frame;
+			uint16_t depth;
+			uint8_t frame_time;
+			uint8_t floor_height;
+			uint8_t unk_31;
+			uint8_t unk_30;
+			uint8_t unk_2F;
+			uint8_t unk_2E;
+			uint16_t unk_2C;
+			uint8_t unk_2B;
+			uint8_t unk_2A;
+			uint16_t unk_28;
+			uint8_t unk_27;
+			uint8_t unk_26;
+			uint8_t unk_25;
+			uint8_t unk_24;
+			uint8_t unk_23;
+			uint8_t unk_22;
+			uint16_t unk_20;
+			int16_t height_speed;
+			int16_t y_speed;
+			int16_t x_speed;
+			uint32_t y;
+			uint32_t x;
+			union
+			{
+				uint16_t height;
+				struct
+				{
+					uint8_t pad_3E[0x1];
+					uint8_t height_whole;
+				};
+			};
+			uint16_t screen_y;
+			uint16_t screen_x;
+			uint16_t damage;
+			uint8_t health;
+			uint8_t health_bars;
+			uint8_t hit;
+			uint8_t attack;
+			uint8_t state;
+			uint8_t routine;
+			uint8_t parameter;
+		};
+		struct
+		{
+			uint8_t pad_00[0x35];
+			uint8_t stepping_left;
+		} april;
+		struct
+		{
+			uint8_t pad_00[0x20];
+			uint8_t balls_left;
+		} ball_dropper;
+		struct
+		{
+			uint8_t pad_00[0x2E];
+			uint16_t trigger_x;
+		} billboard;
+		struct
+		{
+			uint8_t pad_00[0x1F];
+			uint8_t timer;
+			uint8_t flipped;
+			uint8_t pad_21[0xD];
+			uint16_t trigger_x;
+		} billboard_soldier;
+		struct
+		{
+			uint8_t pad_00[0x2D];
+			uint8_t timer;
+		} bomber;
+		struct
+		{
+			uint8_t pad_00[0x9];
+			uint8_t flight_time;
+			uint8_t pad_0A[0x22];
+			uint32_t thrower;
+		} boomerang;
+		struct
+		{
+			uint8_t pad_00[0x20];
+			uint8_t explosions;
+			uint8_t pad_21[0xB];
+			uint32_t target;
+		} boss;
+		struct
+		{
+			uint8_t pad_00[0x9];
+			uint8_t open_time;
+			uint8_t pad_0A[0x16];
+			uint8_t explosions;
+			uint8_t pad_21[0xB];
+			uint32_t target;
+		} boss_shutter;
+		struct
+		{
+			uint8_t pad_00[0x20];
+			uint8_t number;
+			uint8_t pad_21[0xD];
+			uint16_t stop_y;
+		} car_soldier;
+		struct
+		{
+			uint8_t pad_00[0x20];
+			uint8_t aim;
+		} drone_shot;
+		struct
+		{
+			uint8_t pad_00[0x5];
+			uint8_t bounces_left;
+			uint8_t pad_06[0x20];
+			uint16_t hit_sound;
+		} dynamite;
+		struct
+		{
+			uint8_t pad_00[0x1F];
+			uint8_t timer;
+			uint8_t column_done;
+			uint8_t pad_21[0xB];
+			uint32_t vent;
+		} electric;
+		struct
+		{
+			uint8_t pad_00[0x9];
+			uint8_t wait;
+			uint8_t pad_0A[0x1E];
+			uint32_t stop;
+		} elevator;
+		struct
+		{
+			uint8_t pad_00[0x4];
+			uint8_t throw;
+			uint8_t pad_05[0x5];
+			uint8_t side;
+			uint8_t target_faces;
+			uint8_t pad_0C[0x12];
+			uint8_t dodge_chance;
+			uint8_t facing;
+			uint16_t target_dy;
+			uint16_t target_dx;
+			uint8_t target_direction;
+			uint8_t approach;
+			uint16_t move;
+			uint32_t definition;
+			uint8_t retarget_time;
+			uint8_t move_time;
+			uint16_t target;
+		} enemy;
+		struct
+		{
+			uint8_t pad_00[0x4];
+			uint8_t throw;
+			uint8_t pad_05[0x4];
+			uint8_t time;
+			uint8_t side;
+			uint8_t target_faces;
+			uint8_t pad_0C[0x12];
+			uint8_t dodge_chance;
+			uint8_t facing;
+			uint16_t target_dy;
+			uint16_t target_dx;
+			uint8_t target_direction;
+			uint8_t approach;
+			uint16_t move;
+			uint32_t definition;
+			uint8_t retarget_time;
+			uint8_t move_time;
+			uint16_t target;
+		} enemy_back_off;
+		struct
+		{
+			uint8_t pad_00[0x4];
+			uint8_t throw;
+			uint8_t punch_delay;
+			uint8_t pad_06[0x3];
+			uint8_t timer;
+			uint8_t side;
+			uint8_t target_faces;
+			uint8_t pad_0C[0x12];
+			uint8_t dodge_chance;
+			uint8_t facing;
+			uint16_t target_dy;
+			uint16_t target_dx;
+			uint8_t target_direction;
+			uint8_t plan;
+			uint16_t move;
+			uint32_t definition;
+			uint8_t retarget_time;
+			uint8_t move_time;
+			uint16_t target;
+		} enemy_bebop;
+		struct
+		{
+			uint8_t pad_00[0x4];
+			uint8_t throw;
+			uint8_t punch_delay;
+			uint8_t pad_06[0x3];
+			uint8_t timer;
+			uint8_t side;
+			uint8_t target_faces;
+			uint8_t pad_0C[0x3];
+			uint8_t walk_time;
+			uint8_t pad_10[0xE];
+			uint8_t dodge_chance;
+			uint8_t facing;
+			uint16_t target_dy;
+			uint16_t target_dx;
+			uint8_t target_direction;
+			uint8_t plan;
+			uint16_t move;
+			uint32_t definition;
+			uint8_t retarget_time;
+			uint8_t move_time;
+			uint16_t target;
+		} enemy_bebop_enter;
+		struct
+		{
+			uint8_t pad_00[0x4];
+			uint8_t throw;
+			uint8_t punch_delay;
+			uint8_t pad_06[0x3];
+			uint8_t timer;
+			uint8_t side;
+			uint8_t target_faces;
+			uint8_t pad_0C[0x2];
+			uint8_t shots_left;
+			uint8_t shot_time;
+			uint8_t pad_10[0xE];
+			uint8_t dodge_chance;
+			uint8_t facing;
+			uint16_t target_dy;
+			uint16_t target_dx;
+			uint8_t target_direction;
+			uint8_t plan;
+			uint16_t move;
+			uint32_t definition;
+			uint8_t retarget_time;
+			uint8_t move_time;
+			uint16_t target;
+		} enemy_bebop_shoot;
+		struct
+		{
+			uint8_t pad_00[0x4];
+			uint8_t throw;
+			uint8_t pad_05[0x1];
+			uint32_t boomerang;
+			uint8_t side;
+			uint8_t target_faces;
+			uint8_t pad_0C[0x12];
+			uint8_t dodge_chance;
+			uint8_t facing;
+			uint16_t target_dy;
+			uint16_t target_dx;
+			uint8_t target_direction;
+			uint8_t approach;
+			uint16_t move;
+			uint32_t definition;
+			uint8_t retarget_time;
+			uint8_t move_time;
+			uint16_t target;
+		} enemy_boomerang;
+		struct
+		{
+			uint8_t pad_00[0x4];
+			uint8_t throw;
+			uint8_t clockwise;
+			uint8_t pad_06[0x4];
+			uint8_t side;
+			uint8_t target_faces;
+			uint8_t pad_0C[0x12];
+			uint8_t dodge_chance;
+			uint8_t facing;
+			uint16_t target_dy;
+			uint16_t target_dx;
+			uint8_t target_direction;
+			uint8_t approach;
+			uint16_t move;
+			uint32_t definition;
+			uint8_t retarget_time;
+			uint8_t move_time;
+			uint16_t target;
+		} enemy_circle;
+		struct
+		{
+			uint8_t pad_00[0x4];
+			uint8_t throw;
+			uint8_t pad_05[0x4];
+			uint8_t time;
+			uint8_t side;
+			uint8_t target_faces;
+			uint8_t pad_0C[0x12];
+			uint8_t dodge_chance;
+			uint8_t facing;
+			uint16_t target_dy;
+			uint16_t target_dx;
+			uint8_t target_direction;
+			uint8_t approach;
+			uint16_t move;
+			uint32_t definition;
+			uint8_t retarget_time;
+			uint8_t move_time;
+			uint16_t target;
+		} enemy_grab;
+		struct
+		{
+			uint8_t pad_00[0x4];
+			uint8_t throw;
+			uint8_t pad_05[0x4];
+			uint8_t down_time;
+			uint8_t side;
+			uint8_t target_faces;
+			uint8_t pad_0C[0x12];
+			uint8_t dodge_chance;
+			uint8_t facing;
+			uint16_t target_dy;
+			uint16_t target_dx;
+			uint8_t target_direction;
+			uint8_t approach;
+			uint16_t move;
+			uint32_t definition;
+			uint8_t retarget_time;
+			uint8_t move_time;
+			uint16_t target;
+		} enemy_knocked;
+		struct
+		{
+			uint8_t pad_00[0x4];
+			uint8_t throw;
+			uint8_t pad_05[0x3];
+			uint8_t chase_time;
+			uint8_t timer;
+			uint8_t side;
+			uint8_t target_faces;
+			uint8_t pad_0C[0x12];
+			uint8_t dodge_chance;
+			uint8_t facing;
+			uint16_t target_dy;
+			uint16_t target_dx;
+			uint8_t target_direction;
+			uint8_t approach;
+			uint16_t move;
+			uint32_t definition;
+			uint8_t retarget_time;
+			uint8_t move_time;
+			uint16_t target;
+		} enemy_mouser;
+		struct
+		{
+			uint8_t pad_00[0x4];
+			uint8_t throw;
+			uint8_t pad_05[0x4];
+			uint8_t aim_time;
+			uint8_t side;
+			uint8_t target_faces;
+			uint8_t pad_0C[0x12];
+			uint8_t dodge_chance;
+			uint8_t facing;
+			uint16_t target_dy;
+			uint16_t target_dx;
+			uint8_t target_direction;
+			uint8_t approach;
+			uint16_t move;
+			uint32_t definition;
+			uint32_t turtle;
+		} enemy_rocket_soldier;
+		struct
+		{
+			uint8_t pad_00[0x4];
+			uint8_t throw;
+			uint8_t pad_05[0x1];
+			uint8_t far_attack_wait;
+			uint8_t close_attack_wait;
+			uint16_t mode_time;
+			uint8_t side;
+			uint8_t target_faces;
+			uint8_t pad_0C[0x3];
+			uint8_t timer;
+			uint8_t pad_10[0xE];
+			uint8_t dodge_chance;
+			uint8_t facing;
+			uint16_t target_dy;
+			uint16_t target_dx;
+			uint8_t target_direction;
+			uint8_t armed;
+			uint16_t move;
+			uint32_t definition;
+			uint8_t retarget_time;
+			uint8_t move_time;
+			uint16_t target;
+		} enemy_rocksteady;
+		struct
+		{
+			uint8_t pad_00[0x4];
+			uint8_t throw;
+			uint8_t turn;
+			uint8_t far_attack_wait;
+			uint8_t close_attack_wait;
+			uint16_t mode_time;
+			uint8_t side;
+			uint8_t target_faces;
+			uint8_t pad_0C[0x3];
+			uint8_t aim_time;
+			uint8_t pad_10[0xE];
+			uint8_t dodge_chance;
+			uint8_t facing;
+			uint16_t target_dy;
+			uint16_t target_dx;
+			uint8_t target_direction;
+			uint8_t armed;
+			uint16_t move;
+			uint32_t definition;
+			uint8_t retarget_time;
+			uint8_t move_time;
+			uint16_t target;
+		} enemy_rocksteady_circle;
+		struct
+		{
+			uint8_t pad_00[0x4];
+			uint8_t throw;
+			uint8_t pad_05[0x1];
+			uint8_t far_attack_wait;
+			uint8_t close_attack_wait;
+			uint16_t mode_time;
+			uint8_t side;
+			uint8_t target_faces;
+			uint8_t pad_0C[0x3];
+			uint8_t timer;
+			uint8_t pad_10[0xE];
+			uint8_t aim_time;
+			uint8_t facing;
+			uint16_t target_dy;
+			uint16_t target_dx;
+			uint8_t target_direction;
+			uint8_t armed;
+			uint16_t move;
+			uint32_t definition;
+			uint8_t retarget_time;
+			uint8_t move_time;
+			uint16_t target;
+		} enemy_rocksteady_close_in;
+		struct
+		{
+			uint8_t pad_00[0x4];
+			uint8_t throw;
+			uint8_t blink_time;
+			uint8_t far_attack_wait;
+			uint8_t close_attack_wait;
+			uint16_t mode_time;
+			uint8_t side;
+			uint8_t target_faces;
+			uint8_t pad_0C[0x3];
+			uint8_t timer;
+			uint8_t pad_10[0xE];
+			uint8_t dodge_chance;
+			uint8_t facing;
+			uint16_t target_dy;
+			uint16_t target_dx;
+			uint8_t target_direction;
+			uint8_t armed;
+			uint16_t move;
+			uint32_t animations;
+			uint8_t retarget_time;
+			uint8_t move_time;
+			uint16_t target;
+		} enemy_rocksteady_defeated;
+		struct
+		{
+			uint8_t pad_00[0x4];
+			uint8_t throw;
+			uint8_t lie_time;
+			uint8_t far_attack_wait;
+			uint8_t close_attack_wait;
+			uint16_t mode_time;
+			uint8_t side;
+			uint8_t target_faces;
+			uint8_t pad_0C[0x3];
+			uint8_t timer;
+			uint8_t pad_10[0xE];
+			uint8_t dodge_chance;
+			uint8_t facing;
+			uint16_t target_dy;
+			uint16_t target_dx;
+			uint8_t target_direction;
+			uint8_t armed;
+			uint16_t move;
+			uint32_t animations;
+			uint8_t retarget_time;
+			uint8_t move_time;
+			uint16_t target;
+		} enemy_rocksteady_knocked_down;
+		struct
+		{
+			uint8_t pad_00[0x4];
+			uint8_t throw;
+			uint8_t aim;
+			uint8_t far_attack_wait;
+			uint8_t close_attack_wait;
+			uint16_t mode_time;
+			uint8_t side;
+			uint8_t target_faces;
+			uint8_t pad_0C[0x2];
+			uint8_t shots_left;
+			uint8_t shot_time;
+			uint8_t pad_10[0xE];
+			uint8_t dodge_chance;
+			uint8_t facing;
+			uint16_t target_dy;
+			uint16_t target_dx;
+			uint8_t target_direction;
+			uint8_t armed;
+			uint16_t move;
+			uint32_t bullet;
+			uint8_t retarget_time;
+			uint8_t move_time;
+			uint16_t target;
+		} enemy_rocksteady_shoot;
+		struct
+		{
+			uint8_t pad_00[0x4];
+			uint8_t throw;
+			uint8_t aim;
+			uint8_t far_attack_wait;
+			uint8_t close_attack_wait;
+			uint16_t mode_time;
+			uint8_t side;
+			uint8_t target_faces;
+			uint8_t pad_0C[0x2];
+			uint8_t shots_left;
+			uint8_t shot_time;
+			uint8_t pad_10[0xE];
+			uint8_t dodge_chance;
+			uint8_t facing;
+			uint16_t target_dy;
+			uint16_t target_dx;
+			uint8_t target_direction;
+			uint8_t armed;
+			uint16_t move;
+			uint32_t bullet;
+			uint8_t retarget_time;
+			uint8_t move_time;
+			uint16_t target;
+			uint8_t pad_30[0x2];
+			uint32_t aims;
+		} enemy_rocksteady_shoot_around;
+		struct
+		{
+			uint8_t pad_00[0x4];
+			uint8_t throw;
+			uint8_t pad_05[0x1];
+			int16_t brake;
+			uint8_t pad_08[0x1];
+			uint8_t wait;
+			uint8_t side;
+			uint8_t target_faces;
+			uint8_t pad_0C[0x12];
+			uint8_t dodge_chance;
+			uint8_t facing;
+			uint16_t target_dy;
+			uint16_t target_dx;
+			uint8_t target_direction;
+			uint8_t approach;
+			uint16_t move;
+			uint32_t definition;
+			uint8_t retarget_time;
+			uint8_t move_time;
+			uint16_t target;
+		} enemy_rodney;
+		struct
+		{
+			uint8_t pad_00[0x4];
+			uint8_t throw;
+			uint8_t pad_05[0x1];
+			int16_t brake;
+			uint8_t shots_left;
+			uint8_t shot_time;
+			uint8_t side;
+			uint8_t target_faces;
+			uint8_t pad_0C[0x12];
+			uint8_t dodge_chance;
+			uint8_t facing;
+			uint16_t target_dy;
+			uint16_t target_dx;
+			uint8_t target_direction;
+			uint8_t approach;
+			uint16_t move;
+			uint32_t definition;
+			uint8_t retarget_time;
+			uint8_t move_time;
+			uint16_t target;
+		} enemy_rodney_shoot;
+		struct
+		{
+			uint8_t pad_00[0x4];
+			uint8_t throw;
+			uint8_t arm_flags;
+			int16_t brake;
+			uint8_t pad_08[0x1];
+			uint8_t arm_length;
+			uint8_t side;
+			uint8_t target_faces;
+			uint8_t pad_0C[0x12];
+			uint8_t dodge_chance;
+			uint8_t facing;
+			uint16_t target_dy;
+			uint16_t target_dx;
+			uint8_t target_direction;
+			uint8_t approach;
+			uint16_t move;
+			uint32_t arm;
+			uint8_t retarget_time;
+			uint8_t move_time;
+			uint16_t target;
+		} enemy_rodney_whip;
+		struct
+		{
+			uint8_t pad_00[0x4];
+			uint8_t throw;
+			uint8_t pad_05[0x3];
+			uint8_t shots_left;
+			uint8_t shot_time;
+			uint8_t side;
+			uint8_t target_faces;
+			uint8_t pad_0C[0x12];
+			uint8_t dodge_chance;
+			uint8_t facing;
+			uint16_t target_dy;
+			uint16_t target_dx;
+			uint8_t target_direction;
+			uint8_t approach;
+			uint16_t move;
+			uint32_t definition;
+			uint8_t retarget_time;
+			uint8_t move_time;
+			uint16_t target;
+		} enemy_shoot;
+		struct
+		{
+			uint8_t pad_00[0x4];
+			uint8_t throw;
+			uint8_t attack_wait;
+			uint8_t pad_06[0x1];
+			uint8_t timer;
+			uint16_t ray_wait;
+			uint8_t side;
+			uint8_t target_faces;
+			uint8_t pad_0C[0x12];
+			uint8_t guard_wait;
+			uint8_t facing;
+			uint16_t target_dy;
+			uint16_t target_dx;
+			uint8_t target_direction;
+			uint8_t approach;
+			uint16_t move;
+			uint8_t pad_28[0x3];
+			uint8_t hits_to_knock_back;
+			uint8_t retarget_time;
+			uint8_t move_time;
+			uint16_t target;
+		} enemy_shredder;
+		struct
+		{
+			uint8_t pad_00[0x4];
+			uint8_t throw;
+			uint8_t pad_05[0x4];
+			uint8_t steps;
+			uint8_t side;
+			uint8_t target_faces;
+			uint8_t pad_0C[0x12];
+			uint8_t dodge_chance;
+			uint8_t facing;
+			uint16_t target_dy;
+			uint16_t target_dx;
+			uint8_t target_direction;
+			uint8_t approach;
+			uint16_t move;
+			uint32_t definition;
+			uint8_t retarget_time;
+			uint8_t move_time;
+			uint16_t target;
+		} enemy_shuffle;
+		struct
+		{
+			uint8_t pad_00[0x4];
+			uint8_t throw;
+			uint8_t hits_left;
+			uint8_t pad_06[0x4];
+			uint8_t side;
+			uint8_t target_faces;
+			uint8_t pad_0C[0x12];
+			uint8_t dodge_chance;
+			uint8_t facing;
+			uint16_t target_dy;
+			uint16_t target_dx;
+			uint8_t target_direction;
+			uint8_t approach;
+			uint16_t move;
+			uint32_t definition;
+			uint8_t retarget_time;
+			uint8_t move_time;
+			uint16_t target;
+		} enemy_spear;
+		struct
+		{
+			uint8_t pad_00[0x4];
+			uint8_t throw;
+			uint8_t pad_05[0x3];
+			uint8_t time;
+			uint8_t turns;
+			uint8_t side;
+			uint8_t target_faces;
+			uint8_t pad_0C[0x12];
+			uint8_t dodge_chance;
+			uint8_t facing;
+			uint16_t target_dy;
+			uint16_t target_dx;
+			uint8_t target_direction;
+			uint8_t approach;
+			uint16_t move;
+			uint32_t definition;
+			uint8_t retarget_time;
+			uint8_t move_time;
+			uint16_t target;
+		} enemy_stalk;
+		struct
+		{
+			uint8_t pad_00[0x4];
+			uint8_t throw;
+			uint8_t pad_05[0x3];
+			uint8_t throws_left;
+			uint8_t throw_time;
+			uint8_t side;
+			uint8_t target_faces;
+			uint8_t pad_0C[0x12];
+			uint8_t dodge_chance;
+			uint8_t facing;
+			uint16_t target_dy;
+			uint16_t target_dx;
+			uint8_t target_direction;
+			uint8_t approach;
+			uint16_t move;
+			uint32_t definition;
+			uint8_t retarget_time;
+			uint8_t move_time;
+			uint16_t target;
+		} enemy_throw;
+		struct
+		{
+			uint8_t pad_00[0x4];
+			uint8_t throw;
+			uint8_t pad_05[0x1];
+			uint32_t animations;
+			uint8_t side;
+			uint8_t target_faces;
+			uint8_t pad_0C[0x2];
+			uint16_t speed;
+			uint8_t pad_10[0xE];
+			uint8_t dodge_chance;
+			uint8_t facing;
+			uint16_t target_dy;
+			uint16_t target_dx;
+			uint8_t target_direction;
+			uint8_t approach;
+			uint16_t move;
+			uint32_t definition;
+			uint8_t retarget_time;
+			uint8_t move_time;
+			uint16_t target;
+		} enemy_walk;
+		struct
+		{
+			uint8_t pad_00[0x26];
+			uint16_t hit_sound;
+		} falling_debris;
+		struct
+		{
+			uint8_t pad_00[0x1E];
+			uint8_t shots_left;
+			uint8_t timer;
+			uint8_t aim;
+			uint8_t turning;
+			union
+			{
+				uint16_t heading;
+				struct
+				{
+					uint8_t pad_22[0x1];
+					uint8_t direction;
+				};
+			};
+			uint8_t turn_speed;
+			uint8_t bob;
+			uint8_t pad_26[0x4];
+			uint16_t time_left;
+			uint32_t target;
+		} flying_drone;
+		struct
+		{
+			uint8_t pad_00[0x26];
+			uint16_t hit_sound;
+		} foot_car;
+		struct
+		{
+			uint8_t pad_00[0x1F];
+			uint8_t timer;
+			uint8_t pad_20[0xC];
+			uint32_t row_status;
+		} freeze_nozzle;
+		struct
+		{
+			uint8_t pad_00[0x20];
+			uint8_t flies_left;
+			uint8_t pad_21[0xB];
+			uint32_t shooter;
+		} gun_blast;
+		struct
+		{
+			uint8_t pad_00[0x1E];
+			uint8_t shots_left;
+			uint8_t timer;
+			uint8_t drift;
+			uint8_t pad_21[0x1];
+			uint16_t stay_time;
+		} helicopter;
+		struct
+		{
+			uint8_t pad_00[0x1E];
+			uint8_t jets_left;
+			uint8_t timer;
+		} hydrant;
+		struct
+		{
+			uint8_t pad_00[0x1E];
+			uint8_t jets_left;
+			uint8_t timer;
+			uint8_t jet;
+		} hydrant_water;
+		struct
+		{
+			uint8_t pad_00[0x1E];
+			uint8_t move_time;
+			uint8_t timer;
+			uint8_t laser_angle;
+			uint8_t close_turtle;
+			uint8_t hurt;
+			uint8_t pad_23[0x2];
+			uint8_t hit_delay;
+			uint8_t pad_26[0x5];
+			uint8_t hits_left;
+		} krang;
+		struct
+		{
+			uint8_t pad_00[0x1E];
+			uint8_t move_time;
+			uint8_t timer;
+			uint8_t explosions;
+			uint8_t close_turtle;
+			uint8_t hurt;
+			uint8_t pad_23[0x2];
+			uint8_t hit_delay;
+			uint8_t pad_26[0x5];
+			uint8_t hits_left;
+		} krang_explode;
+		struct
+		{
+			uint8_t pad_00[0x1E];
+			uint8_t move_time;
+			uint8_t timer;
+			uint8_t flipped;
+			uint8_t close_turtle;
+			uint8_t hurt;
+			uint8_t pad_23[0x2];
+			uint8_t hit_delay;
+			uint8_t pad_26[0x5];
+			uint8_t hits_left;
+			uint32_t shooter;
+		} krang_fist;
+		struct
+		{
+			uint8_t pad_00[0x1E];
+			uint8_t last;
+			uint8_t delay;
+			uint8_t flipped;
+			uint8_t close_turtle;
+			uint8_t hurt;
+			uint8_t pad_23[0x2];
+			uint8_t hit_delay;
+			uint8_t pad_26[0x5];
+			uint8_t hits_left;
+			uint32_t shooter;
+		} krang_laser;
+		struct
+		{
+			uint8_t pad_00[0x2E];
+			uint16_t trigger_x;
+		} manhole_soldier;
+		struct
+		{
+			uint8_t pad_00[0x20];
+			uint8_t flies_left;
+			uint8_t pad_21[0xB];
+			uint32_t shooter;
+		} missile;
+		struct
+		{
+			uint8_t pad_00[0x5];
+			uint8_t wheelie;
+			uint8_t pad_06[0x3];
+			uint8_t aim_time;
+			uint8_t pad_0A[0x1C];
+			uint16_t hit_sound;
+			uint8_t pad_28[0x4];
+			uint32_t target_turtle;
+		} motorbike;
+		struct
+		{
+			uint8_t pad_00[0x9];
+			uint8_t mousers_left;
+			uint8_t pad_0A[0x1E];
+			uint32_t hole;
+			uint8_t pad_2C[0x1];
+			uint8_t spawn_time;
+		} mouser_hole;
+		struct
+		{
+			uint8_t pad_00[0x20];
+			uint8_t nozzle_status;
+		} nozzle_row;
+		struct
+		{
+			uint8_t pad_00[0x1F];
+			uint8_t timer;
+		} oil_drum;
+		struct
+		{
+			uint8_t pad_00[0x1E];
+			uint8_t soldier_time;
+			uint8_t counter;
+			uint8_t pad_20[0x4];
+			uint16_t last_screen_x;
+			uint8_t pad_26[0x2];
+			uint16_t scroll_y;
+			uint16_t scroll_x;
+			uint32_t blank_row;
+		} parked_car;
+		struct
+		{
+			uint8_t pad_00[0x20];
+			uint8_t announced;
+		} pizza;
+		struct
+		{
+			uint8_t pad_00[0x2C];
+			uint16_t end_y;
+			uint16_t end_x;
+		} profile;
+		struct
+		{
+			uint8_t pad_00[0x1F];
+			uint8_t timer;
+		} rat;
+		struct
+		{
+			uint8_t pad_00[0x1E];
+			uint8_t move_time;
+			uint8_t timer;
+			uint8_t explosions;
+			uint8_t close_turtle;
+			uint8_t hurt;
+			uint8_t shot_hit;
+			uint8_t players;
+			uint8_t hit_delay;
+			uint8_t pad_26[0x3];
+			uint8_t blows;
+			uint8_t pad_2A[0x1];
+			uint8_t hits_left;
+		} rock_soldier;
+		struct
+		{
+			uint8_t pad_00[0x26];
+			uint16_t hit_sound;
+		} rocket;
+		struct
+		{
+			uint8_t pad_00[0x28];
+			uint32_t burst;
+		} rocksteady_bullet;
+		struct
+		{
+			uint8_t pad_00[0x26];
+			uint16_t hit_sound;
+			uint8_t pad_28[0x5];
+			uint8_t hit_delay;
+		} rolling;
+		struct
+		{
+			uint8_t pad_00[0x26];
+			uint16_t hit_sound;
+		} scenery_open_manhole;
+		struct
+		{
+			uint8_t pad_00[0x26];
+			uint16_t hit_sound;
+		} set_object_stats;
+		struct
+		{
+			uint8_t pad_00[0x1E];
+			uint8_t missiles_left;
+			uint8_t delay;
+			uint8_t drift;
+		} sewer_launcher;
+		struct
+		{
+			uint8_t pad_00[0x20];
+			uint8_t goes_right;
+		} sewer_missile;
+		struct
+		{
+			uint8_t pad_00[0x9];
+			uint8_t swim_time;
+		} sewer_ripple;
+		struct
+		{
+			uint8_t pad_00[0x1F];
+			uint8_t blink_timer;
+			uint8_t pad_20[0x1];
+			uint8_t blink_period;
+			uint8_t pad_22[0xA];
+			uint32_t leader;
+		} shock_bars;
+		struct
+		{
+			uint8_t pad_00[0x5];
+			uint8_t landings;
+		} shredder_piece;
+		struct
+		{
+			uint8_t pad_00[0x28];
+			uint32_t shredder;
+			uint8_t pad_2C[0x1];
+			uint8_t time_left;
+		} shredder_ray;
+		struct
+		{
+			uint8_t pad_00[0x1F];
+			uint8_t timer;
+		} spiked_pole;
+		struct
+		{
+			uint8_t pad_00[0x26];
+			uint16_t hit_sound;
+		} start_shot;
+		struct
+		{
+			uint8_t pad_00[0x1F];
+			uint8_t timer;
+			uint8_t explosions;
+			uint8_t turning;
+			union
+			{
+				uint16_t heading;
+				struct
+				{
+					uint8_t pad_22[0x1];
+					uint8_t direction;
+				};
+			};
+			uint8_t turn_speed;
+			uint8_t bob;
+			uint8_t pad_26[0x4];
+			uint16_t time_left;
+			uint32_t target;
+		} stockman;
+		struct
+		{
+			uint8_t pad_00[0x1F];
+			uint8_t shadow_time;
+		} technodrome_ball;
+		struct
+		{
+			uint8_t pad_00[0x8];
+			uint8_t soldiers_left;
+			uint8_t spawn_time;
+		} technodrome_door;
+		struct
+		{
+			uint8_t pad_00[0x2E];
+			uint16_t trigger_x;
+		} tire_soldier;
+		struct
+		{
+			uint8_t pad_00[0x1E];
+			uint8_t shots_left;
+			uint8_t timer;
+			uint8_t phase;
+		} turret;
+		struct
+		{
+			uint8_t pad_00[0x1E];
+			uint8_t shots_left;
+			uint8_t timer;
+			uint8_t flipped;
+		} turret_shot;
+		struct
+		{
+			uint16_t prompt_place;
+			uint32_t hit_target;
+			uint8_t prompt_frame;
+			uint8_t prompt_time;
+			uint16_t combo;
+			uint8_t has_gun;
+			uint8_t enemy_behind;
+			uint8_t pad_0C[0x12];
+			uint8_t attack_press_time;
+			uint8_t pad_1F[0x2];
+			uint8_t combo_step;
+			uint8_t invulnerable_time;
+			uint8_t exit_step;
+			uint32_t hit_by;
+			uint8_t escape_presses;
+			uint8_t wait_timer;
+			uint8_t reaction_variant;
+			uint8_t reaction_step;
+			uint8_t hit_reaction;
+			uint8_t knockback_flags;
+			uint16_t drift_speed;
+			uint8_t jump_flip;
+			uint8_t idle_time;
+			uint8_t move_timer;
+			uint8_t falling;
+			uint16_t jump_speed;
+			uint8_t pad_36[0x16];
+			uint8_t scroll_push;
+		} turtle;
+		struct
+		{
+			uint16_t prompt_place;
+			uint32_t hit_target;
+			uint8_t prompt_frame;
+			uint8_t prompt_time;
+			uint16_t combo;
+			uint8_t has_gun;
+			uint8_t enemy_behind;
+			uint8_t pad_0C[0x12];
+			uint8_t attack_press_time;
+			uint8_t pad_1F[0x2];
+			uint8_t combo_step;
+			uint8_t invulnerable_time;
+			uint8_t exit_step;
+			uint32_t hit_by;
+			uint8_t escape_presses;
+			uint8_t wait_timer;
+			uint8_t reaction_variant;
+			uint8_t reaction_step;
+			uint8_t hit_reaction;
+			uint8_t knockback_flags;
+			uint16_t drift_speed;
+			int16_t jump_in_speed;
+			uint8_t move_timer;
+			uint8_t falling;
+			uint16_t jump_speed;
+			uint8_t pad_36[0x16];
+			uint8_t scroll_push;
+		} turtle_jump_in;
+		struct
+		{
+			uint8_t pad_00[0x28];
+			uint32_t rodney;
+		} whip_arm;
+		struct
+		{
+			uint8_t pad_00[0x28];
+			uint32_t blocks;
+			uint8_t pad_2C[0x2];
+			uint16_t trigger_y;
+		} window_soldier_dive;
+		struct
+		{
+			uint8_t pad_00[0x8];
+			uint8_t delay;
+			uint8_t break_time;
+			uint8_t pad_0A[0x1E];
+			uint32_t blocks;
+			uint8_t pad_2C[0x2];
+			uint16_t trigger_x;
+		} window_soldier_drop;
+	};
+	uint8_t kind;
+	uint8_t contacts;
+	uint8_t flags;
+};
+
+struct animation_frame
+{
+	int16_t attack_depth;
+	uint16_t body_box;
+	uint32_t sprites;
+	uint8_t last_sprite;
+	uint8_t time;
+};
+
+struct attack_frame
+{
+	int16_t attack_height;
+	int16_t attack_width;
+	int16_t attack_y;
+	int16_t attack_x;
+	int16_t attack_depth;
+	uint16_t body_box;
+	uint32_t sprites;
+	uint8_t last_sprite;
+	uint8_t time;
+};
+
+struct sprite
+{
+	int16_t y;
+	int16_t x;
+	uint8_t flips;
+	uint8_t colour;
+	uint8_t code;
+	uint8_t size_code;
+};
+
+struct sprite_size
+{
+	uint8_t pad_00[0x2];
+	int16_t width;
+	int16_t bottom;
+	int16_t left;
+};
+
+struct body_box
+{
+	int16_t height;
+	int16_t half_width;
+};
+
+struct player_slot
+{
+	uint32_t unused;
+	uint8_t pad_04[0x3];
+	uint8_t grab_time;
+	uint8_t mouser_sides;
+	uint8_t rodney_sides;
+	uint8_t sides;
+	uint8_t enemies;
+	uint32_t turtle;
+};
+
+struct player
+{
+	uint8_t message;
+	uint8_t health_bars;
+	uint16_t score;
+	uint16_t unused_setting_copy;
+	union
+	{
+		uint16_t lives;
+		uint8_t lives_low;
+	};
+};
+
+struct coin_slot
+{
+	uint16_t credits;
+	uint8_t counter_on;
+	uint8_t credits_per_coins;
+	uint8_t coins_per_credit;
+	uint8_t counter_pulse;
+	uint8_t coins;
+	uint8_t coins_to_count;
+};
+
+struct palette_effect
+{
+	uint32_t colour;
+	uint32_t step;
+	uint8_t time;
+	uint8_t flags;
+};
+
+struct palette_request
+{
+	uint32_t data;
+	uint16_t kind;
+};
+
+struct layer
+{
+	uint8_t pad_00[0xA];
+	uint8_t new_column;
+	uint8_t new_row;
+	uint32_t new_row_y;
+	uint32_t new_column_x;
+	uint32_t y_min;
+	uint32_t x_min;
+	uint32_t y_max;
+	uint32_t x_max;
+	int8_t x_direction;
+	int8_t y_direction;
+	uint32_t blocks;
+	uint32_t map;
+	uint16_t map_width;
+	uint16_t y_speed;
+	uint16_t x_speed;
+	uint16_t row_phase;
+	uint16_t column_phase;
+	union
+	{
+		uint32_t y;
+		struct
+		{
+			uint8_t pad_38[0x1];
+			uint8_t y_pixel;
+			uint8_t y_page;
+		};
+	};
+	union
+	{
+		uint32_t x;
+		struct
+		{
+			uint8_t pad_3C[0x2];
+			uint8_t x_page;
+		};
+	};
+};
+
+struct typed_pass
+{
+	uint8_t delay;
+	uint8_t wait;
+	uint32_t text;
+	uint32_t place;
+};
+
+struct object_stats
+{
+	uint16_t hit_sound;
+	uint16_t depth;
+	uint16_t damage;
+	uint8_t health;
+	uint8_t health_bars;
+	uint8_t hit;
+	uint8_t attack;
+};
+
 #pragma pack(pop)
 
+_Static_assert(sizeof(struct object) == 0x50, "struct object has the size of the game's blocks");
+_Static_assert(sizeof(struct animation_frame) == 0xA, "struct animation_frame has the size of the program ROM's records");
+_Static_assert(sizeof(struct attack_frame) == 0x12, "struct attack_frame has the size of the program ROM's records");
+_Static_assert(sizeof(struct sprite) == 0x8, "struct sprite has the size of the program ROM's records");
+_Static_assert(sizeof(struct sprite_size) == 0x8, "struct sprite_size has the size of the program ROM's records");
+_Static_assert(sizeof(struct body_box) == 0x4, "struct body_box has the size of the program ROM's records");
+_Static_assert(sizeof(struct player_slot) == 0x10, "struct player_slot has the size of the game's blocks");
+_Static_assert(sizeof(struct player) == 0x8, "struct player has the size of the game's blocks");
+_Static_assert(sizeof(struct coin_slot) == 0x8, "struct coin_slot has the size of the game's blocks");
+_Static_assert(sizeof(struct palette_effect) == 0xA, "struct palette_effect has the size of the game's blocks");
+_Static_assert(sizeof(struct palette_request) == 0x6, "struct palette_request has the size of the game's blocks");
+_Static_assert(sizeof(struct layer) == 0x40, "struct layer has the size of the game's blocks");
+_Static_assert(sizeof(struct typed_pass) == 0xA, "struct typed_pass has the size of the game's blocks");
+_Static_assert(sizeof(struct object_stats) == 0xA, "struct object_stats has the size of the program ROM's records");
 
+#define OBJECT(address) ((struct object *)ram((address), sizeof(struct object)))
+#define ANIMATION_FRAME(address) ((const struct animation_frame *)data_record((address), sizeof(struct animation_frame)))
+#define ATTACK_FRAME(address) ((const struct attack_frame *)data_record((address), sizeof(struct attack_frame)))
+#define SPRITE(address) ((const struct sprite *)data_record((address), sizeof(struct sprite)))
+#define SPRITE_SIZE(address) ((const struct sprite_size *)data_record((address), sizeof(struct sprite_size)))
+#define BODY_BOX(address) ((const struct body_box *)data_record((address), sizeof(struct body_box)))
+#define PLAYER_SLOT(address) ((struct player_slot *)ram((address), sizeof(struct player_slot)))
+#define PLAYER(address) ((struct player *)ram((address), sizeof(struct player)))
+#define COIN_SLOT(address) ((struct coin_slot *)ram((address), sizeof(struct coin_slot)))
+#define PALETTE_EFFECT(address) ((struct palette_effect *)ram((address), sizeof(struct palette_effect)))
+#define PALETTE_REQUEST(address) ((struct palette_request *)ram((address), sizeof(struct palette_request)))
+#define LAYER(address) ((struct layer *)ram((address), sizeof(struct layer)))
+#define TYPED_PASS(address) ((struct typed_pass *)ram((address), sizeof(struct typed_pass)))
+#define OBJECT_STATS(address) ((const struct object_stats *)data_record((address), sizeof(struct object_stats)))
+#define OBJECT_ADDRESS(n) (0x62000u + (n) * 0x50u)    /* the 50 of them, from 0 */
+#define PLAYER_ADDRESS(n) (0x60100u + (n) * 0x8u)    /* the 4 of them, from 0 */
+#define COIN_SLOT_ADDRESS(n) (0x60300u + (n) * 0x8u)    /* the 4 of them, from 0 */
+#define PALETTE_EFFECT_ADDRESS(n) (0x60480u + (n) * 0xAu)    /* the 64 of them, from 0 */
+#define PALETTE_REQUEST_ADDRESS(n) (0x60B00u + (n) * 0x6u)    /* the 40 of them, from 0 */
+#define PLAYER_SLOT_ADDRESS(n) (0x62FA0u + (n) * 0x10u)    /* the 4 of them, from 0 */
+#define LAYER_ADDRESS(n) (0x63300u + (n) * 0x40u)    /* the 3 of them, from 0 */
+#define TYPED_PASS_ADDRESS(n) (0x63430u + (n) * 0xAu)    /* the 8 of them, from 0 */
 
 #endif

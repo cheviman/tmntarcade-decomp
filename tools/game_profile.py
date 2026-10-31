@@ -32,6 +32,9 @@ DISASSEMBLER = "m68000.disassembler"
 CODE_START = 0x1000                             # 000400-000FFF, after the vectors, is all zeros
 DATA_WALK = "data_walk"                         # the data the engines read, walked (tools/data_walk.py)
 OBJECT_REGISTER = "A0"                          # the object a handler runs on: its fields, for the analysis
+# a family of objects whose name starts with another's (enemy_walk, enemy) reads the fields that one names too,
+# besides its own (symbols.txt scoped lines; decompiler/pointers.py)
+NESTED_FAMILIES = True
 TRANSLATOR = "m68000.translate"                 # the translation scaffold (tools/recompile.py) for the 68000
 FRAME_WAIT = 0x0013CE                           # the main loop finds no job here: the frame (runtime/include/tmnt/frame.h)
 # The game's code the board puts its own in place of (runtime/src/board_code.c): where it starts, the board's
@@ -48,9 +51,20 @@ PROGRAM_AREA = (0x000000, 0x060000)
 HARDWARE = [(0x080000, 0x081000, "PALETTE"), (0x0A0000, 0x0A0020, "IO"), (0x0C0000, 0x0C0002, "PRIORITY"),
             (0x100000, 0x108000, "TILES"), (0x10E800, 0x10E802, "UNMAPPED"), (0x140000, 0x140008, "SPRITE_CONTROL"),
             (0x140400, 0x140800, "SPRITES")]
+# a pointer the code works out into one of the board's devices (the K052109's tile RAM a text or a block of tiles
+# is drawn into, the sprite RAM, the palette RAM) is the device's, reached through the bus: io_write8(p, value)
+DEVICE_AREAS = [(start, end) for start, end, _ in HARDWARE]
 # reading the K051937 and the K051960 does something (in the sprite ROM's readback mode, the read moves its
 # offset): a read there stays where its value goes unused
 EFFECT_READ_AREAS = [(0x140000, 0x140800)]
+# the game's structures that lie one after another at a fixed address (symbols.txt declares them): the 50 objects, the
+# players' records, the coin slots, the palette effects' slots, the palette requests, the players' slots the enemies use
+STRUCT_ARRAYS = {"object": (0x062000, 50), "player": (0x060100, 4), "coin_slot": (0x060300, 4),
+                 "palette_effect": (0x060480, 64), "palette_request": (0x060B00, 40), "player_slot": (0x062FA0, 4),
+                 "layer": (0x063300, 3), "typed_pass": (0x063430, 8)}
+# the structures at a fixed address the code reaches by their own names: the layer the code works on, a copy of
+# layer A's or B's (the K052109's two scrolling layers; load_layer_a copies one in, save_layer_a back)
+NAMED_BASES = {0x063300: "WORKING_LAYER", 0x063340: "LAYER_A", 0x063380: "LAYER_B"}
 # the board's memories, as game/support.h names them (addresses the code computes into them)
 REGIONS = [(0x080000, 0x081000, "PALETTE_RAM"), (0x100000, 0x108000, "TILE_RAM"), (0x140400, 0x140800, "SPRITE_RAM")]
 # the VBLANK handler (003DC4) moves its return frame from the supervisor's stack to the user's (move USP, A6 ...
@@ -59,6 +73,19 @@ INTERRUPT_STACK_SWITCH = (0x003DE6, 0x003DF4)
 # the code that runs in supervisor mode only: the reset (up to 001380's move to SR, which leaves it), the VBLANK
 # handler's start (up to its move to SR); a privileged instruction there needs no check of the mode
 SUPERVISOR_CODE = ((0x001000, 0x001384), (0x003DC4, 0x003DF8))
+# the routines that work on memory by its address, whatever is there (the faithful measure of tools/noise_report.py
+# takes their memory reached by address as the original's), each with why
+MEMORY_ROUTINES = {
+    "zero_ram_below": "zeroes D0 + 1 blocks of 256 bytes below the address in A0 with movem (004516-004532), whatever is "
+                      "there: its callers hand it the work RAM's stretches and the sprite RAM (004612 \"lea $140800.l, A0\")",
+    "clear_objects": "zeroes the 50 objects with movem, 32 bytes at a time down from their end (004604 \"lea $62fa0.l, A0\", 00460A \"move.w #$7c, D0\")",
+    # (five ways into one unreached tail, 004666: a place, a count, then three movem a block of 96 bytes, 00466A-004672)
+    "unreached_004620": "unreached: zeroes 4 blocks of 96 bytes below 062000 (004620), whatever is there",
+    "unreached_00462E": "unreached: zeroes 12 blocks of 96 bytes below 0623C0 (00462E), whatever is there",
+    "unreached_00463C": "unreached: zeroes 8 blocks of 96 bytes below 062780 (00463C), whatever is there",
+    "unreached_00464A": "unreached: zeroes 8 blocks of 96 bytes below 062140 (00464A), whatever is there",
+    "unreached_004658": "unreached: zeroes 8 blocks of 96 bytes below 062A00 (004658), whatever is there",
+}
 NOISE_REGISTERS = r"[da][0-7]"                  # the 68000's: what tools/noise_report.py counts as named after a register
 NOTES = {
     "variables": ["/* the game's variables in work RAM (060000-063FFF) */"],

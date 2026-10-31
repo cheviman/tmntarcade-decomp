@@ -95,7 +95,8 @@ static inline uint32_t data32(uint32_t address)
 
 /* A record of the program's data at an address the program holds (ram.h: ANIMATION_FRAME(address)): its 'size'
    bytes the other way round, as the work RAM's structures, so that ram.h declares its fields from its end too.
-   From the piece of the assets it is in (or the work RAM, where the program set the pointer there) */
+   From the piece of the assets it is in (or the work RAM, where the program set the pointer there); bytes past
+   the pieces (a record the code reads only in part, runtime/src/game_program.c) read 0 */
 const void *data_record(uint32_t address, uint32_t size);
 
 #define DATA8(address)  data8(address)

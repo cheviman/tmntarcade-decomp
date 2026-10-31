@@ -3,7 +3,7 @@
  *    Description: the fire's tiles redrawn in the first two areas
  *    Version:     0.1.0
  *    Created:     29-10-2026
- *    Modified:    29-10-2026
+ *    Modified:    30-10-2026
  *    Author:      Sebastian Toyos
  *
  *    Teenage Mutant Ninja Turtles (arcade, Konami 1989): the game's 68000 program decompiled into C by
@@ -20,52 +20,52 @@ void animate_fire_tiles(uint32_t *p_d5, uint32_t *p_d6)
 	uint32_t a0 = 0, a1 = 0, a2 = 0, d5_2 = 0, d6_2 = 0;
 	uint16_t t1 = 0;
 
-	if (unk_060001 != 2u)
+	if (game_state != 2u)
 		return;
-	if (unk_060005 != 5u)
+	if (scene != 5u)
 	{
-		if (unk_060005 != 4u)
+		if (scene != 4u)
 			return;
-		if (unk_060007 != 0u)
+		if (scene_step != 0u)
 		{
-			if (unk_060007 != 1u || unk_060009 != 0u)
+			if (scene_step != 1u || scene_substep != 0u)
 				return;
 		}
-		else if (unk_060009 != 4u)
+		else if (scene_substep != 4u)
 			return;
-		if (unk_060121 != 0u && unk_060121 != 1u)
+		if (stage != 0u && stage != 1u)
 			return;
 	}
-	else if (unk_060121 != 0u && (unk_060121 != 1u || unk_0633EA >= 4u))
+	else if (stage != 0u && (stage != 1u || cutscene_step >= 4u))
 		return;
-	unk_063340 = unk_063380;
-	unk_063344 = unk_063384;
-	d0 = (uint8_t)unk_0600A4;
-	if (d0 == unk_0633F1)
+	LAYER(LAYER_A)->x = LAYER(LAYER_B)->x;
+	LAYER(LAYER_A)->y = LAYER(LAYER_B)->y;
+	d0 = (uint8_t)frame_count;
+	if (d0 == fire_last_frame)
 		return;
-	unk_0633F1 = d0;
-	unk_0633F2++;
-	if (unk_0633F2 >= 4u)
+	fire_last_frame = d0;
+	building_fire_spot++;
+	if (building_fire_spot >= 4u)
 	{
-		unk_0633F2 = 0u;
-		unk_0633F3++;
-		if (unk_0633F3 >= 8u)
-			unk_0633F3 = 0u;
+		building_fire_spot = 0u;
+		building_fire_frame++;
+		if (building_fire_frame >= 8u)
+			building_fire_frame = 0u;
 	}
-	if (unk_060121 != 0u)
+	if (stage != 0u)
 	{
-		unk_0633C6++;
-		if (unk_0633C6 >= 4u)
+		apartment_fire_spot++;
+		if (apartment_fire_spot >= 4u)
 		{
-			unk_0633C6 = 0u;
-			unk_0633C7++;
-			if (unk_0633C7 >= 8u)
-				unk_0633C7 = 0u;
+			apartment_fire_spot = 0u;
+			apartment_fire_frame++;
+			if (apartment_fire_frame >= 8u)
+				apartment_fire_frame = 0u;
 		}
-		d0_2 = (uint16_t)((uint32_t)unk_0633C6 << 2);
+		d0_2 = (uint16_t)((uint32_t)apartment_fire_spot << 2);
 		a0 = fire_tiles[d0_2 / 4u];
 		a2 = mem_read32(a0);
-		a0 = mem_read32(a0 + 4u + (uint16_t)(IN_PAGE(d0_2, unk_0633C7) << 2));
+		a0 = mem_read32(a0 + 4u + (uint16_t)(IN_PAGE(d0_2, apartment_fire_frame) << 2));
 		a1 = fire_blocks_ADDRESS;
 		d7 = 7u;
 		d6_2 = 0x10u;
@@ -73,10 +73,10 @@ void animate_fire_tiles(uint32_t *p_d5, uint32_t *p_d6)
 	}
 	else
 	{
-		d0_2 = (uint16_t)((uint32_t)unk_0633F2 << 2);
+		d0_2 = (uint16_t)((uint32_t)building_fire_spot << 2);
 		a0 = fire_tiles_area_0[d0_2 / 4u];
 		a2 = mem_read32(a0);
-		a0 = mem_read32(a0 + 4u + (uint16_t)(IN_PAGE(d0_2, unk_0633F3) << 2));
+		a0 = mem_read32(a0 + 4u + (uint16_t)(IN_PAGE(d0_2, building_fire_frame) << 2));
 		a1 = fire_blocks_ADDRESS;
 		d7 = 3u;
 		d6_2 = 8u;

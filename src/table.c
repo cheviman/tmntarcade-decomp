@@ -3,7 +3,7 @@
  *    Description: the code the board runs by address (the vectors' handlers), the reset entry, and the tables the game loads by name
  *    Version:     0.1.0
  *    Created:     29-10-2026
- *    Modified:    29-10-2026
+ *    Modified:    30-10-2026
  *    Author:      Sebastian Toyos
  *
  *    Teenage Mutant Ninja Turtles (arcade, Konami 1989): the game's 68000 program decompiled into C by
@@ -14,10 +14,10 @@
 /* the handlers of the vectors (the reset, the exceptions, the interrupts), by address */
 const game_code_entry game_code[] =
 {
-	{ 0x001000u, func_001000 },
-	{ 0x00193Eu, func_00193E },
-	{ 0x003DC4u, func_003DC4 },
-	{ 0x004190u, func_004190 },
+	{ 0x001000u, reset },
+	{ 0x00193Eu, exception_hang },
+	{ 0x003DC4u, vblank_interrupt },
+	{ 0x004190u, irq6_interrupt },
 };
 
 const size_t game_code_count = 4;
@@ -25,7 +25,7 @@ const size_t game_code_count = 4;
 /* the code at the reset vector */
 void game_entry(void)
 {
-	func_001000();
+	reset();
 }
 
 const void *indexed_table_of_32_bit_values_0013DE_data;
@@ -42,6 +42,7 @@ const void *text_layer_places_data;
 const void *big_font_place_data;
 const void *indexed_table_of_8_bit_values_002884_data;
 const void *rom_002885_data;
+const void *indexed_table_of_32_bit_values_0031F2_data;
 const void *rom_00332A_data;
 const void *rom_0033A2_data;
 const void *rom_0033A3_data;
@@ -145,7 +146,7 @@ const void *indexed_table_of_32_bit_values_010148_data;
 const void *indexed_table_of_16_bit_values_010232_data;
 const void *indexed_table_of_32_bit_values_010616_data;
 const void *indexed_table_of_8_bit_values_0107AE_data;
-const void *indexed_table_of_32_bit_values_010A0E_data;
+const void *nozzle_row_routines_data;
 const void *indexed_table_of_32_bit_values_010AB2_data;
 const void *indexed_table_of_32_bit_values_010B7E_data;
 const void *indexed_table_of_8_bit_values_010EAA_data;
@@ -379,9 +380,9 @@ const void *indexed_table_of_8_bit_values_030652_data;
 const void *rom_030653_data;
 const void *indexed_table_of_32_bit_values_030996_data;
 const void *indexed_table_of_32_bit_values_031152_data;
-const void *rom_0471F4_data;
-const void *indexed_table_of_8_bit_values_047BDE_data;
-const void *rom_047BE2_data;
+const void *attack_check_objects_data;
+const void *object_group_counts_data;
+const void *object_groups_data;
 const void *rom_04881C_data;
 const void *rom_048830_data;
 const void *indexed_table_of_8_bit_values_048C5E_data;
@@ -440,6 +441,7 @@ const game_table game_tables[] =
 	{ "big_font_place", 0x002802u, &big_font_place_data, 4 },
 	{ "indexed_table_of_8_bit_values_002884", 0x002884u, &indexed_table_of_8_bit_values_002884_data, 1 },
 	{ "rom_002885", 0x002885u, &rom_002885_data, 1 },
+	{ "indexed_table_of_32_bit_values_0031F2", 0x0031F2u, &indexed_table_of_32_bit_values_0031F2_data, 4 },
 	{ "rom_00332A", 0x00332Au, &rom_00332A_data, 4 },
 	{ "rom_0033A2", 0x0033A2u, &rom_0033A2_data, 1 },
 	{ "rom_0033A3", 0x0033A3u, &rom_0033A3_data, 1 },
@@ -543,7 +545,7 @@ const game_table game_tables[] =
 	{ "indexed_table_of_16_bit_values_010232", 0x010232u, &indexed_table_of_16_bit_values_010232_data, 2 },
 	{ "indexed_table_of_32_bit_values_010616", 0x010616u, &indexed_table_of_32_bit_values_010616_data, 4 },
 	{ "indexed_table_of_8_bit_values_0107AE", 0x0107AEu, &indexed_table_of_8_bit_values_0107AE_data, 1 },
-	{ "indexed_table_of_32_bit_values_010A0E", 0x010A0Eu, &indexed_table_of_32_bit_values_010A0E_data, 4 },
+	{ "nozzle_row_routines", 0x010A0Eu, &nozzle_row_routines_data, 4 },
 	{ "indexed_table_of_32_bit_values_010AB2", 0x010AB2u, &indexed_table_of_32_bit_values_010AB2_data, 4 },
 	{ "indexed_table_of_32_bit_values_010B7E", 0x010B7Eu, &indexed_table_of_32_bit_values_010B7E_data, 4 },
 	{ "indexed_table_of_8_bit_values_010EAA", 0x010EAAu, &indexed_table_of_8_bit_values_010EAA_data, 1 },
@@ -777,9 +779,9 @@ const game_table game_tables[] =
 	{ "rom_030653", 0x030653u, &rom_030653_data, 1 },
 	{ "indexed_table_of_32_bit_values_030996", 0x030996u, &indexed_table_of_32_bit_values_030996_data, 4 },
 	{ "indexed_table_of_32_bit_values_031152", 0x031152u, &indexed_table_of_32_bit_values_031152_data, 4 },
-	{ "rom_0471F4", 0x0471F4u, &rom_0471F4_data, 4 },
-	{ "indexed_table_of_8_bit_values_047BDE", 0x047BDEu, &indexed_table_of_8_bit_values_047BDE_data, 1 },
-	{ "rom_047BE2", 0x047BE2u, &rom_047BE2_data, 4 },
+	{ "attack_check_objects", 0x0471F4u, &attack_check_objects_data, 4 },
+	{ "object_group_counts", 0x047BDEu, &object_group_counts_data, 1 },
+	{ "object_groups", 0x047BE2u, &object_groups_data, 4 },
 	{ "rom_04881C", 0x04881Cu, &rom_04881C_data, 2 },
 	{ "rom_048830", 0x048830u, &rom_048830_data, 1 },
 	{ "indexed_table_of_8_bit_values_048C5E", 0x048C5Eu, &indexed_table_of_8_bit_values_048C5E_data, 1 },
@@ -821,4 +823,4 @@ const game_table game_tables[] =
 	{ "rom_053896", 0x053896u, &rom_053896_data, 4 },
 };
 
-const size_t game_table_count = 393;
+const size_t game_table_count = 394;

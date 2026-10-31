@@ -3,7 +3,7 @@
  *    Description: the texts: from the program's tables of texts into the fixed layer, big characters, numbers
  *    Version:     0.1.0
  *    Created:     29-10-2026
- *    Modified:    29-10-2026
+ *    Modified:    30-10-2026
  *    Author:      Sebastian Toyos
  *
  *    Teenage Mutant Ninja Turtles (arcade, Konami 1989): the game's 68000 program decompiled into C by
@@ -16,7 +16,7 @@ void print_demo_text(uint16_t d7)
 	uint32_t a6 = 0;
 
 	a6 = demo_texts_ADDRESS;
-	func_001EB2(d7, a6);
+	print_table_text(d7, a6);
 }
 
 void print_test_text(uint16_t d7)
@@ -24,7 +24,7 @@ void print_test_text(uint16_t d7)
 	uint32_t a6 = 0;
 
 	a6 = test_mode_texts_ADDRESS;
-	func_001EB2(d7, a6);
+	print_table_text(d7, a6);
 }
 
 void print_game_text(uint16_t d7)
@@ -32,10 +32,11 @@ void print_game_text(uint16_t d7)
 	uint32_t a6 = 0;
 
 	a6 = game_texts_ADDRESS;
-	func_001EB2(d7, a6);
+	print_table_text(d7, a6);
 }
 
-void func_001EB2(uint16_t d7, uint32_t a6)
+/* a text of a table of texts into the fixed layer, or erased */
+void print_table_text(uint16_t d7, uint32_t a6)
 {
 	uint8_t d6 = 0, d7_2 = 0;
 	uint32_t a4 = 0, a6_2 = 0;
@@ -44,7 +45,7 @@ void func_001EB2(uint16_t d7, uint32_t a6)
 	if ((d7 & 0x200u) != 0u)
 	{
 		a6_2 = mem_read32(a6 + (d7 & 0x1FFu));
-		d7_2 = unk_06007A;
+		d7_2 = text_colour;
 		for (;;)
 		{
 			a4 = mem_read32(a6_2);
@@ -64,8 +65,8 @@ void func_001EB2(uint16_t d7, uint32_t a6)
 			}
 		}
 	}
-	a6_2 = mem_read32(a6 + (int16_t)d7);
-	d7_2 = unk_06007A;
+	a6_2 = mem_read32(a6 + d7);
+	d7_2 = text_colour;
 	for (;;)
 	{
 		a4 = mem_read32(a6_2);
@@ -86,48 +87,52 @@ void func_001EB2(uint16_t d7, uint32_t a6)
 	}
 }
 
-void func_001F0A(uint16_t d7)
+/* the colour of the texts printed next */
+void set_text_colour(uint16_t d7)
 {
-	unk_06007A = TABLE8(text_colours, (uint32_t)(int16_t)d7);
+	text_colour = text_colours[d7];
 }
 
-void func_001F2A(uint16_t d7)
+/* a second texts' colour no text uses */
+void set_spare_text_colour(uint16_t d7)
 {
-	unk_06007B = TABLE8(text_colours, (uint32_t)(int16_t)d7);
+	spare_text_colour = text_colours[d7];
 }
 
-uint32_t func_001F3A(uint32_t d4, uint32_t d7)
+/* an enemy defeated: a point to the players' scores, the top score kept */
+uint32_t add_point(uint32_t d4, uint32_t d7)
 {
 	uint32_t a4 = 0, d4_2 = 0;
 
-	if (unk_0600A3 == 0u)
+	if (game_on == 0u)
 		return d4;
 	d4_2 = d7;
 	if ((d4_2 & 1u) != 0u)
 	{
 		a4 = unk_060106_ADDRESS;
-		func_001F92(a4);
+		add_point_to_score(a4);
 	}
 	if ((d4_2 & 2u) != 0u)
 	{
 		a4 = unk_06010E_ADDRESS;
-		func_001F92(a4);
+		add_point_to_score(a4);
 	}
 	if ((d4_2 & 4u) != 0u)
 	{
 		a4 = unk_060116_ADDRESS;
-		func_001F92(a4);
+		add_point_to_score(a4);
 	}
 	if ((d4_2 & 8u) != 0u)
 	{
 		a4 = unk_06011E_ADDRESS;
-		func_001F92(a4);
+		add_point_to_score(a4);
 	}
-	func_001FB8((uint8_t)d4_2);
+	draw_scores((uint8_t)d4_2);
 	return d4_2;
 }
 
-void func_001F92(uint32_t a4)
+/* a point to a player's score and the top score kept */
+void add_point_to_score(uint32_t a4)
 {
 	uint32_t carry = 0, extend = 0;
 	uint16_t d7 = 0;
@@ -135,7 +140,7 @@ void func_001F92(uint32_t a4)
 	uint8_t t1 = 0, t2 = 0, t3 = 0;
 	uint16_t t4 = 0;
 
-	a5 = func_002032_ADDRESS;
+	a5 = draw_score_digits_ADDRESS;
 	d7 = 1u;
 	extend = 0u;
 	do
@@ -152,141 +157,152 @@ void func_001F92(uint32_t a4)
 		d7 = t4;
 	} while (t4 != 0xFFFFu);
 	d7 = mem_read16(a4);
-	a6 = unk_060076_ADDRESS;
-	if (unk_060076 < d7)
-		unk_060076 = d7;
+	a6 = top_score_ADDRESS;
+	if (top_score < d7)
+		top_score = d7;
 }
 
-void func_001FB8(uint8_t d4)
+/* the chosen players' scores drawn in their boxes */
+void draw_scores(uint8_t d4)
 {
 	if ((d4 & 1u) != 0u)
-		func_001FEA();
+		draw_score_player_1();
 	if ((d4 & 2u) != 0u)
-		func_001FF8();
+		draw_score_player_2();
 	if ((d4 & 4u) != 0u)
-		func_002006();
+		draw_score_player_3();
 	if ((d4 & 8u) != 0u)
-		func_002014();
+		draw_score_player_4();
 }
 
-void func_001FEA(void)
+/* the first player's score in his box */
+void draw_score_player_1(void)
 {
 	uint32_t a4 = 0, a6 = 0;
 
 	a6 = unk_060104_ADDRESS;
 	a4 = TILE_RAM + 0x1A4u;
-	func_002032(a4, a6);
+	draw_score_digits(a4, a6);
 }
 
-void func_001FF8(void)
+/* the second player's score in his box */
+void draw_score_player_2(void)
 {
 	uint32_t a4 = 0, a6 = 0;
 
 	a6 = unk_06010C_ADDRESS;
 	a4 = TILE_RAM + 0x1B6u;
-	func_002032(a4, a6);
+	draw_score_digits(a4, a6);
 }
 
-void func_002006(void)
+/* the third player's score in his box */
+void draw_score_player_3(void)
 {
 	uint32_t a4 = 0, a6 = 0;
 
 	a6 = unk_060114_ADDRESS;
 	a4 = TILE_RAM + 0x1C8u;
-	func_002032(a4, a6);
+	draw_score_digits(a4, a6);
 }
 
-void func_002014(void)
+/* the fourth player's score in his box */
+void draw_score_player_4(void)
 {
 	uint32_t a4 = 0, a6 = 0;
 
 	a6 = unk_06011C_ADDRESS;
 	a4 = TILE_RAM + 0x1DAu;
-	func_002032(a4, a6);
+	draw_score_digits(a4, a6);
 }
 
-void func_002022(void)
+/* the top score after HIGH */
+void draw_top_score(void)
 {
 	uint32_t a4 = 0, a6 = 0;
 
-	a6 = unk_060076_ADDRESS;
+	a6 = top_score_ADDRESS;
 	a4 = TILE_RAM + 0x1C2u;
-	func_002032(a4, a6);
+	draw_score_digits(a4, a6);
 }
 
-void func_002032(uint32_t a4, uint32_t a6)
+/* a score's four digits, without leading zeros */
+void draw_score_digits(uint32_t a4, uint32_t a6)
 {
 	uint8_t d6 = 0;
 
 	if (mem_read8(a6) >> 4 != 0u)
 	{
 		d6 = mem_read8(a6) >> 4;
-		a4 = func_002090(d6, a4);
+		a4 = draw_digit(d6, a4);
 		d6 = mem_read8(a6) & 0xFu;
-		a4 = func_002090(d6, a4);
+		a4 = draw_digit(d6, a4);
 		d6 = mem_read8(a6 + 1u) >> 4;
-		a4 = func_002090(d6, a4);
+		a4 = draw_digit(d6, a4);
 		d6 = mem_read8(a6 + 1u) & 0xFu;
-		func_002090(d6, a4);
+		draw_digit(d6, a4);
 		return;
 	}
-	a4 = func_00208C(a4);
+	a4 = draw_blank_digit(a4);
 	if ((mem_read8(a6) & 0xFu) != 0u)
 	{
 		d6 = mem_read8(a6) & 0xFu;
-		a4 = func_002090(d6, a4);
+		a4 = draw_digit(d6, a4);
 		d6 = mem_read8(a6 + 1u) >> 4;
-		a4 = func_002090(d6, a4);
+		a4 = draw_digit(d6, a4);
 		d6 = mem_read8(a6 + 1u) & 0xFu;
-		func_002090(d6, a4);
+		draw_digit(d6, a4);
 		return;
 	}
-	a4 = func_00208C(a4);
+	a4 = draw_blank_digit(a4);
 	if (mem_read8(a6 + 1u) >> 4 != 0u)
 	{
 		d6 = mem_read8(a6 + 1u) >> 4;
-		a4 = func_002090(d6, a4);
+		a4 = draw_digit(d6, a4);
 		d6 = mem_read8(a6 + 1u) & 0xFu;
-		func_002090(d6, a4);
+		draw_digit(d6, a4);
 		return;
 	}
-	a4 = func_00208C(a4);
+	a4 = draw_blank_digit(a4);
 	d6 = mem_read8(a6 + 1u) & 0xFu;
-	func_002090(d6, a4);
+	draw_digit(d6, a4);
 }
 
-uint32_t func_00208C(uint32_t a4)
+/* a blank in place of a leading zero */
+uint32_t draw_blank_digit(uint32_t a4)
 {
 	uint8_t d6 = 0;
 
 	d6 = 0x10u;
-	return func_002090(d6, a4);
+	return draw_digit(d6, a4);
 }
 
-uint32_t func_002090(uint8_t d6, uint32_t a4)
+/* a digit of a score */
+uint32_t draw_digit(uint8_t d6, uint32_t a4)
 {
-	mem_write8(a4, 0u);
+	io_write8(a4, 0u);
 	a4++;
-	mem_write8(a4, d6);
+	io_write8(a4, d6);
 	a4++;
 	return a4;
 }
 
-void func_002098(uint8_t d7)
+/* the chosen scores to 0 */
+void clear_scores(uint8_t d7)
 {
 	if ((d7 & 1u) != 0u)
-		unk_060104 = 0u;
+		PLAYER(PLAYER_ADDRESS(0))->score = 0u;
 	if ((d7 & 2u) != 0u)
-		unk_06010C = 0u;
+		PLAYER(PLAYER_ADDRESS(1))->score = 0u;
 	if ((d7 & 4u) != 0u)
-		unk_060114 = 0u;
+		PLAYER(PLAYER_ADDRESS(2))->score = 0u;
 	if ((d7 & 8u) != 0u)
-		unk_06011C = 0u;
+		PLAYER(PLAYER_ADDRESS(3))->score = 0u;
 	if ((d7 & 0x10u) != 0u)
-		unk_060076 = 0u;
+		top_score = 0u;
 }
 
-void func_0020D6(uint32_t a4, uint32_t a5)
+/* a short text in the plain colour */
+void print_plain_text(uint32_t a4, uint32_t a5)
 {
 	uint8_t d6 = 0;
 
@@ -296,14 +312,15 @@ void func_0020D6(uint32_t a4, uint32_t a5)
 		a5++;
 		if (d6 == 0x3Fu)
 			break;
-		mem_write8(a4, 0u);
+		io_write8(a4, 0u);
 		a4++;
-		mem_write8(a4, d6 - 0x30u);
+		io_write8(a4, d6 - 0x30u);
 		a4++;
 	}
 }
 
-void func_002102(uint8_t d7)
+/* unused: the labels 1UP to 4UP and the top score */
+void draw_score_labels(uint8_t d7)
 {
 	uint32_t a4 = 0, a5 = 0;
 
@@ -311,47 +328,47 @@ void func_002102(uint8_t d7)
 	{
 		a5 = table_loaded_by_lea_0020EC_ADDRESS;
 		a4 = TILE_RAM + 0x11Cu;
-		func_0020D6(a4, a5);
+		print_plain_text(a4, a5);
 		a5 = 0x20F0u;
 		a4 = TILE_RAM + 0x12Eu;
-		func_0020D6(a4, a5);
+		print_plain_text(a4, a5);
 		a5 = 0x20F4u;
 		a4 = TILE_RAM + 0x140u;
-		func_0020D6(a4, a5);
+		print_plain_text(a4, a5);
 		a5 = 0x20F8u;
 		a4 = TILE_RAM + 0x152u;
-		func_0020D6(a4, a5);
+		print_plain_text(a4, a5);
 		return;
 	}
 	if ((d7 & 2u) != 0u)
 	{
 		a5 = 0x20FCu;
 		a4 = TILE_RAM + 0x138u;
-		func_0020D6(a4, a5);
-		func_002022();
+		print_plain_text(a4, a5);
+		draw_top_score();
 	}
 	if ((d7 & 1u) == 0u)
 	{
 		a5 = table_loaded_by_lea_0020EC_ADDRESS;
 		a4 = TILE_RAM + 0x11Cu;
-		func_0020D6(a4, a5);
+		print_plain_text(a4, a5);
 		a5 = 0x20F0u;
 		a4 = TILE_RAM + 0x12Eu;
-		func_0020D6(a4, a5);
+		print_plain_text(a4, a5);
 		return;
 	}
 	a5 = table_loaded_by_lea_0020EC_ADDRESS;
 	a4 = TILE_RAM + 0x11Cu;
-	func_0020D6(a4, a5);
+	print_plain_text(a4, a5);
 	a5 = 0x20F0u;
 	a4 = TILE_RAM + 0x12Eu;
-	func_0020D6(a4, a5);
+	print_plain_text(a4, a5);
 	a5 = 0x20F4u;
 	a4 = TILE_RAM + 0x140u;
-	func_0020D6(a4, a5);
+	print_plain_text(a4, a5);
 	a5 = 0x20F8u;
 	a4 = TILE_RAM + 0x152u;
-	func_0020D6(a4, a5);
+	print_plain_text(a4, a5);
 }
 
 void unreached_00218A(void)
@@ -359,7 +376,8 @@ void unreached_00218A(void)
 	lost_stack(0x00218Au);
 }
 
-void func_0022AA(uint16_t d7)
+/* a text of the test mode's and the credits' table, in its own colour */
+void print_colour_text(uint16_t d7)
 {
 	uint8_t d6 = 0, d7_2 = 0;
 	uint32_t a4 = 0, a6 = 0;
@@ -417,14 +435,15 @@ void func_0022FE(void)
 {
 }
 
-uint32_t func_002300(uint16_t d7)
+/* unused: a picture of rows of tiles */
+uint32_t draw_tile_picture(uint16_t d7)
 {
 	uint8_t d6 = 0, d7_2 = 0;
 	uint16_t d3 = 0;
 	uint32_t a4 = 0, a5 = 0, a6 = 0, d4 = 0;
 	uint16_t t1 = 0, t2 = 0;
 
-	a6 = TABLE32(indexed_table_of_32_bit_values_0031F2, (uint32_t)(int16_t)((uint32_t)d7 << 2));
+	a6 = indexed_table_of_32_bit_values_0031F2[d7 & 0x3FFFu];
 	d3 = mem_read16(a6);
 	a6 += 2u;
 	a5 = a6 + (int16_t)(d3 * 6u);
@@ -459,7 +478,8 @@ void func_002334(void)
 {
 }
 
-void func_002336(uint32_t d7, uint32_t *p_d1, uint32_t *p_d4, uint32_t *p_d5, uint32_t *p_d6)
+/* the chosen players' boxes, and their scores */
+void draw_player_boxes(uint32_t d7, uint32_t *p_d1, uint32_t *p_d4, uint32_t *p_d5, uint32_t *p_d6)
 {
 	uint32_t d4 = *p_d4;
 	uint32_t d5 = *p_d5;
@@ -469,21 +489,22 @@ void func_002336(uint32_t d7, uint32_t *p_d1, uint32_t *p_d4, uint32_t *p_d5, ui
 	do
 	{
 		if ((d7 & shl32(1u, (int)(d6 & 0x1Fu))) != 0u)
-			func_002368((uint16_t)d6, (uint8_t)d7, p_d1, &d4, &d5);
+			draw_player_box((uint16_t)d6, (uint8_t)d7, p_d1, &d4, &d5);
 		d6 = (uint8_t)(d6 + 1u);
 	} while (d6 < 4u);
 	if ((d7 & 0x80u) == 0u && (d7 & 0x40u) != 0u)
 	{
 		d4 = (uint8_t)d7;
 		d4 = d4 & 0x1Fu;
-		func_001FB8((uint8_t)d4);
+		draw_scores((uint8_t)d4);
 	}
 	*p_d4 = d4;
 	*p_d5 = (*p_d5 & 0xFFFF0000u) | (d5 & 0xFFFFu);
 	*p_d6 = d6;
 }
 
-void func_002368(uint16_t d6, uint8_t d7, uint32_t *p_d1, uint32_t *p_d4, uint32_t *p_d5)
+/* a player's box: its frame and label, its lives, its health bar */
+void draw_player_box(uint16_t d6, uint8_t d7, uint32_t *p_d1, uint32_t *p_d4, uint32_t *p_d5)
 {
 	uint32_t d4 = *p_d4;
 	uint16_t d5 = 0;
@@ -494,40 +515,42 @@ void func_002368(uint16_t d6, uint8_t d7, uint32_t *p_d1, uint32_t *p_d4, uint32
 	if ((d7 & 0x40u) != 0u)
 	{
 		a5 = DATA32(a6 + d5);
-		func_0023A4(d5, d6, d7, a5, a6, p_d1, &d4);
+		draw_box_frame_and_label(d5, d6, d7, a5, a6, p_d1, &d4);
 	}
 	if ((d7 & 0x10u) != 0u)
 	{
 		a5 = DATA32(a6 + 8u + d5);
-		d4 = func_0023B2(d4, d6, d7, a5);
+		d4 = draw_lives(d4, d6, d7, a5);
 	}
 	if ((d7 & 0x20u) != 0u)
 	{
 		a5 = DATA32(a6 + 0xCu + d5);
-		d4 = func_00245A(d6, d7, a5);
+		d4 = draw_health_bar(d6, d7, a5);
 	}
 	*p_d4 = d4;
 	*p_d5 = (*p_d5 & 0xFFFF0000u) | d5;
 }
 
-void func_0023A4(uint16_t d5, uint16_t d6, uint8_t d7, uint32_t a5, uint32_t a6, uint32_t *p_d1, uint32_t *p_d4)
+/* a player's box frame and label in his colour */
+void draw_box_frame_and_label(uint16_t d5, uint16_t d6, uint8_t d7, uint32_t a5, uint32_t a6, uint32_t *p_d1, uint32_t *p_d4)
 {
 	uint32_t d4 = *p_d4;
 	uint32_t d0 = 0;
 
-	d0 = func_0024A6(0u, d6);
-	*p_d1 = func_002546((uint8_t)d0, d7, a5);
-	d4 = func_002584((uint8_t)d0, d4, d5, d6, d7, a6);
+	d0 = player_box_colour(0u, d6);
+	*p_d1 = draw_box_frame((uint8_t)d0, d7, a5);
+	d4 = draw_box_label((uint8_t)d0, d4, d5, d6, d7, a6);
 	*p_d4 = (*p_d4 & 0xFFFF0000u) | (d4 & 0xFFFFu);
 }
 
-uint32_t func_0023B2(uint32_t d4, uint16_t d6, uint8_t d7, uint32_t a5)
+/* a player's lives in his box */
+uint32_t draw_lives(uint32_t d4, uint16_t d6, uint8_t d7, uint32_t a5)
 {
 	uint16_t d3 = 0;
 	uint32_t a4 = 0, d0 = 0, d4_2 = 0;
 
-	d0 = func_0024A6(0u, d6);
-	func_0024B6((uint8_t)d0, a5);
+	d0 = player_box_colour(0u, d6);
+	clear_lives_digits((uint8_t)d0, a5);
 	if ((d7 & 0x80u) != 0u)
 		return d4;
 	d4_2 = (d4 & ~0xFFFFu) | d6;
@@ -560,16 +583,17 @@ uint32_t func_0023B2(uint32_t d4, uint16_t d6, uint8_t d7, uint32_t a5)
 	return d4;
 }
 
-uint32_t func_00245A(uint16_t d6, uint8_t d7, uint32_t a5)
+/* a player's health bar in his box */
+uint32_t draw_health_bar(uint16_t d6, uint8_t d7, uint32_t a5)
 {
 	uint32_t a4 = 0, d0 = 0, d4 = 0;
 	uint16_t t1 = 0;
 
-	d0 = func_0024A6(0u, d6);
-	d4 = func_002506((uint8_t)d0, a5);
+	d0 = player_box_colour(0u, d6);
+	d4 = clear_health_bar((uint8_t)d0, a5);
 	if ((d7 & 0x80u) != 0u)
 		return d4;
-	a4 = 0x334Au + unk_060106((uint16_t)((uint32_t)d6 << 3)) * 8u;
+	a4 = 0x334Au + PLAYER(PLAYER_ADDRESS(0) + (d6 & 0x1FFFu) * 0x8u)->health_bars * 8u;
 	d4 = 3u;
 	do
 	{
@@ -585,7 +609,8 @@ uint32_t func_00245A(uint16_t d6, uint8_t d7, uint32_t a5)
 	return d4;
 }
 
-uint32_t func_0024A6(uint32_t d0, uint16_t d6)
+/* a player's colour in the boxes */
+uint32_t player_box_colour(uint32_t d0, uint16_t d6)
 {
 	uint32_t d0_2 = 0;
 
@@ -594,7 +619,8 @@ uint32_t func_0024A6(uint32_t d0, uint16_t d6)
 	return d0_2;
 }
 
-void func_0024B6(uint8_t d0, uint32_t a5)
+/* the lives' place in a box blank */
+void clear_lives_digits(uint8_t d0, uint32_t a5)
 {
 	mem_write8(a5, d0);
 	mem_write8(a5 + 2u, d0);
@@ -614,7 +640,8 @@ void func_0024B6(uint8_t d0, uint32_t a5)
 	mem_write8(a5 + 0x7Fu, 0x2Au);
 }
 
-uint32_t func_002506(uint8_t d0, uint32_t a5)
+/* the health bar's place in a box blank */
+uint32_t clear_health_bar(uint8_t d0, uint32_t a5)
 {
 	uint32_t d4 = 0;
 
@@ -637,7 +664,8 @@ uint32_t func_002506(uint8_t d0, uint32_t a5)
 	return d4;
 }
 
-uint32_t func_002546(uint8_t d0, uint8_t d7, uint32_t a5)
+/* a player's box frame */
+uint32_t draw_box_frame(uint8_t d0, uint8_t d7, uint32_t a5)
 {
 	uint8_t d2 = 0;
 	uint32_t a4 = 0, d1 = 0;
@@ -665,7 +693,8 @@ uint32_t func_002546(uint8_t d0, uint8_t d7, uint32_t a5)
 	return d1;
 }
 
-uint32_t func_002584(uint8_t d0, uint32_t d4, uint16_t d5, uint16_t d6, uint8_t d7, uint32_t a6)
+/* a player's box label 1UP to 4UP */
+uint32_t draw_box_label(uint8_t d0, uint32_t d4, uint16_t d5, uint16_t d6, uint8_t d7, uint32_t a6)
 {
 	uint32_t a4 = 0, a5 = 0;
 
@@ -715,13 +744,14 @@ void unreached_0025C8(void)
 	}
 }
 
-void func_002604(void)
+/* unused: the stage's number and its name of the development */
+void print_stage_title(void)
 {
 	uint8_t d6 = 0, d7 = 0;
 	uint32_t a4 = 0, a6 = 0;
 
-	a6 = rom_003402[unk_060121];
-	d7 = unk_06007A;
+	a6 = rom_003402[stage];
+	d7 = text_colour;
 	for (;;)
 	{
 		a4 = mem_read32(a6);
@@ -742,7 +772,8 @@ void func_002604(void)
 	}
 }
 
-void func_00263C(uint32_t *p_d4, uint32_t *p_d5, uint32_t *p_d6, uint32_t *p_d7)
+/* the message under a player's box */
+void draw_player_message(uint32_t *p_d4, uint32_t *p_d5, uint32_t *p_d6, uint32_t *p_d7)
 {
 	uint32_t d4 = *p_d4;
 	uint32_t d5 = *p_d5;
@@ -751,24 +782,24 @@ void func_00263C(uint32_t *p_d4, uint32_t *p_d5, uint32_t *p_d6, uint32_t *p_d7)
 	uint32_t a6 = 0, d6_2 = 0;
 
 	d6 = d7 & 3u;
-	unk_06007A = rom_001F1B[d6];
-	unk_06007A |= 1u;
-	a6 = unk_060100_ADDRESS + (uint16_t)((uint32_t)d6 << 3);
+	text_colour = rom_001F1B[d6];
+	text_colour |= 1u;
+	a6 = PLAYER_ADDRESS(0) + (uint16_t)((uint32_t)d6 << 3);
 	d6_2 = (uint8_t)d7;
 	d6_2 = d6_2 & 0x3Cu;
 	switch (d6_2)
 	{
 	case 0:
-		func_002688((uint8_t)d7, a6, &d4, &d5, &d6_2);
+		message_insert_coin((uint8_t)d7, a6, &d4, &d5, &d6_2);
 		break;
 	case 4:
-		func_0026A0((uint8_t)d7, a6, &d4, &d5, &d6_2);
+		message_press_start((uint8_t)d7, a6, &d4, &d5, &d6_2);
 		break;
 	case 8:
-		func_0026E4(a6, &d4, &d5, &d6_2, &d7);
+		message_out_of_lives(a6, &d4, &d5, &d6_2, &d7);
 		break;
 	case 12:
-		func_002746((uint8_t)d7, a6, &d4, &d5, &d6_2);
+		message_clear((uint8_t)d7, a6, &d4, &d5, &d6_2);
 		break;
 	}
 	*p_d4 = (*p_d4 & 0xFFFF0000u) | (d4 & 0xFFFFu);
@@ -777,19 +808,21 @@ void func_00263C(uint32_t *p_d4, uint32_t *p_d5, uint32_t *p_d6, uint32_t *p_d7)
 	*p_d7 = (*p_d7 & 0xFFFFFF00u) | (d7 & 0xFFu);
 }
 
-void func_002688(uint8_t d7, uint32_t a6, uint32_t *p_d4, uint32_t *p_d5, uint32_t *p_d6)
+/* INSERT COIN(S) in a player's box */
+void message_insert_coin(uint8_t d7, uint32_t a6, uint32_t *p_d4, uint32_t *p_d5, uint32_t *p_d6)
 {
 	uint32_t d4 = 0, d5 = 0;
 
-	if ((mem_read8(a6 + 7u) & 1u) == 0u)
-		mem_write8(a6 + 7u, 1u);
+	if ((PLAYER(a6)->message & 1u) == 0u)
+		PLAYER(a6)->message = 1u;
 	*p_d6 = 0u;
 	print_text_at(d7, &d4, &d5, p_d6);
 	*p_d4 = (*p_d4 & 0xFFFF0000u) | (d4 & 0xFFFFu);
 	*p_d5 = (*p_d5 & 0xFFFFFF00u) | (d5 & 0xFFu);
 }
 
-void func_0026A0(uint8_t d7, uint32_t a6, uint32_t *p_d4, uint32_t *p_d5, uint32_t *p_d6)
+/* PRESS START blinking under a player's box */
+void message_press_start(uint8_t d7, uint32_t a6, uint32_t *p_d4, uint32_t *p_d5, uint32_t *p_d6)
 {
 	uint32_t d4 = *p_d4;
 	uint32_t d5 = *p_d5;
@@ -797,28 +830,28 @@ void func_0026A0(uint8_t d7, uint32_t a6, uint32_t *p_d4, uint32_t *p_d5, uint32
 	uint32_t d6 = 0;
 	uint8_t t1 = 0;
 
-	if ((mem_read8(a6 + 7u) & 2u) != 0u)
+	if ((PLAYER(a6)->message & 2u) != 0u)
 	{
-		d6 = (uint8_t)unk_0600A4;
+		d6 = (uint8_t)frame_count;
 		t1 = d6 & 0xFu;
 		d6 = t1;
 		if (t1 == 0u)
 		{
 			d6 = 2u;
-			if (unk_0600B8 != 0u)
+			if (hide_press_start != 0u)
 				d6 = 8u;
-			if ((unk_0600A4 & 0x10u) != 0u)
+			if ((frame_count & 0x10u) != 0u)
 				d6 = (uint8_t)(d6 + 1u);
 			print_text_at(d7, &d4, &d5, &d6);
 		}
 	}
 	else
 	{
-		mem_write8(a6 + 7u, 2u);
+		PLAYER(a6)->message = 2u;
 		d6 = 2u;
-		if (unk_0600B8 != 0u)
+		if (hide_press_start != 0u)
 			d6 = 8u;
-		if ((unk_0600A4 & 0x10u) != 0u)
+		if ((frame_count & 0x10u) != 0u)
 			d6 = (uint8_t)(d6 + 1u);
 		print_text_at(d7, &d4, &d5, &d6);
 	}
@@ -827,7 +860,8 @@ void func_0026A0(uint8_t d7, uint32_t a6, uint32_t *p_d4, uint32_t *p_d5, uint32
 	*p_d6 = d6;
 }
 
-void func_0026E4(uint32_t a6, uint32_t *p_d4, uint32_t *p_d5, uint32_t *p_d6, uint32_t *p_d7)
+/* the knocked-out head of a player who lost his last life */
+void message_out_of_lives(uint32_t a6, uint32_t *p_d4, uint32_t *p_d5, uint32_t *p_d6, uint32_t *p_d7)
 {
 	uint32_t d4 = *p_d4;
 	uint8_t d5 = (uint8_t)*p_d5;
@@ -836,44 +870,44 @@ void func_0026E4(uint32_t a6, uint32_t *p_d4, uint32_t *p_d5, uint32_t *p_d6, ui
 	uint32_t d6 = 0, ignored = 0;
 	uint8_t t1 = 0, t2 = 0;
 
-	if ((mem_read8(a6 + 7u) & 4u) != 0u)
+	if ((PLAYER(a6)->message & 4u) != 0u)
 	{
-		d6 = (uint8_t)unk_0600A4;
+		d6 = (uint8_t)frame_count;
 		t1 = d6 & 7u;
 		d6 = t1;
 		if (t1 == 0u)
 		{
-			d6 = (uint8_t)(4u + (((uint8_t)unk_0600A4 & 0x18u) >> 3));
+			d6 = (uint8_t)(4u + (((uint8_t)frame_count & 0x18u) >> 3));
 			print_text_at(d7, &d4, &ignored, &d6);
-			t2 = (uint8_t)unk_0600A4 & 0x18u;
+			t2 = (uint8_t)frame_count & 0x18u;
 			d5 = t2;
 			if (t2 == 0u)
 			{
-				mem_write8(a6 + 7u, mem_read8(a6 + 7u) + 0x20u);
-				if ((int8_t)mem_read8(a6 + 7u) < 0)
+				PLAYER(a6)->message += 0x20u;
+				if ((int8_t)PLAYER(a6)->message < 0)
 				{
-					mem_write8(a6 + 7u, 0u);
+					PLAYER(a6)->message = 0u;
 					d7 &= 3u;
-					unk_0600B3 &= ~shl32(1u, (int)(d7));
+					players_out_of_lives &= ~shl32(1u, (int)(d7));
 				}
 			}
 		}
 	}
 	else
 	{
-		mem_write8(a6 + 7u, 4u);
-		d6 = (uint8_t)(4u + (((uint8_t)unk_0600A4 & 0x18u) >> 3));
+		PLAYER(a6)->message = 4u;
+		d6 = (uint8_t)(4u + (((uint8_t)frame_count & 0x18u) >> 3));
 		print_text_at(d7, &d4, &ignored, &d6);
-		t2 = (uint8_t)unk_0600A4 & 0x18u;
+		t2 = (uint8_t)frame_count & 0x18u;
 		d5 = t2;
 		if (t2 == 0u)
 		{
-			mem_write8(a6 + 7u, mem_read8(a6 + 7u) + 0x20u);
-			if ((int8_t)mem_read8(a6 + 7u) < 0)
+			PLAYER(a6)->message += 0x20u;
+			if ((int8_t)PLAYER(a6)->message < 0)
 			{
-				mem_write8(a6 + 7u, 0u);
+				PLAYER(a6)->message = 0u;
 				d7 &= 3u;
-				unk_0600B3 &= ~shl32(1u, (int)(d7));
+				players_out_of_lives &= ~shl32(1u, (int)(d7));
 			}
 		}
 	}
@@ -883,15 +917,16 @@ void func_0026E4(uint32_t a6, uint32_t *p_d4, uint32_t *p_d5, uint32_t *p_d6, ui
 	*p_d7 = (*p_d7 & 0xFFFFFF00u) | d7;
 }
 
-void func_002746(uint8_t d7, uint32_t a6, uint32_t *p_d4, uint32_t *p_d5, uint32_t *p_d6)
+/* the line under a player's box cleared */
+void message_clear(uint8_t d7, uint32_t a6, uint32_t *p_d4, uint32_t *p_d5, uint32_t *p_d6)
 {
 	uint16_t d4 = (uint16_t)*p_d4;
 	uint8_t d5 = (uint8_t)*p_d5;
 	uint32_t d4_2 = 0, d5_2 = 0;
 
-	if ((mem_read8(a6 + 7u) & 8u) != 0u)
+	if ((PLAYER(a6)->message & 8u) != 0u)
 		return;
-	mem_write8(a6 + 7u, 2u);
+	PLAYER(a6)->message = 2u;
 	*p_d6 = 1u;
 	print_text_at(d7, &d4_2, &d5_2, p_d6);
 	*p_d4 = (*p_d4 & 0xFFFF0000u) | (d4_2 & 0xFFFFu);
@@ -908,7 +943,7 @@ void print_text_at(uint8_t d7, uint32_t *p_d4, uint32_t *p_d5, uint32_t *p_d6)
 	a5 = positioned_texts[d6 & 0x3FFFu];
 	d4 = (uint16_t)(((uint8_t)d7 & 3u) << 2);
 	a4 = text_layer_places[d4 / 4u];
-	d4 = unk_06007A;
+	d4 = text_colour;
 	for (;;)
 	{
 		d6_2 = mem_read16(a5);
@@ -933,12 +968,10 @@ void print_text_at(uint8_t d7, uint32_t *p_d4, uint32_t *p_d5, uint32_t *p_d6)
 	}
 }
 
-void draw_big_character(uint32_t *p_d5, uint32_t *p_d6, uint32_t *p_d7, uint32_t *p_a5)
+uint32_t draw_big_character(uint16_t d6, uint8_t d7)
 {
-	uint16_t d6 = (uint16_t)*p_d6;
-	uint8_t d7 = (uint8_t)*p_d7;
-	uint16_t d4 = 0;
-	uint32_t a4 = 0, a5 = 0, a6 = 0, d5 = 0, d7_2 = 0;
+	uint16_t d4 = 0, d5 = 0;
+	uint32_t a4 = 0, a5 = 0, a6 = 0, d7_2 = 0;
 	uint16_t t1 = 0, t2 = 0;
 
 	a4 = big_font_place;
@@ -949,7 +982,7 @@ void draw_big_character(uint32_t *p_d5, uint32_t *p_d6, uint32_t *p_d7, uint32_t
 	{
 		d5 = 3u;
 		d7_2 = 0u;
-		d7_2 = func_00280C(d7_2);
+		d7_2 = big_character_colour(d7_2);
 		do
 		{
 			d6 = ((uint16_t)IN_PAGE(d6, DATA8(a5)) >> 4) & 0xFu;
@@ -970,13 +1003,11 @@ void draw_big_character(uint32_t *p_d5, uint32_t *p_d6, uint32_t *p_d7, uint32_t
 		d4 = t2;
 		a4 += 0x70u;
 	} while (t2 != 0xFFFFu);
-	*p_d5 = d5;
-	*p_d6 = (*p_d6 & 0xFFFF0000u) | d6;
-	*p_d7 = d7_2;
-	*p_a5 = a5;
+	return d7_2;
 }
 
-uint32_t func_00280C(uint32_t d7)
+/* the colour of a big character */
+uint32_t big_character_colour(uint32_t d7)
 {
 	uint32_t d7_2 = 0;
 
@@ -984,7 +1015,8 @@ uint32_t func_00280C(uint32_t d7)
 	return d7_2;
 }
 
-void func_002818(uint8_t d7, uint32_t *p_d4, uint32_t *p_d6)
+/* a text in tall characters: the rankings, CONTINUE, GAME OVER */
+void print_tall_text(uint8_t d7, uint32_t *p_d4, uint32_t *p_d6)
 {
 	uint32_t d4 = *p_d4;
 	uint32_t d6 = *p_d6;
@@ -1010,7 +1042,7 @@ void func_002818(uint8_t d7, uint32_t *p_d4, uint32_t *p_d6)
 				}
 				if ((uint8_t)d6 == 0x2Fu)
 					break;
-				a4 = func_002908(a4);
+				a4 = erase_tall_character(a4);
 			}
 		}
 	}
@@ -1021,7 +1053,7 @@ void func_002818(uint8_t d7, uint32_t *p_d4, uint32_t *p_d6)
 		a6 += 4u;
 		d4_2 = mem_read8(a6);
 		a6++;
-		d4_2 = func_00291E(d4_2);
+		d4_2 = tall_text_colour(d4_2);
 		for (;;)
 		{
 			d6_2 = mem_read8(a6);
@@ -1035,12 +1067,13 @@ void func_002818(uint8_t d7, uint32_t *p_d4, uint32_t *p_d6)
 			if (d6_2 == 0x2Fu)
 				break;
 			d6_2 = (uint8_t)(d6_2 - 0x30u);
-			a4 = func_002862((uint8_t)d4_2, (uint16_t)d6_2, a4, a5);
+			a4 = draw_tall_character((uint8_t)d4_2, (uint16_t)d6_2, a4, a5);
 		}
 	}
 }
 
-uint32_t func_002862(uint8_t d4, uint16_t d6, uint32_t a4, uint32_t a5)
+/* a tall character */
+uint32_t draw_tall_character(uint8_t d4, uint16_t d6, uint32_t a4, uint32_t a5)
 {
 	if (d6 == 0xFEu)
 	{
@@ -1057,7 +1090,8 @@ uint32_t func_002862(uint8_t d4, uint16_t d6, uint32_t a4, uint32_t a5)
 	return a4;
 }
 
-uint32_t func_002908(uint32_t a4)
+/* a tall character erased */
+uint32_t erase_tall_character(uint32_t a4)
 {
 	mem_write8(a4 + 0x80u, 0u);
 	mem_write8(a4 + 0x81u, 0x10u);
@@ -1068,7 +1102,8 @@ uint32_t func_002908(uint32_t a4)
 	return a4;
 }
 
-uint32_t func_00291E(uint32_t d4)
+/* the colour of a text in tall characters */
+uint32_t tall_text_colour(uint32_t d4)
 {
 	uint32_t d4_2 = 0;
 

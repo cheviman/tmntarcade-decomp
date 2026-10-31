@@ -4,7 +4,7 @@
  *                 the video chips' memories and registers
  *    Version:     0.1.0
  *    Created:     29-10-2026
- *    Modified:    29-10-2026
+ *    Modified:    30-10-2026
  *    Author:      Sebastian Toyos
  *
  *    license:BSD-3-Clause
@@ -78,7 +78,7 @@ enum
 enum
 {
 	TMNT_LEFT = 0x01, TMNT_RIGHT = 0x02, TMNT_UP = 0x04, TMNT_DOWN = 0x08,
-	TMNT_ATTACK = 0x10, TMNT_JUMP = 0x20      /* (MAME: buttons 1 and 2; the 4-player board has no start) */
+	TMNT_JUMP = 0x10, TMNT_ATTACK = 0x20      /* (MAME: buttons 1 and 2; the 4-player board has no start) */
 };
 /* The DIP switches as MAME sets them by default: 1 coin 1 credit, 2 lives, normal difficulty, demo sounds on,
    no flip, test mode off */
